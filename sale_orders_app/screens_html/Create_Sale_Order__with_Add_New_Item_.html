@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashvision - Create New Sale Order</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-dim": "#d8dae0",
+                        "on-error": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "surface-bright": "#f8f9ff",
+                        "inverse-on-surface": "#eff0f7",
+                        "on-tertiary-fixed": "#321300",
+                        "secondary-container": "#bed9ff",
+                        "tertiary-container": "#8e4302",
+                        "surface-container-highest": "#e1e2e8",
+                        "primary": "#004277",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "primary-container": "#005a9e",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#d3e4ff",
+                        "on-secondary-fixed": "#001d36",
+                        "secondary-fixed": "#d1e4ff",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c20",
+                        "error-container": "#ffdad6",
+                        "on-background": "#191c20",
+                        "tertiary": "#6b3000",
+                        "inverse-primary": "#a2c9ff",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "on-surface-variant": "#414750",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#ffc29d",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9ff",
+                        "surface-tint": "#1260a5",
+                        "surface-container": "#ecedf4",
+                        "on-primary-fixed-variant": "#004881",
+                        "surface-container-high": "#e7e8ee",
+                        "secondary": "#456080",
+                        "inverse-surface": "#2e3035",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "tertiary-fixed": "#ffdbc8",
+                        "on-primary-container": "#b1d1ff",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "surface-variant": "#e1e2e8",
+                        "surface-container-low": "#f2f3fa",
+                        "on-secondary-container": "#445f7f",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#001c38",
+                        "outline": "#727782",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "outline-variant": "#c1c7d2",
+                        "on-error-container": "#93000a"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+            color: #191c20;
+        }
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 h-16 bg-[#f8f9ff] dark:bg-slate-950/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)]">
+<div class="flex items-center gap-8">
+<div class="text-xl font-extrabold tracking-tight text-[#004277] dark:text-blue-200 font-['Manrope']">Flashvision</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-[#004277] dark:text-blue-300 border-b-2 border-[#004277] font-['Manrope'] tracking-wide font-semibold py-1" href="#">Sales Orders</a>
+<a class="text-[#414750] dark:text-slate-400 font-['Manrope'] tracking-wide font-semibold hover:bg-[#f2f3fa] transition-colors py-1 px-2 rounded" href="#">OMS</a>
+<a class="text-[#414750] dark:text-slate-400 font-['Manrope'] tracking-wide font-semibold hover:bg-[#f2f3fa] transition-colors py-1 px-2 rounded" href="#">Delivery</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative flex items-center bg-surface-container-low px-4 py-1.5 rounded-full border border-outline-variant/20">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 font-body" placeholder="Search orders..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:bg-[#f2f3fa] rounded-full transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="p-2 text-on-surface-variant hover:bg-[#f2f3fa] rounded-full transition-colors"><span class="material-symbols-outlined">help_outline</span></button>
+<div class="h-8 w-8 rounded-full bg-primary-fixed overflow-hidden flex items-center justify-center">
+<img alt="User Profile" class="h-full w-full object-cover" data-alt="professional headshot of a corporate executive in a crisp white shirt against a neutral gray background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAee5BAzLMh4NzyuDfmcUKLLX0DLLc64UPz6qhklnzN8tYBEUDZGaGp62lL1P1cyGtxxQjL_VgBx1Ber2lNbiSH4b8dGRgz-gSSZBog0LDL7pMnNuKMlwCGvX3A0zPmAu_9m6Q2Drln5ftwXMNmaFR4cBEO1irnxPFbUMApqSVxpQaBRxbgqyKewGDLH37BkaiJZWzyfi0-zFHO4ow_GNOwC-n0QzqBI1q2TdKgC9GKrDdf8JU1zsdv7VrufJpGWTgocVUEXnKmBUOc"/>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Shared Component) - Hidden on smaller desktop, shown as layout anchor -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-6 space-y-4 bg-[#f2f3fa] dark:bg-slate-900 w-64 pt-24 z-40 hidden xl:flex">
+<div class="space-y-1">
+<button class="w-full flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#004277] to-[#005a9e] text-white rounded-lg shadow-sm scale-[0.98] active:translate-x-1 duration-150">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-['Inter'] text-sm font-medium">Sales Orders</span>
+</button>
+<button class="w-full flex items-center gap-3 px-4 py-3 text-[#414750] dark:text-slate-400 hover:text-[#004277] dark:hover:text-blue-200 transition-all font-['Inter'] text-sm font-medium">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>OMS</span>
+</button>
+<button class="w-full flex items-center gap-3 px-4 py-3 text-[#414750] dark:text-slate-400 hover:text-[#004277] dark:hover:text-blue-200 transition-all font-['Inter'] text-sm font-medium">
+<span class="material-symbols-outlined">local_shipping</span>
+<span>Delivery</span>
+</button>
+</div>
+<div class="mt-auto space-y-1">
+<button class="w-full flex items-center gap-3 px-4 py-3 text-[#414750] font-['Inter'] text-sm font-medium hover:bg-[#ecedf4] rounded-lg transition-all">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</button>
+<button class="w-full flex items-center gap-3 px-4 py-3 text-[#414750] font-['Inter'] text-sm font-medium hover:bg-[#ecedf4] rounded-lg transition-all">
+<span class="material-symbols-outlined">contact_support</span>
+<span>Support</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 px-8 xl:ml-64 max-w-7xl mx-auto">
+<!-- Header Section -->
+<header class="mb-10 flex justify-between items-end">
+<div class="space-y-1">
+<h1 class="text-3xl font-extrabold tracking-tight text-primary font-headline">New Sale Order</h1>
+<p class="text-on-surface-variant font-body">Create and dispatch synthetic logistics requests.</p>
+</div>
+</header>
+<!-- Form Layout -->
+<div class="space-y-8">
+<!-- Order Header & Metadata -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-6 bg-surface-container-low p-8 rounded-xl">
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Sale Order #</label>
+<input class="w-full bg-surface-container-highest/50 border-none rounded-lg text-primary font-bold focus:ring-2 ring-primary/20" readonly="" type="text" value="SO-2024-0081"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Order Date</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20" type="date" value="2024-10-24"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Status</label>
+<select class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20">
+<option>Draft</option>
+<option>Confirmed</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Order Type</label>
+<select class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20">
+<option>Standard</option>
+<option class="text-tertiary">Urgent</option>
+</select>
+</div>
+</section>
+<!-- Customer & Terms Split Layout (Asymmetric) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Customer Info -->
+<section class="lg:col-span-8 space-y-6 bg-surface-container-low p-8 rounded-xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">person_search</span>
+<h2 class="text-lg font-bold text-primary font-headline">Customer Information</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2 col-span-full">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Select Customer</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline">search</span>
+<input class="w-full pl-10 bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20" placeholder="Search customer name or ID..." type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Contact Person</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20" placeholder="Full Name" type="text"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Contact Phone</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Billing Address</label>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20" rows="3"></textarea>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Shipping Address</label>
+<div class="flex items-center gap-2">
+<input class="rounded text-primary focus:ring-primary/20 h-4 w-4" id="same_billing" type="checkbox"/>
+<label class="text-[10px] text-on-surface-variant font-medium" for="same_billing">Same as Billing</label>
+</div>
+</div>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20" rows="3"></textarea>
+</div>
+</div>
+</section>
+<!-- Sales & Terms -->
+<section class="lg:col-span-4 space-y-6 bg-surface-container p-8 rounded-xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">assignment_turned_in</span>
+<h2 class="text-lg font-bold text-primary font-headline">Sales &amp; Terms</h2>
+</div>
+<div class="space-y-5">
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Salesperson</label>
+<select class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20">
+<option>Alexander Pierce</option>
+<option>Elena Rodriguez</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Payment Terms</label>
+<select class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20">
+<option>Net 30</option>
+<option>Net 60</option>
+<option>COD</option>
+<option>Prepaid</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Expected Delivery</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20" type="date"/>
+</div>
+</div>
+</section>
+</div>
+<!-- Order Line Items Table -->
+<section class="bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,28,56,0.06)] rounded-xl overflow-hidden">
+<div class="px-8 py-5 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low"><h2 class="text-lg font-bold text-primary font-headline">Order Line Items</h2>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 px-3 py-1.5 border border-primary text-primary text-sm font-bold rounded-lg hover:bg-primary/5 transition-all">
+<span class="material-symbols-outlined text-lg">add_box</span>
+        Add New Item
+    </button>
+<button class="flex items-center gap-2 text-primary text-sm font-bold hover:opacity-80 transition-all">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+        Add Line
+    </button>
+</div></div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface text-on-surface-variant">
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest w-16">Sr.</th>
+<th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest min-w-[300px]">Item Code / Name</th>
+<th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest">UOM</th>
+<th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-right">Order Qty</th>
+<th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-right">Unit Price</th>
+<th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-right">Subtotal</th>
+<th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest">Remarks</th>
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest w-12"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<!-- Row 1 -->
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="px-8 py-4 text-sm font-medium text-outline">01</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary-container">science</span>
+</div>
+<div class="w-full">
+<input class="w-full bg-transparent border-none p-0 text-sm font-bold text-primary focus:ring-0" type="text" value="SYN-CH-002"/>
+<div class="text-[10px] text-outline">Industrial Grade Ethylene</div>
+</div>
+</div>
+</td>
+<td class="px-4 py-4">
+<select class="bg-transparent border-none p-0 text-sm focus:ring-0">
+<option>Metric Tons</option>
+<option>Barrels</option>
+</select>
+</td>
+<td class="px-4 py-4 text-right">
+<input class="w-20 text-right bg-transparent border-none p-0 text-sm font-semibold focus:ring-0" type="number" value="120"/>
+</td>
+<td class="px-4 py-4 text-right">
+<input class="w-24 text-right bg-transparent border-none p-0 text-sm font-semibold focus:ring-0" type="text" value="$450.00"/>
+</td>
+<td class="px-4 py-4 text-right text-sm font-bold text-primary">$54,000.00</td>
+<td class="px-4 py-4">
+<input class="w-full bg-transparent border-none p-0 text-xs focus:ring-0 italic text-outline" placeholder="Add remark..." type="text"/>
+</td>
+<td class="px-8 py-4 text-right">
+<button class="text-error/40 group-hover:text-error transition-colors"><span class="material-symbols-outlined">delete</span></button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group hover:bg-surface-container-low transition-colors">
+<td class="px-8 py-4 text-sm font-medium text-outline">02</td>
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary-container">inventory_2</span>
+</div>
+<div class="w-full">
+<input class="w-full bg-transparent border-none p-0 text-sm font-bold text-primary focus:ring-0" type="text" value="PKG-LD-440"/>
+<div class="text-[10px] text-outline">Reinforced Sealant Pellets</div>
+</div>
+</div>
+</td>
+<td class="px-4 py-4">
+<select class="bg-transparent border-none p-0 text-sm focus:ring-0">
+<option>Pallets</option>
+<option>Units</option>
+</select>
+</td>
+<td class="px-4 py-4 text-right">
+<input class="w-20 text-right bg-transparent border-none p-0 text-sm font-semibold focus:ring-0" type="number" value="15"/>
+</td>
+<td class="px-4 py-4 text-right">
+<input class="w-24 text-right bg-transparent border-none p-0 text-sm font-semibold focus:ring-0" type="text" value="$2,100.00"/>
+</td>
+<td class="px-4 py-4 text-right text-sm font-bold text-primary">$31,500.00</td>
+<td class="px-4 py-4">
+<input class="w-full bg-transparent border-none p-0 text-xs focus:ring-0 italic text-outline" placeholder="Priority handling requested" type="text"/>
+</td>
+<td class="px-8 py-4 text-right">
+<button class="text-error/40 group-hover:text-error transition-colors"><span class="material-symbols-outlined">delete</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Summary & Totals -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Description -->
+<section class="md:col-span-7 bg-surface-container-low p-8 rounded-xl space-y-4">
+<label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Overall Order Description / Notes</label>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl focus:ring-2 ring-primary/20 p-4 text-sm" placeholder="Specify any logistical constraints, laboratory requirements, or compliance codes here..." rows="6"></textarea>
+</section>
+<!-- Totals -->
+<section class="md:col-span-5 bg-primary text-on-primary p-8 rounded-xl shadow-lg relative overflow-hidden">
+<!-- Subtle background graphic/texture -->
+<div class="absolute -right-10 -bottom-10 opacity-10">
+<span class="material-symbols-outlined text-[160px]" style="font-variation-settings: 'FILL' 1;">payments</span>
+</div>
+<h3 class="text-sm font-bold uppercase tracking-widest opacity-70 mb-6">Financial Summary</h3>
+<div class="space-y-4 relative z-10">
+<div class="flex justify-between items-center">
+<span class="text-sm">Subtotal</span>
+<span class="text-sm font-semibold">$85,500.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm">Tax / VAT (12%)</span>
+<span class="text-sm font-semibold">$10,260.00</span>
+</div>
+<div class="flex justify-between items-center text-on-primary-container">
+<span class="text-sm">Discount</span>
+<span class="text-sm font-semibold">-$500.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm">Shipping Charges</span>
+<input class="bg-primary-container/30 border-none rounded text-right w-24 text-sm py-1 focus:ring-0" type="text" value="$1,200.00"/>
+</div>
+<div class="pt-6 mt-4 border-t border-white/10 flex justify-between items-end">
+<span class="text-lg font-bold font-headline">Grand Total</span>
+<span class="text-3xl font-extrabold font-headline tracking-tight">$96,460.00</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Global Actions -->
+<footer class="flex flex-col md:flex-row justify-between items-center gap-4 pt-8 border-t border-outline-variant/20">
+<button class="px-8 py-3 text-error font-bold hover:bg-error-container/20 rounded-xl transition-all w-full md:w-auto">
+                    Cancel Order
+                </button>
+<div class="flex gap-4 w-full md:w-auto">
+<button class="px-8 py-3 bg-secondary-container text-on-secondary-container font-bold rounded-xl hover:opacity-90 transition-all flex-1 md:flex-none">
+                        Save as Draft
+                    </button>
+<button class="px-10 py-3 bg-gradient-to-br from-[#004277] to-[#005a9e] text-on-primary font-bold rounded-xl shadow-lg hover:shadow-primary/20 transition-all flex-1 md:flex-none">
+                        Submit Order
+                    </button>
+</div>
+</footer>
+</div>
+</main>
+<!-- Contextual Visual - Order Tracking Graph (Bento-style Decorative) -->
+</body></html>

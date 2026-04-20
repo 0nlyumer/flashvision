@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashvision Inventory Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-bright": "#f8f9ff",
+              "outline": "#727782",
+              "secondary-container": "#bed9ff",
+              "on-tertiary": "#ffffff",
+              "error": "#ba1a1a",
+              "secondary": "#456080",
+              "secondary-fixed-dim": "#adc9ed",
+              "primary-fixed": "#d3e4ff",
+              "on-tertiary-fixed": "#321300",
+              "surface": "#f8f9ff",
+              "on-primary": "#ffffff",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#d1e4ff",
+              "on-tertiary-container": "#ffc29d",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-highest": "#e1e2e8",
+              "primary": "#004277",
+              "on-secondary-container": "#445f7f",
+              "error-container": "#ffdad6",
+              "background": "#f8f9ff",
+              "surface-container-high": "#e7e8ee",
+              "on-secondary": "#ffffff",
+              "on-primary-container": "#b1d1ff",
+              "on-background": "#191c20",
+              "on-secondary-fixed": "#001d36",
+              "inverse-surface": "#2e3035",
+              "surface-tint": "#1260a5",
+              "surface-container-low": "#f2f3fa",
+              "on-tertiary-fixed-variant": "#743500",
+              "primary-fixed-dim": "#a2c9ff",
+              "tertiary-fixed-dim": "#ffb68a",
+              "surface-variant": "#e1e2e8",
+              "on-primary-fixed-variant": "#004881",
+              "primary-container": "#005a9e",
+              "on-secondary-fixed-variant": "#2d4867",
+              "tertiary-fixed": "#ffdbc8",
+              "inverse-on-surface": "#eff0f7",
+              "on-surface-variant": "#414750",
+              "on-primary-fixed": "#001c38",
+              "on-error-container": "#93000a",
+              "surface-dim": "#d8dae0",
+              "tertiary-container": "#8e4302",
+              "tertiary": "#6b3000",
+              "surface-container": "#ecedf4",
+              "inverse-primary": "#a2c9ff",
+              "on-surface": "#191c20",
+              "outline-variant": "#c1c7d2"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-effect {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .asymmetric-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8f9ff;
+        color: #191c20;
+      }
+      h1, h2, h3, .font-headline {
+        font-family: 'Manrope', sans-serif;
+      }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- Sidebar Navigation -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#f2f3fa] dark:bg-[#191c20] flex flex-col p-6 gap-4 z-40">
+<div class="mb-8 px-2">
+<h1 class="font-headline font-black text-[#004277] text-2xl tracking-tighter">Flashvision</h1>
+<p class="text-xs font-medium text-on-surface-variant tracking-wide opacity-70 uppercase">Synthetic Logistics</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 text-[#414750] hover:bg-[#ecedf4] transition-all duration-200 cursor-pointer active:opacity-80 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body text-sm font-medium">Overview</span>
+</a>
+<!-- Active Tab: Inventory/Stock Control -->
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#2c2f34] text-[#004277] rounded-lg shadow-sm transition-all duration-200 cursor-pointer active:opacity-80" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-body text-sm font-semibold">Stock Control</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#414750] hover:bg-[#ecedf4] transition-all duration-200 cursor-pointer active:opacity-80 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="swap_horiz">swap_horiz</span>
+<span class="font-body text-sm font-medium">Movements</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#414750] hover:bg-[#ecedf4] transition-all duration-200 cursor-pointer active:opacity-80 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span class="font-body text-sm font-medium">Locations</span>
+</a>
+</nav>
+<div class="mt-auto">
+<button class="w-full py-4 bg-gradient-to-br from-[#004277] to-[#005a9e] text-white rounded-xl font-headline font-bold text-sm shadow-lg hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+                New Adjustment
+            </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 p-10 min-h-screen">
+<!-- Header / Top Bar -->
+<header class="flex justify-between items-end mb-12">
+<div>
+<h2 class="text-4xl font-headline font-extrabold tracking-tight text-on-surface">Inventory Dashboard</h2>
+<p class="text-on-surface-variant mt-1 font-body">Real-time oversight of global synthetic asset distribution.</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-sm focus:ring-2 focus:ring-primary w-64 transition-all" placeholder="Search SKU or Batch..." type="text"/>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-secondary-container overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a professional logistics manager in a bright office setting with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9o5EsiPgPNfHu_E55_e4t2T5VLHCN_p-O_XbCGEmVIQI0m39BKb6oNCxH6tRv_MH-_idjeYEWgXkuy3m51nG2KcnGTYFx2y26CsfITBVZhNI0x0BawbBAentGPv3gW9vppNVU4O7fOp7S_07yMZqw7qQeVr1ccvt-74hk3jCzNT37JX011LbFvcYbI6uSVyRlYDc8ypSiq7VKZB-XBv4SnZh5qP2bJBfAJsIthhM4BaiQKAGEvx10CHACtE9Y628cXraOlUtGWQT2"/>
+</div>
+</div>
+</header>
+<!-- KPI Cards Section -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+<!-- Total Stock Value -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] flex flex-col justify-between h-32 relative overflow-hidden">
+<div class="z-10">
+<p class="text-xs font-label font-bold text-on-surface-variant uppercase tracking-widest">Total Stock Value</p>
+<h3 class="text-2xl font-headline font-extrabold text-primary mt-1">$4.28M</h3>
+</div>
+<div class="flex items-center gap-1 text-xs font-bold text-emerald-600 z-10">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span>+2.4% vs last mo</span>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-5">
+<span class="material-symbols-outlined text-8xl" data-icon="payments">payments</span>
+</div>
+</div>
+<!-- Recent Movements -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] flex flex-col justify-between h-32 relative overflow-hidden">
+<div class="z-10">
+<p class="text-xs font-label font-bold text-on-surface-variant uppercase tracking-widest">Recent Movements</p>
+<h3 class="text-2xl font-headline font-extrabold text-primary mt-1">1,402</h3>
+</div>
+<p class="text-xs font-medium text-on-surface-variant z-10">Past 24 hours</p>
+<div class="absolute -right-4 -bottom-4 opacity-5">
+<span class="material-symbols-outlined text-8xl" data-icon="local_shipping">local_shipping</span>
+</div>
+</div>
+</section>
+<!-- Data Visualization Grid -->
+<section class="asymmetric-grid mb-10">
+<!-- High-Stock Items by Category -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)]">
+<div class="flex justify-between items-center mb-10">
+<h3 class="text-xl font-headline font-bold text-on-surface">High-Stock Items by Category</h3>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-surface-container-low rounded-full text-[10px] font-bold uppercase tracking-wider text-primary">Volume (MT)</span>
+</div>
+</div>
+<div class="flex items-end justify-between h-64 gap-8 px-4">
+<!-- Polymers -->
+<div class="flex-1 flex flex-col items-center gap-4">
+<div class="w-full bg-primary-container rounded-t-lg relative group h-[95%]">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">1,250MT</div>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">Polymers</span>
+</div>
+<!-- Chemicals -->
+<div class="flex-1 flex flex-col items-center gap-4">
+<div class="w-full bg-primary rounded-t-lg relative group h-[88%]">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">1,100MT</div>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">Chemicals</span>
+</div>
+<!-- Fabrics -->
+<div class="flex-1 flex flex-col items-center gap-4">
+<div class="w-full bg-secondary rounded-t-lg relative group h-[82%]">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">980MT</div>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">Fabrics</span>
+</div>
+<!-- Resins -->
+<div class="flex-1 flex flex-col items-center gap-4">
+<div class="w-full bg-primary-container rounded-t-lg relative group h-[90%]">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">1,150MT</div>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">Resins</span>
+</div>
+<!-- Additive -->
+<div class="flex-1 flex flex-col items-center gap-4">
+<div class="w-full bg-secondary-container rounded-t-lg relative group h-[75%]">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-on-surface text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">820MT</div>
+</div>
+<span class="text-xs font-medium text-on-surface-variant">Additives</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Completed Sale Orders Table -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] overflow-hidden">
+<div class="p-8 flex justify-between items-center bg-surface-container-low">
+<div class="flex items-center gap-3">
+<div class="w-2 h-6 bg-primary rounded-full"></div>
+<h3 class="text-xl font-headline font-bold text-on-surface">Completed Sale Orders</h3>
+</div>
+<button class="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+                    Export All <span class="material-symbols-outlined text-base" data-icon="download">download</span>
+</button>
+</div>
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Item Name / SKU</th>
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Customer</th>
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-center">Completion Date</th>
+<th class="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right">Total Quantity</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-6">
+<div class="flex flex-col">
+<span class="font-bold text-on-surface text-sm">Polypropylene High-Density Resin</span>
+<span class="text-xs text-on-surface-variant">SKU: POLY-772-HD</span>
+</div>
+</td>
+<td class="px-8 py-6">
+<span class="text-sm font-medium text-on-surface">Nexus Manufacturing Inc.</span>
+</td>
+<td class="px-8 py-6 text-center text-sm text-on-surface-variant">Oct 24, 2023</td>
+<td class="px-8 py-6 text-right font-bold text-primary">450 MT</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-6">
+<div class="flex flex-col">
+<span class="font-bold text-on-surface text-sm">Synthetic Aramid Fiber (Grade A)</span>
+<span class="text-xs text-on-surface-variant">SKU: FIB-990-AR</span>
+</div>
+</td>
+<td class="px-8 py-6">
+<span class="text-sm font-medium text-on-surface">Aerospace Dynamics</span>
+</td>
+<td class="px-8 py-6 text-center text-sm text-on-surface-variant">Oct 22, 2023</td>
+<td class="px-8 py-6 text-right font-bold text-primary">120 Rolls</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-6">
+<div class="flex flex-col">
+<span class="font-bold text-on-surface text-sm">Cobalt-Catalyst Liquid Solution</span>
+<span class="text-xs text-on-surface-variant">SKU: CHEM-441-CO</span>
+</div>
+</td>
+<td class="px-8 py-6">
+<span class="text-sm font-medium text-on-surface">Global Bio-Labs Ltd.</span>
+</td>
+<td class="px-8 py-6 text-center text-sm text-on-surface-variant">Oct 21, 2023</td>
+<td class="px-8 py-6 text-right font-bold text-primary">85 Units</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-6">
+<div class="flex flex-col">
+<span class="font-bold text-on-surface text-sm">Industrial Polymer Additive G-4</span>
+<span class="text-xs text-on-surface-variant">SKU: ADD-011-G4</span>
+</div>
+</td>
+<td class="px-8 py-6">
+<span class="text-sm font-medium text-on-surface">Precision Synthetics</span>
+</td>
+<td class="px-8 py-6 text-center text-sm text-on-surface-variant">Oct 20, 2023</td>
+<td class="px-8 py-6 text-right font-bold text-primary">500 KG</td>
+</tr>
+</tbody>
+</table>
+<div class="p-6 text-center">
+<button class="text-primary font-headline font-bold text-sm py-2 px-6 rounded-lg hover:bg-primary-fixed transition-colors">
+                    View All Sales Records
+                </button>
+</div>
+</section>
+</main>
+<!-- FAB for quick action -->
+<div class="fixed bottom-10 right-10">
+<button class="w-16 h-16 bg-primary-container text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-90 transition-transform group">
+<span class="material-symbols-outlined text-3xl" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<div class="absolute right-full mr-4 bg-on-surface text-white text-[10px] font-bold py-2 px-4 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                Quick Transfer
+            </div>
+</button>
+</div>
+</body></html>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashvision | Delivery Challan Dashboard</title>
+<!-- Fonts: Manrope for headlines, Inter for body/data -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#e1e2e8",
+              "on-surface": "#191c20",
+              "on-secondary-fixed-variant": "#2d4867",
+              "secondary-fixed": "#d1e4ff",
+              "surface-container": "#ecedf4",
+              "surface-tint": "#1260a5",
+              "on-tertiary-fixed-variant": "#743500",
+              "on-primary": "#ffffff",
+              "background": "#f8f9ff",
+              "secondary": "#456080",
+              "primary-container": "#005a9e",
+              "error": "#ba1a1a",
+              "primary-fixed-dim": "#a2c9ff",
+              "outline-variant": "#c1c7d2",
+              "surface-bright": "#f8f9ff",
+              "on-background": "#191c20",
+              "surface-container-low": "#f2f3fa",
+              "outline": "#727782",
+              "inverse-on-surface": "#eff0f7",
+              "tertiary-container": "#8e4302",
+              "tertiary": "#6b3000",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#a2c9ff",
+              "tertiary-fixed-dim": "#ffb68a",
+              "tertiary-fixed": "#ffdbc8",
+              "on-error": "#ffffff",
+              "inverse-surface": "#2e3035",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-fixed": "#001d36",
+              "error-container": "#ffdad6",
+              "primary-fixed": "#d3e4ff",
+              "on-surface-variant": "#414750",
+              "on-tertiary": "#ffffff",
+              "on-primary-fixed": "#001c38",
+              "on-primary-container": "#b1d1ff",
+              "surface-dim": "#d8dae0",
+              "on-tertiary-container": "#ffc29d",
+              "on-primary-fixed-variant": "#004881",
+              "surface": "#f8f9ff",
+              "on-error-container": "#93000a",
+              "surface-container-highest": "#e1e2e8",
+              "primary": "#004277",
+              "secondary-fixed-dim": "#adc9ed",
+              "on-tertiary-fixed": "#321300",
+              "on-secondary-container": "#445f7f",
+              "surface-container-high": "#e7e8ee",
+              "secondary-container": "#bed9ff"
+            },
+            fontFamily: {
+              "headline": ["Manrope", "sans-serif"],
+              "body": ["Inter", "sans-serif"],
+              "label": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9ff; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .asymmetric-shadow { box-shadow: 0 20px 40px rgba(0, 28, 56, 0.06); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #ced4da; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-on-surface overflow-hidden">
+<!-- SideNavBar (Desktop Shell) -->
+<aside class="h-screen w-64 fixed left-0 top-0 flex flex-col bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50">
+<div class="p-6 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">flash_on</span>
+</div>
+<div>
+<div class="text-lg font-black text-blue-900 dark:text-white leading-tight">Flashvision</div>
+<div class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Logistics Intelligence</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1 mt-4 overflow-y-auto custom-scrollbar">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-manrope text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-manrope text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">shopping_cart</span>
+<span>Sales Orders</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-manrope text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">account_tree</span>
+<span>OMS</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-manrope text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary">inventory_2</span>
+<span>Inventory</span>
+</a>
+<!-- Active State: Delivery -->
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-600/10 dark:bg-blue-400/10 text-blue-700 dark:text-blue-300 font-manrope text-sm font-bold rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+<span>Delivery</span>
+</a>
+</nav>
+<div class="p-4 mt-auto border-t border-slate-200/50 dark:border-slate-800/50">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-manrope text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 font-manrope text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-800 transition-all duration-200 ease-in-out group" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen flex flex-col bg-background relative overflow-y-auto">
+<!-- TopNavBar -->
+<header class="docked full-width top-0 sticky z-40 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none flex justify-between items-center w-full px-8 py-4">
+<div class="flex items-center gap-8 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container placeholder:text-slate-400 transition-all" placeholder="Search dispatches, challans, or orders..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800"></div>
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="text-right hidden xl:block">
+<p class="text-xs font-bold text-on-surface leading-tight">Alex Sterling</p>
+<p class="text-[10px] text-on-surface-variant">Logistics Director</p>
+</div>
+<img class="w-10 h-10 rounded-full object-cover border-2 border-primary-fixed ring-4 ring-primary-fixed/20 group-hover:ring-primary-fixed/40 transition-all" data-alt="professional portrait of a middle-aged male executive with confident expression in a clean studio setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpE_7nq3cQA2WhQwuKWRDeRExnrwDZ2H4cLF9MyG5b8jJwrnmbawBaT3K0ZvtOEBBws0978SY6nNpxxcGodOkJF4gaHFTMaOSc2FXlK-TIZp-2Vgr33JIbpf0eUnfbhhr3MIq1NPxu47bJgK2ot6dCu1P9p381UKWpXqz30L-69ajlaIe17bTDt5BIAT4GFF2fOSyYtsb4IFTfqUvFtSShYTbXFw1paQT1RfoSsoH2r-XNYODxmk9Xc-XziXFtdFLNwzH_TJu_V1_6"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="p-8 lg:p-10 space-y-10 max-w-[1440px] mx-auto w-full">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h1 class="text-3xl font-extrabold tracking-tight text-on-surface font-headline">Delivery Dashboard</h1>
+<p class="text-on-surface-variant mt-1 text-sm">Managing 1,284 total dispatches in the current fiscal month.</p>
+</div>
+<button class="flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-xl font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-xl">add_circle</span>
+<span>Create New Challan</span>
+</button>
+</div>
+<!-- KPI Section: High Level Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Total Dispatches -->
+<div class="bg-surface-container-lowest p-6 rounded-full asymmetric-shadow border border-white/50 group hover:translate-y-[-2px] transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">package_2</span>
+</div>
+<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">+12.5%</span>
+</div>
+<p class="text-on-surface-variant text-sm font-medium">Total Dispatches</p>
+<h3 class="text-4xl font-extrabold text-on-surface mt-1">1,284</h3>
+</div>
+<!-- Pending Challans -->
+<div class="bg-surface-container-lowest p-6 rounded-full asymmetric-shadow border border-white/50 group hover:translate-y-[-2px] transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">pending_actions</span>
+</div>
+<span class="text-xs font-bold text-tertiary bg-tertiary-fixed px-2 py-1 rounded-lg">Critical</span>
+</div>
+<p class="text-on-surface-variant text-sm font-medium">Pending Challans</p>
+<h3 class="text-4xl font-extrabold text-on-surface mt-1">42</h3>
+</div>
+<!-- Completed Orders -->
+<div class="bg-surface-container-lowest p-6 rounded-full asymmetric-shadow border border-white/50 group hover:translate-y-[-2px] transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-700">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+</div>
+<span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">Target: 95%</span>
+</div>
+<p class="text-on-surface-variant text-sm font-medium">Completed Orders</p>
+<h3 class="text-4xl font-extrabold text-on-surface mt-1">892</h3>
+</div>
+</div>
+<!-- Main Data Grid (Bento Style) -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Chart Section: Left Column (8 cols) -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- Bar Chart Card -->
+<div class="bg-surface-container-lowest p-8 rounded-full asymmetric-shadow border border-white/50">
+<div class="flex justify-between items-center mb-10">
+<div>
+<h4 class="text-lg font-bold text-on-surface font-headline">Completed Sale Orders</h4>
+<p class="text-on-surface-variant text-xs">Last 30 Days trend analysis</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Domestic</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary-fixed"></span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Export</span>
+</div>
+</div>
+</div>
+<!-- Visual Representation of Bar Chart -->
+<div class="flex items-end justify-between h-48 gap-2 relative">
+<!-- Chart Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between border-b border-slate-100">
+<div class="w-full border-t border-slate-50"></div>
+<div class="w-full border-t border-slate-50"></div>
+<div class="w-full border-t border-slate-50"></div>
+<div class="w-full border-t border-slate-50"></div>
+</div>
+<!-- Individual Bars -->
+<div class="flex-1 flex flex-col justify-end gap-1 group relative h-full">
+<div class="w-full bg-primary-fixed rounded-t-sm h-[30%]"></div>
+<div class="w-full bg-primary rounded-t-sm h-[40%]"></div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-slate-400 font-bold">WK 1</div>
+</div>
+<div class="flex-1 flex flex-col justify-end gap-1 group relative h-full">
+<div class="w-full bg-primary-fixed rounded-t-sm h-[20%]"></div>
+<div class="w-full bg-primary rounded-t-sm h-[55%]"></div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-slate-400 font-bold">WK 2</div>
+</div>
+<div class="flex-1 flex flex-col justify-end gap-1 group relative h-full">
+<div class="w-full bg-primary-fixed rounded-t-sm h-[45%]"></div>
+<div class="w-full bg-primary rounded-t-sm h-[35%]"></div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-slate-400 font-bold">WK 3</div>
+</div>
+<div class="flex-1 flex flex-col justify-end gap-1 group relative h-full">
+<div class="w-full bg-primary-fixed rounded-t-sm h-[25%]"></div>
+<div class="w-full bg-primary rounded-t-sm h-[65%]"></div>
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-slate-400 font-bold">WK 4</div>
+</div>
+</div>
+<!-- Stats Footer -->
+<div class="grid grid-cols-3 gap-4 mt-12 pt-8 border-t border-surface-container-low">
+<div>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider mb-1">Avg Time</p>
+<p class="text-xl font-bold text-on-surface">4.2 Days</p>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider mb-1">On-Time %</p>
+<p class="text-xl font-bold text-on-surface">98.4%</p>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant font-bold uppercase tracking-wider mb-1">Active Carriers</p>
+<p class="text-xl font-bold text-on-surface">18 Units</p>
+</div>
+</div>
+</div>
+<!-- Finished Items List -->
+<div class="bg-surface-container-lowest rounded-full asymmetric-shadow border border-white/50 overflow-hidden">
+<div class="p-6 border-b border-surface-container-low flex justify-between items-center">
+<h4 class="text-lg font-bold text-on-surface font-headline">Finished Items (Ready for Delivery)</h4>
+<button class="text-primary text-sm font-bold hover:underline">View All Inventory</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container-low text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+<tr>
+<th class="px-6 py-4">Item Name</th>
+<th class="px-6 py-4">Sale Order ID</th>
+<th class="px-6 py-4">Quantity</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low text-sm">
+<tr class="hover:bg-surface transition-colors">
+<td class="px-6 py-5 font-semibold text-on-surface">Industrial Centrifuge X1</td>
+<td class="px-6 py-5 font-mono text-slate-500">SO-2024-8842</td>
+<td class="px-6 py-5">14 Units</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+<span class="w-1 h-1 rounded-full bg-emerald-600"></span> READY
+                                            </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface transition-colors">
+<td class="px-6 py-5 font-semibold text-on-surface">Pneumatic Valves-H9</td>
+<td class="px-6 py-5 font-mono text-slate-500">SO-2024-9105</td>
+<td class="px-6 py-5">120 Units</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+<span class="w-1 h-1 rounded-full bg-emerald-600"></span> READY
+                                            </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-surface transition-colors">
+<td class="px-6 py-5 font-semibold text-on-surface">Synthetic Lubricant Core</td>
+<td class="px-6 py-5 font-mono text-slate-500">SO-2024-9118</td>
+<td class="px-6 py-5">500 Ltr</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold">
+<span class="w-1 h-1 rounded-full bg-amber-600"></span> INSPECTION
+                                            </span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Progress Flow Section: Right Column (4 cols) -->
+<div class="col-span-12 lg:col-span-4 space-y-8">
+<div class="bg-surface-container-lowest p-6 rounded-full asymmetric-shadow border border-white/50 h-full">
+<div class="flex justify-between items-center mb-6">
+<h4 class="text-lg font-bold text-on-surface font-headline">Active Production Flow</h4>
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+</div>
+<div class="space-y-8">
+<!-- Production Item 1 -->
+<div class="space-y-3">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-xs font-bold text-slate-500 uppercase">SO-2024-8842</p>
+<p class="text-sm font-semibold text-on-surface mt-0.5">Industrial Centrifuge X1</p>
+</div>
+<p class="text-xs font-bold text-primary">70%</p>
+</div>
+<div class="w-full h-2 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 70%"></div>
+</div>
+<p class="text-[10px] font-medium text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">inventory</span>
+                                    14/20 Items Ready
+                                </p>
+</div>
+<!-- Production Item 2 -->
+<div class="space-y-3">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-xs font-bold text-slate-500 uppercase">SO-2024-9105</p>
+<p class="text-sm font-semibold text-on-surface mt-0.5">Pneumatic Valves-H9</p>
+</div>
+<p class="text-xs font-bold text-primary">45%</p>
+</div>
+<div class="w-full h-2 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim rounded-full" style="width: 45%"></div>
+</div>
+<p class="text-[10px] font-medium text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm">inventory</span>
+                                    54/120 Items Ready
+                                </p>
+</div>
+<!-- Vertical Pulse Tracker (As requested in DS) -->
+<div class="mt-10 pt-8 border-t border-surface-container-low">
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-6">Dispatch Pipeline</p>
+<div class="relative pl-8 space-y-8">
+<!-- Thick Progress Line -->
+<div class="absolute left-[3px] top-2 bottom-2 w-1 bg-surface-variant rounded-full">
+<div class="absolute top-0 w-full bg-primary rounded-full h-[60%]"></div>
+</div>
+<!-- Steps -->
+<div class="relative group">
+<div class="absolute -left-[33px] w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold ring-4 ring-background">1</div>
+<p class="text-xs font-bold text-on-surface">Order Aggregation</p>
+<p class="text-[10px] text-on-surface-variant">Completed at 09:15 AM</p>
+</div>
+<div class="relative group">
+<div class="absolute -left-[33px] w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-white font-bold ring-4 ring-background">2</div>
+<p class="text-xs font-bold text-on-surface">Quality Clearance</p>
+<p class="text-[10px] text-on-surface-variant">Batch #482 passed 10:45 AM</p>
+</div>
+<div class="relative group">
+<div class="absolute -left-[33px] w-6 h-6 rounded-full bg-surface-variant flex items-center justify-center text-[10px] text-on-surface-variant font-bold ring-4 ring-background">3</div>
+<p class="text-xs font-bold text-slate-400">Loading &amp; Sealing</p>
+<p class="text-[10px] text-slate-400">Estimated start: 02:00 PM</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Attribution/Meta -->
+<footer class="flex justify-between items-center py-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+<p>© 2024 FLASHVISION LOGISTICS INTELLIGENCE</p>
+<div class="flex gap-6">
+<a class="hover:text-primary transition-colors" href="#">System Health: 100%</a>
+<a class="hover:text-primary transition-colors" href="#">Legal &amp; Compliance</a>
+</div>
+</footer>
+</div>
+</main>
+<!-- Visual Polish: Decorative Gradient Glows -->
+<div class="fixed top-[-10%] right-[-5%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-[-5%] left-[-5%] w-[30%] h-[30%] bg-tertiary/5 blur-[100px] rounded-full pointer-events-none"></div>
+</body></html>

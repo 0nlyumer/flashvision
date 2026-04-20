@@ -1,0 +1,297 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Adjust Production Metres | Flashvision OMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed-dim": "#a2c9ff",
+              "primary": "#004277",
+              "on-secondary-container": "#445f7f",
+              "tertiary-fixed-dim": "#ffb68a",
+              "secondary-container": "#bed9ff",
+              "on-secondary-fixed-variant": "#2d4867",
+              "primary-container": "#005a9e",
+              "on-tertiary-fixed-variant": "#743500",
+              "tertiary-fixed": "#ffdbc8",
+              "surface-tint": "#1260a5",
+              "surface-dim": "#d8dae0",
+              "outline-variant": "#c1c7d2",
+              "on-surface-variant": "#414750",
+              "on-primary": "#ffffff",
+              "on-error": "#ffffff",
+              "on-primary-fixed": "#001c38",
+              "error-container": "#ffdad6",
+              "tertiary": "#6b3000",
+              "outline": "#727782",
+              "on-tertiary-fixed": "#321300",
+              "surface-variant": "#e1e2e8",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed-variant": "#004881",
+              "secondary-fixed": "#d1e4ff",
+              "surface-container": "#ecedf4",
+              "surface-bright": "#f8f9ff",
+              "on-error-container": "#93000a",
+              "tertiary-container": "#8e4302",
+              "secondary-fixed-dim": "#adc9ed",
+              "surface-container-highest": "#e1e2e8",
+              "on-background": "#191c20",
+              "inverse-primary": "#a2c9ff",
+              "on-primary-container": "#b1d1ff",
+              "inverse-on-surface": "#eff0f7",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#2e3035",
+              "surface": "#f8f9ff",
+              "primary-fixed": "#d3e4ff",
+              "on-tertiary-container": "#ffc29d",
+              "background": "#f8f9ff",
+              "secondary": "#456080",
+              "on-secondary-fixed": "#001d36",
+              "surface-container-low": "#f2f3fa",
+              "on-secondary": "#ffffff",
+              "surface-container-high": "#e7e8ee",
+              "on-surface": "#191c20",
+              "error": "#ba1a1a"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#f2f3fa] dark:bg-slate-900 flex flex-col p-4 space-y-2 z-50">
+<div class="mb-8 px-2 flex items-center space-x-3">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">factory</span>
+</div>
+<div>
+<h2 class="font-manrope font-black text-[#004277] text-lg leading-tight" style="">Flashvision</h2>
+<p class="text-[10px] uppercase tracking-tighter text-on-surface-variant font-bold" style="">Production Hub</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center space-x-3 px-3 py-2.5 bg-[#ffffff] dark:bg-slate-800 text-[#004277] dark:text-blue-300 rounded-lg shadow-sm font-bold duration-100 active:scale-95" href="#" style="">
+<span class="material-symbols-outlined" data-icon="factory" style="">factory</span>
+<span class="" style=""><br></span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800 rounded-lg transition-all duration-200 hover:translate-x-1" href="#" style="">
+<span class="material-symbols-outlined" data-icon="list_alt" style="">list_alt</span>
+<span class="" style="">Order Queue</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800 rounded-lg transition-all duration-200 hover:translate-x-1" href="#" style="">
+<span class="material-symbols-outlined" data-icon="group_work" style="">group_work</span>
+<span class="" style="">Resource Alloc</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800 rounded-lg transition-all duration-200 hover:translate-x-1" href="#" style="">
+<span class="material-symbols-outlined" data-icon="verified" style="">verified</span>
+<span class="" style="">Quality Control</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800 rounded-lg transition-all duration-200 hover:translate-x-1" href="#" style="">
+<span class="material-symbols-outlined" data-icon="analytics" style="">analytics</span>
+<span class="" style="">Reports</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2.5 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800 rounded-lg transition-all duration-200 hover:translate-x-1" href="#" style="">
+<span class="material-symbols-outlined" data-icon="inventory_2" style="">inventory_2</span>
+<span class="" style="">Archive</span>
+</a>
+</nav>
+<div class="pt-4 mt-4 border-t border-outline-variant/20 space-y-1">
+<a class="flex items-center space-x-3 px-3 py-2 text-[#414750] text-sm hover:text-primary transition-colors" href="#" style="">
+<span class="material-symbols-outlined" data-icon="support_agent" style="">support_agent</span>
+<span class="" style="">Support</span>
+</a>
+<a class="flex items-center space-x-3 px-3 py-2 text-[#414750] text-sm hover:text-error transition-colors" href="#" style="">
+<span class="material-symbols-outlined" data-icon="logout" style="">logout</span>
+<span class="" style="">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen pb-24">
+<!-- TopAppBar (Shared Component) -->
+<header class="flex justify-between items-center w-full px-8 py-4 backdrop-blur-md bg-[#f8f9ff]/80 dark:bg-slate-950/80 sticky top-0 z-40">
+<div class="flex items-center space-x-8">
+<h1 class="text-xl font-bold tracking-tighter text-[#004277] dark:text-blue-300 font-manrope" style="">Flashvision OMS</h1>
+<nav class="hidden md:flex space-x-6">
+<a class="text-[#414750] dark:text-slate-400 hover:text-[#005A9E] font-manrope tracking-wide font-semibold text-sm" href="#" style="">Dashboard</a>
+<a class="text-[#004277] dark:text-blue-300 border-b-2 border-[#004277] dark:border-blue-300 pb-1 font-manrope tracking-wide font-semibold text-sm" href="#" style="">Planning</a>
+<a class="text-[#414750] dark:text-slate-400 hover:text-[#005A9E] font-manrope tracking-wide font-semibold text-sm" href="#" style="">Inventory</a>
+<a class="text-[#414750] dark:text-slate-400 hover:text-[#005A9E] font-manrope tracking-wide font-semibold text-sm" href="#" style="">Logistics</a>
+</nav>
+</div>
+<div class="flex items-center space-x-4">
+<button class="p-2 hover:bg-[#f2f3fa] rounded-full transition-colors text-on-surface-variant" style="">
+<span class="material-symbols-outlined" data-icon="notifications" style="">notifications</span>
+</button>
+<button class="p-2 hover:bg-[#f2f3fa] rounded-full transition-colors text-on-surface-variant" style="">
+<span class="material-symbols-outlined" data-icon="settings" style="">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border border-outline-variant/30">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="Professional headshot of a logistics manager in a modern office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFElVn-iWhMCS4EKpZ97j8uzTWDBBVdhQoX7455ZY1o8Az1PGw4QrNNfakr0oxiVCyaf5OxLxwRyfGtWSJawFK6ubZbfZbGdkC5DHrY1XRFydkq8ZeYakIdyZLA0A1Efx6gkqPguVHiTOH9cMiWGsMaXBh_Hes3ipdb0DXGJl8oqYqSeY4fkfhDCLMkVj8OXgj6ubrUWehjRt1_4VtFAeO2kyo2lY1QRgkq0fh_OOVL_UEbslUNkTyPkZg4XO-HiSYH5BPFi0604y2" style="">
+</div>
+</div>
+</header>
+<!-- Content Area: Adjust Production Metres -->
+<div class="max-w-6xl mx-auto px-10 pt-12"><nav class="flex border-b border-outline-variant/30 mb-8">
+<a class="px-6 py-3 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent" href="#" style="">Orders</a>
+<a class="px-6 py-3 text-sm font-bold text-primary border-b-2 border-primary" href="#" style="">Production Planning</a>
+<a class="px-6 py-3 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent" href="#" style="">Planning History</a>
+</nav>
+<!-- Header Section -->
+<div class="mb-10">
+<div class="flex items-center space-x-2 text-primary mb-2">
+<span class="material-symbols-outlined text-sm" style="">arrow_back</span>
+<span class="text-xs font-bold uppercase tracking-widest font-label" style="">Back to Selection</span>
+</div>
+<h2 class="text-4xl font-extrabold text-on-surface tracking-tight font-headline" style="">Adjust Production Metres</h2>
+<p class="text-on-surface-variant mt-2 max-w-2xl font-body" style="">Review and refine the production targets for the selected sales orders. Adjustments here will update the final mill run requirements.</p>
+</div>
+<!-- Bento-style Grid for Orders -->
+<div class="grid grid-cols-1 gap-6 mb-12">
+<!-- Item Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_20px_40px_rgba(0,28,56,0.06)] border border-outline-variant/10 flex flex-col md:flex-row md:items-center justify-between gap-8 group">
+<div class="flex items-start space-x-5 flex-1">
+<div class="w-16 h-16 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-3xl" style="">precision_manufacturing</span>
+</div>
+<div class="space-y-1">
+<div class="flex items-center space-x-2">
+<span class="bg-secondary-container text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter" style="">SO-88421</span>
+<span class="text-on-surface-variant text-xs font-medium" style="">Synthetic Polymer - XL4</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface" style="">Precision Grade High-Density Filament</h3>
+<p class="text-xs text-outline font-medium" style="">Batch: ALPHA-9 | Delivery: Oct 24, 2024</p>
+</div>
+</div>
+<div class="flex items-center space-x-12 shrink-0">
+<div class="text-right">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1" style="">Original Order Metres</p>
+<p class="text-2xl font-manrope font-extrabold text-on-surface" style="">2,450<span class="text-sm font-medium ml-1" style="">m</span></p>
+</div>
+<div class="w-48">
+<label class="block text-[10px] uppercase tracking-widest text-primary font-bold mb-1" style="">Production Metres</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-lg px-4 py-3 text-lg font-bold text-primary focus:ring-2 focus:ring-primary-container focus:bg-white transition-all outline-none" type="number" value="2450">
+<span class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm font-semibold" style="">m</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Item Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_20px_40px_rgba(0,28,56,0.06)] border border-outline-variant/10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+<div class="flex items-start space-x-5 flex-1">
+<div class="w-16 h-16 rounded-xl bg-surface-container flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-3xl" style="">layers</span>
+</div>
+<div class="space-y-1">
+<div class="flex items-center space-x-2">
+<span class="bg-secondary-container text-on-secondary-fixed-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter" style="">SO-88425</span>
+<span class="text-on-surface-variant text-xs font-medium" style="">Industrial Weave - T2</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface" style="">Reinforced Geotextile Membrane</h3>
+<p class="text-xs text-outline font-medium" style="">Batch: BETA-3 | Delivery: Oct 28, 2024</p>
+</div>
+</div>
+<div class="flex items-center space-x-12 shrink-0">
+<div class="text-right">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1" style="">Original Order Metres</p>
+<p class="text-2xl font-manrope font-extrabold text-on-surface" style="">5,100<span class="text-sm font-medium ml-1" style="">m</span></p>
+</div>
+<div class="w-48">
+<label class="block text-[10px] uppercase tracking-widest text-primary font-bold mb-1" style="">Production Metres</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-lg px-4 py-3 text-lg font-bold text-primary focus:ring-2 focus:ring-primary-container focus:bg-white transition-all outline-none" type="number" value="5100">
+<span class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm font-semibold" style="">m</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Item Card 3 (Attention State) -->
+<div class="bg-white rounded-xl p-6 shadow-[0_20px_40px_rgba(0,28,56,0.06)] border-l-4 border-tertiary flex flex-col md:flex-row md:items-center justify-between gap-8">
+<div class="flex items-start space-x-5 flex-1">
+<div class="w-16 h-16 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary shrink-0">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: &quot;FILL&quot; 1;">warning</span>
+</div>
+<div class="space-y-1">
+<div class="flex items-center space-x-2">
+<span class="bg-tertiary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter" style="">SO-88430</span>
+<span class="text-tertiary font-bold text-xs" style="">High-Priority Adjustment</span>
+</div>
+<h3 class="text-xl font-bold text-on-surface" style="">Ultra-Flex Conductive Thread</h3>
+<p class="text-xs text-tertiary/70 font-medium italic" style="">Shortage Warning: Raw material supply low for this batch</p>
+</div>
+</div>
+<div class="flex items-center space-x-12 shrink-0">
+<div class="text-right">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1" style="">Original Order Metres</p>
+<p class="text-2xl font-manrope font-extrabold text-on-surface" style="">850<span class="text-sm font-medium ml-1" style="">m</span></p>
+</div>
+<div class="w-48">
+<label class="block text-[10px] uppercase tracking-widest text-tertiary font-bold mb-1" style="">Production Metres</label>
+<div class="relative">
+<input class="w-full bg-tertiary-fixed/30 border-none rounded-lg px-4 py-3 text-lg font-bold text-tertiary focus:ring-2 focus:ring-tertiary focus:bg-white transition-all outline-none" type="number" value="850">
+<span class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm font-semibold" style="">m</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Summary Section -->
+<div class="bg-surface-container rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between">
+<div class="flex space-x-12 mb-6 md:mb-0">
+<div>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1" style="">Total Selected Items</p>
+<p class="text-3xl font-manrope font-black text-on-surface" style="">03</p>
+</div>
+<div>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1" style="">Cumulative Target</p>
+<p class="text-3xl font-manrope font-black text-on-surface" style="">8,400<span class="text-sm font-bold ml-1" style="">m</span></p>
+</div>
+</div>
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-10 py-5 rounded-xl font-bold text-lg flex items-center space-x-4 shadow-xl hover:shadow-primary/20 transition-all active:scale-95 group" style="">
+<span class="" style="">Generate Production Slip</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" style="">receipt_long</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="flex justify-between items-center px-10 py-3 fixed bottom-0 left-64 right-0 bg-[#f8f9ff] dark:bg-slate-950 border-t border-outline-variant/15 z-40">
+<div class="text-[#414750] dark:text-slate-500 font-inter text-xs uppercase tracking-widest" style="">
+            © 2024 Flashvision Precision Logistics. Confidential.
+        </div>
+<div class="flex space-x-8">
+<a class="text-[#414750] hover:text-[#005A9E] font-inter text-xs uppercase tracking-widest hover:underline underline-offset-4" href="#" style="">Terms of Service</a>
+<a class="text-[#414750] hover:text-[#005A9E] font-inter text-xs uppercase tracking-widest hover:underline underline-offset-4" href="#" style="">Privacy Policy</a>
+<a class="text-[#414750] hover:text-[#005A9E] font-inter text-xs uppercase tracking-widest hover:underline underline-offset-4 flex items-center" href="#" style="">
+<span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                System Status
+            </a>
+</div>
+</footer>
+<!-- Overlay Background Texture -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.03] z-[-1]" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuBVORJPL1exB2-gPlqZFYq034So160wByhaCqwnMzegWm-0ypPpjrZZr10p1IJ8spekz_xb92zRGY5gSDnYdQDSKESOYQ-R9hZcfCHQ-GnXM66HRveGIYv814TisPvl94DKXdH3WpuYTsvh8UaPP__Bx3ex-UTBHoVdf7YeK6dsNoFxYdCD6qriVI9Z48mX30iUtg81y5SajN_-NzQK7K7AZKH4aSZHsBsoOBk4KURvJ6lu8_SNEKnIZts8YDb8LhdDgyqKwKm2AsNM&quot;);">
+</div>
+</body></html>

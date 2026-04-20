@@ -1,0 +1,279 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Flashvision | Stock Adjustment</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-bright": "#f8f9ff",
+                        "outline": "#727782",
+                        "secondary-container": "#bed9ff",
+                        "on-tertiary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "secondary": "#456080",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "primary-fixed": "#d3e4ff",
+                        "on-tertiary-fixed": "#321300",
+                        "surface": "#f8f9ff",
+                        "on-primary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#d1e4ff",
+                        "on-tertiary-container": "#ffc29d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e1e2e8",
+                        "primary": "#004277",
+                        "on-secondary-container": "#445f7f",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "surface-container-high": "#e7e8ee",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#b1d1ff",
+                        "on-background": "#191c20",
+                        "on-secondary-fixed": "#001d36",
+                        "inverse-surface": "#2e3035",
+                        "surface-tint": "#1260a5",
+                        "surface-container-low": "#f2f3fa",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "surface-variant": "#e1e2e8",
+                        "on-primary-fixed-variant": "#004881",
+                        "primary-container": "#005a9e",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "tertiary-fixed": "#ffdbc8",
+                        "inverse-on-surface": "#eff0f7",
+                        "on-surface-variant": "#414750",
+                        "on-primary-fixed": "#001c38",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d8dae0",
+                        "tertiary-container": "#8e4302",
+                        "tertiary": "#6b3000",
+                        "surface-container": "#ecedf4",
+                        "inverse-primary": "#a2c9ff",
+                        "on-surface": "#191c20",
+                        "outline-variant": "#c1c7d2"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#f8f9ff]/80 dark:bg-[#191c20]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)]">
+<div class="flex items-center justify-between px-8 h-16 w-full">
+<div class="text-xl font-extrabold bg-gradient-to-br from-[#004277] to-[#005a9e] bg-clip-text text-transparent font-['Manrope'] tracking-tight">
+                Flashvision
+            </div>
+<div class="hidden md:flex items-center gap-8 font-['Manrope'] font-bold tracking-tight">
+<a class="text-[#414750] hover:text-[#005a9e] transition-colors duration-300" href="#"><br></a>
+<a class="text-[#414750] hover:text-[#005a9e] transition-colors duration-300" href="#"><br></a>
+<a class="text-[#004277] border-b-2 border-[#004277] pb-1" href="#"><br></a>
+<a class="text-[#414750] hover:text-[#005a9e] transition-colors duration-300" href="#"><br></a>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors active:scale-95">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-highest ml-2">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="professional headshot of a logistics manager in a modern office environment, soft cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXVsG8JFXe3NSVftg6v4ouvcoxeBRJ5soTiP6gJqweiRo57Re6FdFI-ez0WqVf5i6EcE1LAazclAPsZaVa6R0ucRWCxmI5aj_NZIaFJpQjbSuvWWgKsRcHG-X37OvAy5HIEe73u1Jgz02m-rflc2W74AlYRyI26ybX1FkTw29_TeVPX5eFZIb6ZUXciLfC9O3C-3qVc_LTQW5QlCPOH4-k_JuB_TCvePLPnva7s81aDaL81LOs9Nya7kfioVl-l3Decg6JWnRS3r6a">
+</div>
+</div>
+</div>
+</nav>
+<!-- SideNavBar (Hidden on Mobile) -->
+<aside class="hidden lg:flex flex-col p-6 gap-4 h-screen w-64 fixed left-0 top-0 bg-[#f2f3fa] dark:bg-[#191c20] z-40 pt-20">
+<div class="mb-8 px-2">
+<h2 class="font-['Manrope'] font-black text-[#004277] text-lg">Flashvision</h2>
+<p class="text-xs text-on-surface-variant font-medium">Synthetic Logistics</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 p-3 text-[#414750] hover:bg-[#ecedf4] rounded-lg transition-all duration-200 hover:translate-x-1 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span> Overview
+            </a>
+<a class="flex items-center gap-3 p-3 text-[#414750] hover:bg-[#ecedf4] rounded-lg transition-all duration-200 hover:translate-x-1 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined">inventory_2</span> Stock Control
+            </a>
+<a class="flex items-center gap-3 p-3 bg-white shadow-sm text-[#004277] rounded-lg transition-all duration-200 font-['Inter'] text-sm font-medium" href="#">Inventory</a>
+<a class="flex items-center gap-3 p-3 text-[#414750] hover:bg-[#ecedf4] rounded-lg transition-all duration-200 hover:translate-x-1 font-['Inter'] text-sm font-medium" href="#">
+<span class="material-symbols-outlined">location_on</span> Locations
+            </a>
+</nav>
+<button class="mt-auto flex items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-container text-white py-3 px-4 rounded-xl shadow-lg hover:shadow-primary/20 active:scale-95 transition-all font-semibold">
+<span class="material-symbols-outlined">add</span> New Adjustment
+        </button>
+</aside>
+<!-- Main Content -->
+<main class="pt-24 pb-12 px-6 lg:pl-72 lg:pr-12 max-w-[1600px] mx-auto">
+<nav class="flex items-center gap-8 border-b border-surface-container-highest mb-8 pb-px">
+<a class="pb-4 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent" href="#">Inventory Dashboard</a>
+<a class="pb-4 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent" href="#">Inventory</a>
+<a class="pb-4 text-sm font-bold text-primary border-b-2 border-primary relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary" href="#">Adjustment</a>
+<a class="pb-4 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent" href="#">Items Record</a>
+<a class="pb-4 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors border-b-2 border-transparent" href="#">Returns</a>
+</nav><header class="mb-10">
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">Manual Stock Adjustment</h1>
+<p class="text-on-surface-variant font-body">Correct inventory discrepancies with high-precision tracking.</p>
+</header>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+<!-- Form Section -->
+<section class="xl:col-span-8 space-y-8">
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)] p-8">
+<form class="space-y-6">
+<!-- Select Item -->
+<div>
+<label class="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Select Item</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl pl-12 pr-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all placeholder:text-outline-variant" placeholder="Search by SKU, Name or Batch ID..." type="text">
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Adjustment Type -->
+<div>
+<label class="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Adjustment Type</label>
+<div class="flex gap-3">
+<button class="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl bg-primary-container text-white font-semibold transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined">add_circle</span> Addition
+                                    </button>
+<button class="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl bg-surface-container-low text-on-surface-variant font-semibold hover:bg-surface-container transition-all" type="button">
+<span class="material-symbols-outlined">remove_circle</span> Subtraction
+                                    </button>
+</div>
+</div>
+<!-- Quantity -->
+<div>
+<label class="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Quantity</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all" placeholder="0.00" type="number">
+</div>
+</div>
+<!-- Reason -->
+<div>
+<label class="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Reason for Adjustment</label>
+<select class="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all text-on-surface appearance-none">
+<option>Select a reason...</option>
+<option>Damage / Spoilage</option>
+<option>Correction / Miscount</option>
+<option>Initial Stock Entry</option>
+<option>Return to Vendor</option>
+<option>Internal Use</option>
+</select>
+</div>
+<!-- Remarks -->
+<div>
+<label class="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Remarks</label>
+<textarea class="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all" placeholder="Enter detailed notes regarding this correction..." rows="4"></textarea>
+</div>
+<div class="flex justify-end gap-4 pt-4">
+<button class="px-8 py-4 rounded-xl text-primary font-bold hover:bg-primary/5 transition-colors" type="button">Discard</button>
+<button class="px-10 py-4 rounded-xl bg-gradient-to-br from-primary to-primary-container text-white font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all" type="submit">Process Adjustment</button>
+</div>
+</form>
+</div>
+</section>
+<!-- Reference / Reference Info Section -->
+<aside class="xl:col-span-4 space-y-6">
+<!-- Current Stock Insight -->
+<div class="bg-surface-container-low rounded-xl p-8 border border-outline-variant/15">
+<h3 class="text-sm font-bold text-on-surface-variant mb-6 tracking-widest uppercase">Live Item Insights</h3>
+<div class="flex items-center gap-4 mb-8">
+<div class="w-16 h-16 rounded-xl bg-surface-container-highest flex items-center justify-center overflow-hidden">
+<img alt="Synthetic Logistics Part" class="w-full h-full object-cover" data-alt="high-tech industrial components neatly organized on a clean laboratory shelf with blue accent lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6_I7nCq-Stx1iWBYzXD8-UOSGcrJ2RexbvHfHdY5b8EHGhI9apXPxGRKIkoJb0CXwQHAyjTtRm6Hvt5b6_gLrl6_av0ao94_0crlr1Rcv3vFcgOv6Ortj-MH3tsc4NOhVrep1i9E97OuTyZyoINic2OR8wqyAhNUj05DfkSyrvrIKhJKrdVBF-ASm84EYRT72kGPDXPLOh6pZplOwA_2iewjHkUBrl2OhxXibIWyzjh5LXUpdZxi5ljLzT5Et1lGrwCIbIPNbNUFC">
+</div>
+<div>
+<p class="font-bold text-on-surface text-lg leading-tight">Iso-Hexane Grade-B</p>
+<p class="text-xs text-outline font-medium">SKU: FLV-882-QX</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-end p-4 bg-surface-container-lowest rounded-xl">
+<div>
+<span class="text-xs font-medium text-on-surface-variant">Current Balance</span>
+<p class="text-2xl font-black text-primary">1,420 <span class="text-sm font-medium">Units</span></p>
+</div>
+<span class="material-symbols-outlined text-primary/40 text-3xl">inventory</span>
+</div>
+<div class="flex justify-between items-end p-4 bg-surface-container-lowest rounded-xl">
+<div>
+<span class="text-xs font-medium text-on-surface-variant">Last Movement</span>
+<p class="text-lg font-bold text-on-surface">3h ago</p>
+</div>
+<span class="material-symbols-outlined text-secondary/40">schedule</span>
+</div>
+<div class="flex justify-between items-end p-4 bg-surface-container-lowest rounded-xl">
+<div>
+<span class="text-xs font-medium text-on-surface-variant">Location</span>
+<p class="text-lg font-bold text-on-surface">WH-A / Row 12</p>
+</div>
+<span class="material-symbols-outlined text-secondary/40">location_on</span>
+</div>
+</div>
+<!-- Visual Context Image -->
+<div class="mt-8 rounded-xl overflow-hidden h-40 relative group">
+<img alt="Warehouse Storage" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="modern automated warehouse interior with symmetric shelving and blue LED lighting, clean industrial look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNWC1_jt0RPPYEzH3rV3JPtJ8PYbRT6LhoFmpi1wo2VvoXC5ZnyEAwLpaoh7hRC_w5kzeG6f4hYheK1s163jyFaj7o11ZQVcpiTS7K__U-dPZCgQkuoUxdsrKcEN-q-yrxXUjzNFkQFfj4rd9N9gaf4kNC2FJbnuB8OuOerG8Jnhjx9FBZ9IfwR1mxSego8yLR8QkMDwEjvxEe8WL21m1ru56unkMaDBdLyqfXMCE43qs1yPel6e-sEney9b4aFXlo8CIfy9Akara-">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent flex items-end p-4">
+<p class="text-white text-xs font-medium">Verified Location: Zone 4 Warehouse</p>
+</div>
+</div>
+</div>
+<!-- Recent History Bento -->
+<div class="bg-surface-container-highest rounded-xl p-6">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-sm font-bold text-on-surface">Recent Activity</h3>
+<a class="text-xs font-bold text-primary hover:underline" href="#">View All</a>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+<div class="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">remove</span>
+</div>
+<div>
+<p class="text-xs font-bold">-45 Units</p>
+<p class="text-[10px] text-on-surface-variant">Damage • Dec 14, 2023</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">add</span>
+</div>
+<div>
+<p class="text-xs font-bold">+120 Units</p>
+<p class="text-[10px] text-on-surface-variant">Restock • Dec 12, 2023</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Success Feedback Overlay (Hidden by Default) -->
+<div class="fixed bottom-8 right-8 pointer-events-none opacity-0 translate-y-4">
+<div class="bg-primary text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-bold">Stock Adjustment Confirmed</span>
+</div>
+</div>
+</body></html>

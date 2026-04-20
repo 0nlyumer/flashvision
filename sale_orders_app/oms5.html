@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashvision OMS - Production Slip</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed-dim": "#a2c9ff",
+              "primary": "#004277",
+              "on-secondary-container": "#445f7f",
+              "tertiary-fixed-dim": "#ffb68a",
+              "secondary-container": "#bed9ff",
+              "on-secondary-fixed-variant": "#2d4867",
+              "primary-container": "#005a9e",
+              "on-tertiary-fixed-variant": "#743500",
+              "tertiary-fixed": "#ffdbc8",
+              "surface-tint": "#1260a5",
+              "surface-dim": "#d8dae0",
+              "outline-variant": "#c1c7d2",
+              "on-surface-variant": "#414750",
+              "on-primary": "#ffffff",
+              "on-error": "#ffffff",
+              "on-primary-fixed": "#001c38",
+              "error-container": "#ffdad6",
+              "tertiary": "#6b3000",
+              "outline": "#727782",
+              "on-tertiary-fixed": "#321300",
+              "surface-variant": "#e1e2e8",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed-variant": "#004881",
+              "secondary-fixed": "#d1e4ff",
+              "surface-container": "#ecedf4",
+              "surface-bright": "#f8f9ff",
+              "on-error-container": "#93000a",
+              "tertiary-container": "#8e4302",
+              "secondary-fixed-dim": "#adc9ed",
+              "surface-container-highest": "#e1e2e8",
+              "on-background": "#191c20",
+              "inverse-primary": "#a2c9ff",
+              "on-primary-container": "#b1d1ff",
+              "inverse-on-surface": "#eff0f7",
+              "on-tertiary": "#ffffff",
+              "inverse-surface": "#2e3035",
+              "surface": "#f8f9ff",
+              "primary-fixed": "#d3e4ff",
+              "on-tertiary-container": "#ffc29d",
+              "background": "#f8f9ff",
+              "secondary": "#456080",
+              "on-secondary-fixed": "#001d36",
+              "surface-container-low": "#f2f3fa",
+              "on-secondary": "#ffffff",
+              "surface-container-high": "#e7e8ee",
+              "on-surface": "#191c20",
+              "error": "#ba1a1a"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            .print-canvas { 
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                width: 100% !important;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface-container-low font-body text-on-surface antialiased min-h-screen">
+<!-- Top Navigation (Contextual Suppression Logic: Hidden for print focus, but visible for UI Context) -->
+<header class="no-print bg-[#f8f9ff] dark:bg-slate-950 shadow-sm dark:shadow-none flex justify-between items-center w-full px-8 py-4 backdrop-blur-md bg-opacity-80 fixed top-0 z-50">
+<div class="text-xl font-bold tracking-tighter text-[#004277] dark:text-blue-300 font-headline">
+            Flashvision OMS
+        </div>
+<nav class="flex space-x-8 font-manrope tracking-wide font-semibold text-sm">
+<a class="text-[#414750] dark:text-slate-400 hover:text-[#005A9E] transition-colors" href="#">Dashboard</a>
+<a class="text-[#004277] dark:text-blue-300 border-b-2 border-[#004277] dark:border-blue-300 pb-1" href="#">Planning</a>
+<a class="text-[#414750] dark:text-slate-400 hover:text-[#005A9E] transition-colors" href="#">Inventory</a>
+<a class="text-[#414750] dark:text-slate-400 hover:text-[#005A9E] transition-colors" href="#">Logistics</a>
+</nav>
+<div class="flex items-center space-x-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high p-2 rounded-full transition-colors">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-surface-container-high p-2 rounded-full transition-colors">settings</span>
+<div class="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center text-white overflow-hidden">
+<img class="object-cover w-full h-full" data-alt="professional portrait of a manufacturing operations manager in a clean studio setting with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtPSsEyjRni79v0L1rVNS8cPtZGsWokisxR9r3lPwUyPDYP7gSKkSIyfyMMarteoalu1N219ojWscLeJTTdXH2woFDpJC6M0gcdB-qnEY6u8Q8CRAHQV9Ld-j7_QfC-jFP-AS9kNgoYF1jVmOTRc92k98U4IOa3mR4Mf4Pci155TtcePs0jBPLzawUXOF7Ss61-sOGMGjvGzd0zpa_nhea8dM0CUBco-7IquTy2lRMu0o2yHGsGuQOdHRBPiZz6cwQ9eBT2XPB5E2k"/>
+</div>
+</div>
+</header>
+<!-- Sidebar (Suppressed for focused task, but kept as semantic anchor) -->
+<aside class="no-print h-screen w-64 fixed left-0 top-0 bg-[#f2f3fa] dark:bg-slate-900 flex flex-col p-4 space-y-2 pt-24">
+<div class="mb-8 px-2">
+<h2 class="font-manrope font-black text-[#004277] text-lg uppercase tracking-tight">Production Hub</h2>
+<p class="text-xs text-on-surface-variant opacity-70">Precision Logistics</p>
+</div>
+<a class="flex items-center space-x-3 p-3 bg-[#ffffff] dark:bg-slate-800 text-[#004277] dark:text-blue-300 rounded-lg shadow-sm font-bold duration-200" href="#">
+<span class="material-symbols-outlined">factory</span>
+<span>Production</span>
+</a>
+<a class="flex items-center space-x-3 p-3 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800 rounded-lg transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">list_alt</span>
+<span>Order Queue</span>
+</a>
+<a class="flex items-center space-x-3 p-3 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800 rounded-lg transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">group_work</span>
+<span>Resource Alloc</span>
+</a>
+<a class="flex items-center space-x-3 p-3 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800 rounded-lg transition-all hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">verified</span>
+<span>Quality Control</span>
+</a>
+<div class="mt-auto pt-4 border-t border-outline-variant/20">
+<a class="flex items-center space-x-3 p-3 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] rounded-lg" href="#">
+<span class="material-symbols-outlined">support_agent</span>
+<span>Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 pb-20 px-8 flex flex-col items-center"><!-- Tab Navigation -->
+<div class="no-print w-full max-w-4xl mb-6 border-b border-outline-variant/30">
+<nav class="flex space-x-8">
+<button class="px-1 pb-4 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors relative group">
+      Orders
+      <span class="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform"></span>
+</button>
+<button class="px-1 pb-4 text-sm font-bold text-primary relative">
+      Production Planning
+      <span class="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></span>
+</button>
+<button class="px-1 pb-4 text-sm font-semibold text-on-surface-variant hover:text-primary transition-colors relative group">
+      Planning History
+      <span class="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform"></span>
+</button>
+</nav>
+</div>
+<!-- Action Bar (Non-Printable) -->
+<div class="no-print w-full max-w-4xl flex justify-between items-center mb-8">
+<button class="flex items-center space-x-2 text-primary font-semibold hover:opacity-70 transition-opacity">
+<span class="material-symbols-outlined">arrow_back</span>
+<span>Back to Planning</span>
+</button>
+<div class="flex space-x-3">
+<button class="flex items-center space-x-2 px-5 py-2.5 rounded-xl border border-outline-variant text-primary font-medium hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+<span>Export PDF</span>
+</button>
+<button class="flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-white font-semibold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all" onclick="window.print()">
+<span class="material-symbols-outlined text-sm">print</span>
+<span>Print Slip</span>
+</button>
+</div>
+</div>
+<!-- The Production Slip Document -->
+<section class="print-canvas w-full max-w-4xl bg-white min-h-[1100px] shadow-[0_20px_40px_rgba(0,28,56,0.06)] rounded-xl p-12 flex flex-col">
+<!-- Document Header -->
+<header class="flex justify-between items-start border-b-4 border-primary pb-8 mb-10">
+<div class="space-y-1">
+<h1 class="text-3xl font-headline font-extrabold text-primary tracking-tighter">FLASHVISION</h1>
+<p class="text-sm font-label uppercase tracking-[0.2em] text-on-surface-variant font-medium">Precision Logistics System</p>
+</div>
+<div class="text-right">
+<h2 class="text-2xl font-headline font-bold text-on-surface uppercase tracking-wide">Production Slip</h2>
+<p class="text-primary font-mono text-sm font-semibold">REF: #FV-2024-990812</p>
+</div>
+</header>
+<!-- Metadata Grid -->
+<div class="grid grid-cols-3 gap-8 mb-12 bg-surface-container-low p-6 rounded-xl">
+<div>
+<label class="block text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Slip ID</label>
+<p class="text-on-surface font-semibold">PS-8829-QX</p>
+</div>
+<div>
+<label class="block text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Generated Date</label>
+<p class="text-on-surface font-semibold">October 24, 2024 | 14:32</p>
+</div>
+<div>
+<label class="block text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Authorizing User</label>
+<p class="text-on-surface font-semibold">Marcus Chen (Ops Senior)</p>
+</div>
+</div>
+<!-- Table Section -->
+<div class="flex-grow">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-primary text-white">
+<th class="py-4 px-6 font-headline text-xs uppercase tracking-widest rounded-tl-lg">Item Name</th>
+<th class="py-4 px-6 font-headline text-xs uppercase tracking-widest">Selected Metres</th>
+<th class="py-4 px-6 font-headline text-xs uppercase tracking-widest">Adjusted Metres</th>
+<th class="py-4 px-6 font-headline text-xs uppercase tracking-widest rounded-tr-lg">Status</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="border-b border-surface-container transition-colors hover:bg-surface-container-low">
+<td class="py-5 px-6">
+<span class="block font-bold text-primary">Ultra-Strength Synthetic Fiber</span>
+<span class="text-xs text-on-surface-variant">SKU: SYN-990-B</span>
+</td>
+<td class="py-5 px-6 font-medium">1,200.00 m</td>
+<td class="py-5 px-6 font-bold text-primary">1,215.50 m</td>
+<td class="py-5 px-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-fixed-variant">
+                                    Ready for Production
+                                </span>
+</td>
+</tr>
+<tr class="border-b border-surface-container transition-colors hover:bg-surface-container-low">
+<td class="py-5 px-6">
+<span class="block font-bold text-primary">Reinforced Polymer Coating</span>
+<span class="text-xs text-on-surface-variant">SKU: POL-212-A</span>
+</td>
+<td class="py-5 px-6 font-medium">450.00 m</td>
+<td class="py-5 px-6 font-bold text-primary">450.00 m</td>
+<td class="py-5 px-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-fixed-variant">
+                                    Ready for Production
+                                </span>
+</td>
+</tr>
+<tr class="border-b border-surface-container transition-colors hover:bg-surface-container-low">
+<td class="py-5 px-6">
+<span class="block font-bold text-primary">High-Tension Tensile Core</span>
+<span class="text-xs text-on-surface-variant">SKU: TEN-X44-G</span>
+</td>
+<td class="py-5 px-6 font-medium">2,800.00 m</td>
+<td class="py-5 px-6 font-bold text-primary">2,828.00 m</td>
+<td class="py-5 px-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-fixed-variant">
+                                    Ready for Production
+                                </span>
+</td>
+</tr>
+<tr class="bg-surface-container-low/50">
+<td class="py-5 px-6">
+<span class="block font-bold text-primary">Conductive Copper Weave</span>
+<span class="text-xs text-on-surface-variant">SKU: COP-003-L</span>
+</td>
+<td class="py-5 px-6 font-medium">150.00 m</td>
+<td class="py-5 px-6 font-bold text-primary">152.25 m</td>
+<td class="py-5 px-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-secondary-container text-on-secondary-fixed-variant">
+                                    Ready for Production
+                                </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Notes & Authentication -->
+<div class="mt-12 grid grid-cols-2 gap-12 border-t border-outline-variant/30 pt-10">
+<div class="space-y-4">
+<h4 class="text-xs font-bold uppercase tracking-widest text-primary">Instructions &amp; Notes</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">
+                        All measurements have been adjusted for machine calibration tolerances (+1.2% avg). Please ensure chemical reservoirs are primed to Batch Level 4 before initiating feed. Quality Control sign-off required at first-metre mark.
+                    </p>
+</div>
+<div class="flex flex-col items-end justify-end space-y-6">
+<div class="w-48 border-b border-on-surface pt-12 text-center">
+<span class="text-[10px] uppercase text-on-surface-variant font-medium">Authorized Signature</span>
+</div>
+<div class="bg-surface-container p-2 rounded-lg">
+<img class="w-20 h-20 opacity-80 mix-blend-multiply" data-alt="a professional blue QR code on a white background for digital document verification and tracking" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqH0PMrxjPzkybuP0QfHHQMTc4Ubbhkd_jGmmt9oIpwDlG00CxwmFMV_i8_-mxzwGc-UxKgBpBN83qRbPyuFjLQnfGPx597xxkS0NaTz8gtxr72YBKUTjcmme3bnWNw4GF15v0wZAF1zVf7KbgsD6cOLmcCnvUStkqDdO3DVoTQiN-h4J4_z27vpYEA5jxeSBLq5jJY5npjXiD94oxJs43q2VtOxsPa3ur8DpLA9lhIdjxIx2P9kw7bHpw7_BB-ypbyX3uztFctMKb"/>
+</div>
+</div>
+</div>
+<!-- Slip Footer -->
+<footer class="mt-auto pt-10 flex justify-between items-center text-[10px] font-label uppercase tracking-widest text-on-surface-variant opacity-60">
+<p>Confidential - Flashvision Precision Logistics</p>
+<p>Page 01 of 01</p>
+<p>System Version 4.8.2-OMS</p>
+</footer>
+</section>
+</main>
+<!-- Global Footer (Non-Printable) -->
+<footer class="no-print flex justify-between items-center px-10 py-3 fixed bottom-0 left-64 right-0 bg-[#f8f9ff] dark:bg-slate-950 border-t border-[#outline_variant]/15 z-50">
+<div class="font-inter text-xs uppercase tracking-widest text-[#414750] dark:text-slate-500">
+            © 2024 Flashvision Precision Logistics. Confidential.
+        </div>
+<div class="flex space-x-6">
+<a class="font-inter text-xs uppercase tracking-widest text-[#414750] hover:text-[#005A9E] underline underline-offset-4" href="#">Terms of Service</a>
+<a class="font-inter text-xs uppercase tracking-widest text-[#414750] hover:text-[#005A9E] underline underline-offset-4" href="#">Privacy Policy</a>
+<a class="font-inter text-xs uppercase tracking-widest text-[#414750] hover:text-[#005A9E] underline underline-offset-4" href="#">System Status</a>
+</div>
+</footer>
+</body></html>

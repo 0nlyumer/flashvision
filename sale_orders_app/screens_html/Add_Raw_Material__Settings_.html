@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Raw Material - Flashvision</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-container": "#ffc29d",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#414750",
+                        "on-surface": "#191c20",
+                        "background": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d8dae0",
+                        "on-background": "#191c20",
+                        "tertiary": "#6b3000",
+                        "surface-container": "#ecedf4",
+                        "on-primary-fixed-variant": "#004881",
+                        "inverse-on-surface": "#eff0f7",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbc8",
+                        "on-secondary-container": "#445f7f",
+                        "inverse-surface": "#2e3035",
+                        "outline-variant": "#c1c7d2",
+                        "tertiary-container": "#8e4302",
+                        "primary": "#004277",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "surface-bright": "#f8f9ff",
+                        "surface-variant": "#e1e2e8",
+                        "error": "#ba1a1a",
+                        "outline": "#727782",
+                        "inverse-primary": "#a2c9ff",
+                        "surface": "#f8f9ff",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "surface-container-low": "#f2f3fa",
+                        "on-secondary-fixed": "#001d36",
+                        "on-tertiary-fixed": "#321300",
+                        "on-primary-fixed": "#001c38",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#bed9ff",
+                        "secondary-fixed": "#d1e4ff",
+                        "primary-container": "#005a9e",
+                        "secondary": "#456080",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "surface-tint": "#1260a5",
+                        "on-primary-container": "#b1d1ff",
+                        "primary-fixed": "#d3e4ff",
+                        "surface-container-high": "#e7e8ee"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+        }
+        .bg-glass {
+            background: rgba(248, 249, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #004277 0%, #005a9e 100%);
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- SideNavBar Integration -->
+<aside class="fixed left-0 top-0 h-screen w-64 border-r-0 flex flex-col py-6 px-4 bg-[#f8f9ff] dark:bg-[#191c20] shadow-[0_20px_40px_rgba(0,28,56,0.06)] z-50">
+<div class="mb-10 px-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl primary-gradient flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">layers</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight text-[#004277] dark:text-[#ffffff] font-headline">Flashvision</h1>
+<p class="text-xs text-on-surface-variant font-medium">Admin Console</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 text-[#414750] dark:text-[#c4c7cc] hover:bg-[#ecedf4]/50 dark:hover:bg-[#2c2e33]/50 font-headline font-medium text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 text-[#414750] dark:text-[#c4c7cc] hover:bg-[#ecedf4]/50 dark:hover:bg-[#2c2e33]/50 font-headline font-medium text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 text-[#414750] dark:text-[#c4c7cc] hover:bg-[#ecedf4]/50 dark:hover:bg-[#2c2e33]/50 font-headline font-medium text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span>Orders</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 text-[#414750] dark:text-[#c4c7cc] hover:bg-[#ecedf4]/50 dark:hover:bg-[#2c2e33]/50 font-headline font-medium text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-[#005A9E] dark:text-[#ffffff] border-r-4 border-[#005A9E] font-semibold bg-[#ecedf4] dark:bg-[#2c2e33] font-headline text-sm tracking-wide" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#414750] hover:bg-[#ecedf4]/50 transition-colors font-headline font-medium text-sm" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-[#414750] hover:bg-[#ecedf4]/50 transition-colors font-headline font-medium text-sm" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen">
+<!-- TopAppBar Integration -->
+<header class="w-full h-16 sticky top-0 z-40 bg-[#f8f9ff]/80 dark:bg-[#191c20]/80 backdrop-blur-xl flex justify-between items-center px-8">
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant font-headline font-bold">Settings</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">chevron_right</span>
+<span class="text-primary font-headline font-bold">Add Raw Material</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="absolute inset-y-0 left-3 flex items-center text-outline">
+<span class="material-symbols-outlined text-lg">search</span>
+</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-sm focus:ring-2 focus:ring-primary/20 w-64 transition-all" placeholder="Search settings..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border border-outline-variant/20">
+<img alt="User" data-alt="minimalist professional avatar of a man with clean lines and soft lighting on a pale blue background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2LpMOScmvhUch5e0ZIRoqUcv-4c7_G0rYvrl4p1mUZDMY4OsvD7O8_QftojAUuikaK4ocXtmm0Y80TTvZhtri9PacD9L-FzoWmUygRGqUalmvRGbscE8idLXhk2tcLRlTI85ivl49sMJsK9J2SwdtL_WTCHJW92MXGj4f7JVMcGHNP5sQTaboq6eJlyYTX5LbPhuA_ch_ryLiF92nfyBI_y-ZM894vEXrJVYjmImG5qXrFeHi5gBy_tnryYKYmZs70U4HMPQgn-n3"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<section class="max-w-5xl mx-auto py-12 px-8">
+<div class="flex flex-col md:flex-row gap-12 items-start">
+<!-- Editorial Header -->
+<div class="w-full md:w-1/3 sticky top-28">
+<h2 class="font-headline text-4xl font-extrabold tracking-tight text-on-surface mb-4">New Raw<br/>Material</h2>
+<p class="text-on-surface-variant leading-relaxed mb-8">
+                        Register a new chemical compound or industrial component to your central repository. Ensure exact naming for procurement precision.
+                    </p>
+<div class="bg-surface-container-low rounded-xl p-6 space-y-4">
+<div class="flex gap-4 items-center">
+<div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">inventory</span>
+</div>
+<span class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">Quick Tips</span>
+</div>
+<ul class="text-sm text-on-surface-variant space-y-3">
+<li class="flex gap-2">
+<span class="text-primary font-bold">•</span>
+                                Use standard chemical notation where applicable.
+                            </li>
+<li class="flex gap-2">
+<span class="text-primary font-bold">•</span>
+                                UOM affects all downstream price calculations.
+                            </li>
+</ul>
+</div>
+</div>
+<!-- Form Section (Bento Inspired Layout) -->
+<div class="w-full md:w-2/3">
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)] p-10">
+<form class="space-y-8">
+<!-- Section Heading -->
+<div class="pb-6 border-b border-surface-container">
+<h3 class="font-headline text-xl font-bold text-on-surface">Material Identification</h3>
+<p class="text-sm text-on-surface-variant mt-1">Basic details required for inventory tracking.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Field: Item Name -->
+<div class="col-span-2 md:col-span-1">
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2" for="item-name">Item Name</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl px-4 py-3.5 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all outline-none text-on-surface font-medium placeholder:text-outline/50" id="item-name" placeholder="e.g. Polished Aluminum Sheet" type="text"/>
+</div>
+</div>
+<!-- Field: UOM -->
+<div class="col-span-2 md:col-span-1">
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2" for="uom">Unit of Measure</label>
+<div class="relative">
+<select class="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl px-4 py-3.5 focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all outline-none appearance-none text-on-surface font-medium cursor-pointer" id="uom">
+<option disabled="" selected="" value="">Select UOM</option>
+<option value="kg">Kilograms (kg)</option>
+<option value="l">Liters (L)</option>
+<option value="m">Meters (m)</option>
+<option value="unit">Units (ea)</option>
+<option value="sqm">Square Meters (m²)</option>
+</select>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-outline">expand_more</span>
+</div>
+</div>
+<!-- Field: Category (Asymmetric Grid Filler) -->
+<div class="col-span-2">
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2" for="category">Category (Optional)</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-full border border-outline-variant/30 text-xs font-semibold text-on-surface-variant hover:bg-surface-container hover:text-primary transition-all" type="button">Metals</button>
+<button class="px-4 py-2 rounded-full border border-outline-variant/30 text-xs font-semibold text-on-surface-variant hover:bg-surface-container hover:text-primary transition-all" type="button">Polymers</button>
+<button class="px-4 py-2 rounded-full border border-outline-variant/30 text-xs font-semibold text-on-surface-variant hover:bg-surface-container hover:text-primary transition-all" type="button">Glass</button>
+<button class="px-4 py-2 rounded-full border border-outline-variant/30 text-xs font-semibold text-on-surface-variant hover:bg-surface-container hover:text-primary transition-all" type="button">Textiles</button>
+<button class="px-4 py-2 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold" type="button">+ Custom</button>
+</div>
+</div>
+</div>
+<!-- Image Attachment Area (High-End Polish) -->
+<div class="pt-6">
+<label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">Material Reference Image</label>
+<div class="w-full aspect-[21/9] rounded-xl overflow-hidden relative group cursor-pointer border-2 border-dashed border-outline-variant/30 bg-surface-container-low flex items-center justify-center hover:bg-surface-container transition-all">
+<div class="text-center">
+<span class="material-symbols-outlined text-4xl text-outline mb-2">add_photo_alternate</span>
+<p class="text-sm text-on-surface-variant font-medium">Click to upload or drag &amp; drop</p>
+<p class="text-xs text-outline/70 mt-1">PNG, JPG up to 10MB</p>
+</div>
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+</div>
+<!-- Actions -->
+<div class="pt-10 flex items-center justify-between">
+<button class="text-on-surface-variant font-semibold text-sm hover:text-error transition-all flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-lg">cancel</span>
+                                    Discard Changes
+                                </button>
+<div class="flex gap-4">
+<button class="px-8 py-3.5 rounded-xl font-headline font-bold text-sm text-primary hover:bg-primary/5 transition-all" type="button">
+                                        Save as Draft
+                                    </button>
+<button class="px-10 py-3.5 rounded-xl primary-gradient text-white font-headline font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all" type="submit">
+                                        Add Material
+                                    </button>
+</div>
+</div>
+</form>
+</div>
+<!-- Footnote / Audit Trail Area -->
+<div class="mt-8 px-4 flex items-center gap-4 text-outline/60">
+<span class="material-symbols-outlined text-sm">info</span>
+<p class="text-[11px] leading-relaxed italic">
+                            Adding a new material will notify the Procurement and Inventory leads automatically. Entry will be logged under your administrator ID for audit compliance.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

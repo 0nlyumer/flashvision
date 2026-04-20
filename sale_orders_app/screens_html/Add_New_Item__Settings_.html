@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Item | Flashvision</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed": "#001c38",
+              "surface-variant": "#e1e2e8",
+              "primary-fixed": "#d3e4ff",
+              "on-background": "#191c20",
+              "surface": "#f8f9ff",
+              "secondary-fixed": "#d1e4ff",
+              "on-primary-fixed-variant": "#004881",
+              "surface-container-high": "#e7e8ee",
+              "on-primary-container": "#b1d1ff",
+              "error": "#ba1a1a",
+              "background": "#f8f9ff",
+              "secondary-container": "#bed9ff",
+              "inverse-on-surface": "#eff0f7",
+              "on-secondary-fixed-variant": "#2d4867",
+              "tertiary-fixed-dim": "#ffb68a",
+              "primary-container": "#005a9e",
+              "outline": "#727782",
+              "primary": "#004277",
+              "tertiary-container": "#8e4302",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed": "#ffdbc8",
+              "surface-container": "#ecedf4",
+              "on-tertiary-container": "#ffc29d",
+              "on-secondary-container": "#445f7f",
+              "inverse-primary": "#a2c9ff",
+              "on-tertiary-fixed-variant": "#743500",
+              "on-surface-variant": "#414750",
+              "surface-bright": "#f8f9ff",
+              "surface-container-highest": "#e1e2e8",
+              "on-error": "#ffffff",
+              "inverse-surface": "#2e3035",
+              "primary-fixed-dim": "#a2c9ff",
+              "on-tertiary-fixed": "#321300",
+              "on-surface": "#191c20",
+              "on-primary": "#ffffff",
+              "surface-tint": "#1260a5",
+              "on-secondary": "#ffffff",
+              "surface-container-low": "#f2f3fa",
+              "surface-container-lowest": "#ffffff",
+              "surface-dim": "#d8dae0",
+              "on-secondary-fixed": "#001d36",
+              "secondary-fixed-dim": "#adc9ed",
+              "secondary": "#456080",
+              "error-container": "#ffdad6",
+              "outline-variant": "#c1c7d2",
+              "tertiary": "#6b3000",
+              "on-error-container": "#93000a"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopAppBar -->
+<header class="w-full h-16 flex items-center no-border tonal-shift bg-[#f2f3fa] dark:bg-slate-900 flex justify-between items-center px-8 w-full backdrop-blur-md bg-opacity-80 sticky top-0 z-40">
+<div class="flex items-center gap-8">
+<span class="text-lg font-bold tracking-tight text-[#191c20] dark:text-slate-100">Flashvision</span>
+<nav class="hidden md:flex gap-6 items-center">
+<a class="font-['Manrope'] tracking-wide text-sm font-semibold text-[#414750] dark:text-slate-400 font-medium hover:text-[#005a9e] transition-colors" href="#">Dashboard</a>
+<a class="font-['Manrope'] tracking-wide text-sm font-semibold text-[#414750] dark:text-slate-400 font-medium hover:text-[#005a9e] transition-colors" href="#">Inventory</a>
+<a class="font-['Manrope'] tracking-wide text-sm font-semibold text-[#414750] dark:text-slate-400 font-medium hover:text-[#005a9e] transition-colors" href="#">Orders</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#414750] dark:text-slate-400 hover:text-[#004277] transition-all scale-95 active:opacity-80">notifications</button>
+<button class="material-symbols-outlined text-[#414750] dark:text-slate-400 hover:text-[#004277] transition-all scale-95 active:opacity-80">help_outline</button>
+<div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container ml-2">
+<img alt="User Profile Avatar" data-alt="professional headshot of a logistics manager in a clean white office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_rY81Pjwg5yhvShSP3W3Du0DWEvl5JrlnmzopjdM2BO70ff5wkXq5WtdE7pHhLGhD4m1uCIkn_rkWF2g-saeYUpHEi6Gtxk9YIruKJN9I2eMzFOXMQpW_QZ0X5xLkB8erQ_O2bnBa74zPQpfq3Vx7aaPeEtENzqQPAg1gaIIxjcs6Y-L2I4oOyK8BiBIDp9F9KbmLUeycD1x6YLU8Bl6ZiC0Za4amDvJsRFTVLu5C0GonSNimD7-xtgxmCiHpFam99nnOG_kvE1uz"/>
+</div>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-64px)]">
+<!-- SideNavBar (Updated to show Settings as active) -->
+<aside class="h-screen w-64 hidden md:flex flex-col py-8 border-r border-slate-100 dark:border-slate-800 tonal-shift bg-[#f2f3fa] dark:bg-slate-900/50 shadow-[20px_0_40px_rgba(0,28,56,0.03)] sticky top-16 h-[calc(100vh-64px)]">
+<div class="px-8 mb-8">
+<h2 class="text-xl font-extrabold text-[#004277] dark:text-blue-500">Flashvision</h2>
+<p class="text-xs text-on-surface-variant font-medium tracking-wider uppercase opacity-70">Precision Logistics</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 py-3 px-4 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800/50 rounded-lg mx-4 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-['Manrope'] text-sm tracking-normal">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 py-3 px-4 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800/50 rounded-lg mx-4 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-['Manrope'] text-sm tracking-normal">Inventory</span>
+</a>
+<a class="flex items-center gap-3 py-3 px-4 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800/50 rounded-lg mx-4 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="font-['Manrope'] text-sm tracking-normal">Orders</span>
+</a>
+<a class="flex items-center gap-3 py-3 px-4 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] dark:hover:bg-slate-800/50 rounded-lg mx-4 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-['Manrope'] text-sm tracking-normal">Analytics</span>
+</a>
+<a class="flex items-center gap-3 py-3 px-4 bg-white dark:bg-slate-800 text-[#004277] dark:text-blue-300 font-bold rounded-l-full ml-4 shadow-sm" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Manrope'] text-sm tracking-normal">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-4 space-y-1">
+<a class="flex items-center gap-3 py-2 px-4 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] rounded-lg mx-2 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">support_agent</span>
+<span class="text-sm">Support</span>
+</a>
+<a class="flex items-center gap-3 py-2 px-4 text-[#414750] dark:text-slate-400 hover:bg-[#ecedf4] rounded-lg mx-2 transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">logout</span>
+<span class="text-sm">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col p-8 md:p-12 items-center justify-center bg-surface relative">
+<!-- Decorative Background Element -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+<div class="absolute -top-[10%] -right-[5%] w-[40%] h-[40%] bg-primary-fixed/20 rounded-full blur-[120px]"></div>
+<div class="absolute -bottom-[10%] -left-[5%] w-[30%] h-[30%] bg-secondary-fixed/30 rounded-full blur-[100px]"></div>
+</div>
+<!-- Header Content -->
+<div class="w-full max-w-2xl mb-10 text-center relative z-10">
+<div class="inline-flex items-center px-4 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold tracking-widest uppercase mb-4">
+                Administrative
+            </div>
+<h1 class="text-4xl font-extrabold text-on-surface tracking-tight mb-3">Add New Item</h1>
+<p class="text-on-surface-variant font-body">Input the precision specifications for the new synthetic fabric stock.</p>
+</div>
+<!-- Form Card -->
+<div class="w-full max-w-2xl bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)] overflow-hidden relative z-10">
+<div class="p-10 space-y-8">
+<!-- Form Fields Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Item Name -->
+<div class="flex flex-col gap-2">
+<label class="text-[0.75rem] font-semibold text-on-surface-variant uppercase tracking-wider ml-1" for="item_name">Item Name</label>
+<input class="w-full h-12 px-4 rounded-lg bg-surface-container-low border-transparent border-outline-variant/20 focus:border-primary focus:ring-0 focus:bg-surface-container-lowest transition-all text-sm font-medium" id="item_name" placeholder="Enter product code or name" type="text"/>
+</div>
+<!-- Fabric Name with Add Button -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-end mb-0.5">
+<label class="text-[0.75rem] font-semibold text-on-surface-variant uppercase tracking-wider ml-1" for="fabric_name">Fabric Name</label>
+<button class="text-[10px] font-bold text-primary hover:text-primary-container flex items-center gap-1 uppercase tracking-tighter transition-colors">
+<span class="material-symbols-outlined text-xs">add</span> Add New
+                            </button>
+</div>
+<div class="relative">
+<select class="w-full h-12 px-4 pr-10 appearance-none rounded-lg bg-surface-container-low border-transparent border-outline-variant/20 focus:border-primary focus:ring-0 focus:bg-surface-container-lowest transition-all text-sm font-medium" id="fabric_name">
+<option disabled="" selected="" value="">Select fabric type</option>
+<option>Synthetic Blend Alpha</option>
+<option>Graphene-Infused Mesh</option>
+<option>High-Tenacity Poly</option>
+<option>Micro-Fiber Composite</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+</div>
+</div>
+<!-- UOM Dropdown -->
+<div class="flex flex-col gap-2">
+<label class="text-[0.75rem] font-semibold text-on-surface-variant uppercase tracking-wider ml-1" for="uom">UOM</label>
+<div class="relative">
+<select class="w-full h-12 px-4 pr-10 appearance-none rounded-lg bg-surface-container-low border-transparent border-outline-variant/20 focus:border-primary focus:ring-0 focus:bg-surface-container-lowest transition-all text-sm font-medium" id="uom">
+<option>Meters</option>
+<option>Yards</option>
+<option>Rolls</option>
+<option>Units</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+</div>
+</div>
+<!-- Packing Size -->
+<div class="flex flex-col gap-2">
+<label class="text-[0.75rem] font-semibold text-on-surface-variant uppercase tracking-wider ml-1" for="packing_size">Packing Size (Meters)</label>
+<input class="w-full h-12 px-4 rounded-lg bg-surface-container-low border-transparent border-outline-variant/20 focus:border-primary focus:ring-0 focus:bg-surface-container-lowest transition-all text-sm font-medium" id="packing_size" placeholder="0.00" step="0.01" type="number"/>
+</div>
+<!-- Price Per Meter (PKR) -->
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="text-[0.75rem] font-semibold text-on-surface-variant uppercase tracking-wider ml-1" for="price">Price per Meter <span class="lowercase italic font-normal">(Optional)</span></label>
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-on-surface-variant group-focus-within:text-primary transition-colors">
+<span class="text-xs font-bold uppercase">PKR</span>
+</div>
+<input class="w-full h-12 pl-12 pr-4 rounded-lg bg-surface-container-low border-transparent border-outline-variant/20 focus:border-primary focus:ring-0 focus:bg-surface-container-lowest transition-all text-sm font-medium" id="price" placeholder="0.00" step="0.01" type="number"/>
+</div>
+</div>
+<!-- Upload Item Image -->
+<div class="flex flex-col gap-2 md:col-span-2">
+<label class="text-[0.75rem] font-semibold text-on-surface-variant uppercase tracking-wider ml-1">Item Picture</label>
+<div class="border-2 border-dashed border-outline-variant/40 rounded-xl p-8 flex flex-col items-center justify-center gap-3 bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined">add_a_photo</span>
+</div>
+<div class="text-center">
+<p class="text-sm font-semibold text-on-surface">Upload Item Image</p>
+<p class="text-xs text-on-surface-variant">PNG, JPG or WEBP up to 5MB</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Separator -->
+<div class="pt-4 flex items-center gap-4">
+<div class="flex-1 h-px bg-surface-container-high"></div>
+<span class="text-[10px] uppercase tracking-[0.2em] font-bold text-outline-variant">Validation Status</span>
+<div class="flex-1 h-px bg-surface-container-high"></div>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col sm:flex-row gap-4 justify-end pt-4">
+<button class="px-8 h-12 text-primary font-bold text-sm tracking-wide rounded-lg hover:bg-surface-container-low transition-all active:scale-95">
+                        Cancel
+                    </button>
+<button class="px-10 h-12 bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold text-sm tracking-wide rounded-lg shadow-md hover:shadow-lg hover:brightness-110 transition-all active:scale-95">
+                        Save Item
+                    </button>
+</div>
+</div>
+</div>
+<!-- Secondary Image/Brand Content (Asymmetric Placement) -->
+<div class="mt-12 w-full max-w-2xl grid grid-cols-3 gap-6 opacity-60 hover:opacity-100 transition-opacity">
+<div class="h-24 rounded-xl overflow-hidden grayscale contrast-125">
+<img alt="Detail of luxury synthetic fabric" data-alt="extreme macro close up of a high tech blue carbon fiber weave with sharp detail and architectural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAex_G7nockE9wp172a7ze7E4U-SMo09ZKJ5tZJgzgoTuBAd_pautYp-uZD0ZBuYWn8kd60ayqtefu_5z30-055CiXD1D8knFTu6atwGttrQDlsWQNrhIYwaz6KpjY81yVEgKbu4YX53FtG7H2AUhfIA1MXWZtY6fs-raPzJX4rPBMyWyPpGdijr0r3S3vRicTmPWBlhvpVtdId6L4DISAmf-vMaj83p3FQbD3CY4IgW54p92Tn-EJQ2zAE_RhPzVJz6CnbH9lM4X1R"/>
+</div>
+<div class="h-24 rounded-xl overflow-hidden grayscale contrast-125">
+<img alt="Logistics facility interior" data-alt="wide shot of a futuristic sterile automated warehouse with blue neon accents and high ceilings" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4YaWKh1E4f3F3_EBGrQpKYydxT_cFlRNpQrIxi_DxZ7m8PP-HQVOL4Km3tX5OhKLb7o_mVOFpJfWsJMMtq1kA4r3RUm1Prtth8kpYCUUpTYNkbO5Qgu6LzPblok2ZujqetQX4eVi4GYjCaLccb9tXRSvB6xUpc9gLE-HWXlf1NXu0FB_cILV8Owgq_P-_amjRvAiTHYAS_WY-41z7R8UO8PAWvRo-aBOD1LLbyyq6OAhJPfxc3kyR5YXeftx8fB0nsf50C6AqDND6"/>
+</div>
+<div class="h-24 rounded-xl overflow-hidden grayscale contrast-125">
+<img alt="Technical quality control" data-alt="close up of a robotic hand precisely inspecting textile rolls in a high end manufacturing facility" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBC6cknvcDEIh8_f8Hfc21kfBeu4o7eT7ZpeaQJMRULBHogvhuBqd0fJdZt85ha-iSIuvCPh6sHAwVrEpp4AhYIDogHI-FqMJtYzBsHTPesiYXWUujy4P9TOnb4p3BnL3Vuenj0d5aOd2XmnhauC9-VKprePbPElF432g5ZV_xrA4wgNLKortG-ci4IZYQsEitZNnnSYzq50pYJnmM7vmaBOz_pRM77MdMUJDWLsQHPTMK2KX39RxQzviG-7KyiKwlbE7A9KW5ovOb5"/>
+</div>
+</div>
+</main>
+</div>
+<!-- Mobile Bottom Navigation -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface-container-lowest backdrop-blur-lg flex items-center justify-around z-50 shadow-[0_-4px_16px_rgba(0,0,0,0.05)]">
+<button class="flex flex-col items-center gap-1 text-[#414750]">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<span class="text-[10px] font-bold">Dashboard</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#414750]">
+<span class="material-symbols-outlined text-xl">inventory_2</span>
+<span class="text-[10px] font-bold">Inventory</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#004277]">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-[10px] font-bold">Settings</span>
+</button>
+</nav>
+</body></html>

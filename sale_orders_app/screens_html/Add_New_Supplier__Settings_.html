@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Supplier - Flashvision Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-container": "#ffc29d",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#414750",
+                        "on-surface": "#191c20",
+                        "background": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d8dae0",
+                        "on-background": "#191c20",
+                        "tertiary": "#6b3000",
+                        "surface-container": "#ecedf4",
+                        "on-primary-fixed-variant": "#004881",
+                        "inverse-on-surface": "#eff0f7",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbc8",
+                        "on-secondary-container": "#445f7f",
+                        "inverse-surface": "#2e3035",
+                        "outline-variant": "#c1c7d2",
+                        "tertiary-container": "#8e4302",
+                        "primary": "#004277",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "surface-bright": "#f8f9ff",
+                        "surface-variant": "#e1e2e8",
+                        "error": "#ba1a1a",
+                        "outline": "#727782",
+                        "inverse-primary": "#a2c9ff",
+                        "surface": "#f8f9ff",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "surface-container-low": "#f2f3fa",
+                        "on-secondary-fixed": "#001d36",
+                        "on-tertiary-fixed": "#321300",
+                        "on-primary-fixed": "#001c38",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#bed9ff",
+                        "secondary-fixed": "#d1e4ff",
+                        "primary-container": "#005a9e",
+                        "secondary": "#456080",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "surface-tint": "#1260a5",
+                        "on-primary-container": "#b1d1ff",
+                        "primary-fixed": "#d3e4ff",
+                        "surface-container-high": "#e7e8ee"
+                    },
+                    fontFamily: {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9ff;
+        }
+        .font-headline { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface overflow-x-hidden">
+<!-- SideNavBar (Predicted Anchor) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-6 px-4 h-screen w-64 border-r-0 bg-[#f8f9ff] dark:bg-[#191c20] shadow-[0_20px_40px_rgba(0,28,56,0.06)] z-50">
+<div class="flex items-center gap-3 mb-10 px-2">
+<div class="w-10 h-10 bg-primary-container rounded-xl flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">visibility</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tight text-[#004277] dark:text-[#ffffff] font-headline">Flashvision</h1>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-semibold">Admin Console</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl font-['Manrope'] font-medium text-sm tracking-wide text-[#414750] dark:text-[#c4c7cc] hover:bg-[#ecedf4]/50 dark:hover:bg-[#2c2e33]/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl font-['Manrope'] font-medium text-sm tracking-wide text-[#414750] dark:text-[#c4c7cc] hover:bg-[#ecedf4]/50 dark:hover:bg-[#2c2e33]/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl font-['Manrope'] font-medium text-sm tracking-wide text-[#414750] dark:text-[#c4c7cc] hover:bg-[#ecedf4]/50 dark:hover:bg-[#2c2e33]/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span>Orders</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl font-['Manrope'] font-medium text-sm tracking-wide text-[#414750] dark:text-[#c4c7cc] hover:bg-[#ecedf4]/50 dark:hover:bg-[#2c2e33]/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span>Analytics</span>
+</a>
+<!-- Active State: Settings -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl font-['Manrope'] font-semibold text-sm tracking-wide text-[#005A9E] dark:text-[#ffffff] border-r-4 border-[#005A9E] bg-[#ecedf4] dark:bg-[#2c2e33]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-surface-container/50 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl font-['Manrope'] font-medium text-sm tracking-wide text-[#414750] hover:bg-[#ecedf4]/50 transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl font-['Manrope'] font-medium text-sm tracking-wide text-error hover:bg-error-container/20 transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="pl-64 min-h-screen">
+<!-- TopAppBar (Predicted Anchor) -->
+<header class="w-full h-16 sticky top-0 z-40 bg-[#f8f9ff]/80 dark:bg-[#191c20]/80 backdrop-blur-xl flex justify-between items-center px-8">
+<div class="flex items-center gap-4">
+<span class="text-on-surface-variant text-sm font-medium">Settings</span>
+<span class="material-symbols-outlined text-outline-variant text-sm">chevron_right</span>
+<span class="text-[#004277] dark:text-[#ffffff] font-bold font-headline">Add New Supplier</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-sm w-64 focus:ring-2 focus:ring-[#005A9E]/20" placeholder="Search resources..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional headshot of a middle aged man in a blue shirt with a clean corporate background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAORBJqqqcb6mUxWbNMKlov1SdhPClWci6johwRROp8ZaxNi4LLWrAzjwEt3puwINci8zlFF61odXfHRCEIMVc-E2I8NOGF6c-ydbgFIE_TNv6kej2aRyhE1uI3wqgliCWDqTAibonedLP8LewsNmqen6MvRBVXnYhVDuQirjRXIyHleXntly8roSwUPwr2H1IRpf4WeqEzupO_nwnyU0AzlzQoFdJxGCP1acMsWDbcJTa2Mb-yp448joJLdtKeZ6435MyaPyit-5Dz"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Form Canvas -->
+<div class="p-10 max-w-5xl mx-auto">
+<div class="mb-10 flex justify-between items-end">
+<div>
+<h2 class="text-4xl font-extrabold font-headline tracking-tight text-on-surface mb-2">Create Supplier Profile</h2>
+<p class="text-on-surface-variant max-w-md">Onboard a new logistical partner to the Flashvision ecosystem. Ensure all contact details are verified for PKR transaction processing.</p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-2.5 text-sm font-semibold text-on-surface hover:bg-surface-container transition-all rounded-xl">Cancel</button>
+<button class="px-8 py-2.5 text-sm font-semibold text-white bg-gradient-to-br from-primary to-primary-container rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 transition-all">Save Supplier</button>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<!-- Main Form Section -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<div class="bg-surface-container-lowest p-8 rounded-[2rem] shadow-[0_20px_40px_rgba(0,28,56,0.04)]">
+<h3 class="text-lg font-bold font-headline mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">business_center</span>
+                            Primary Information
+                        </h3>
+<div class="space-y-6">
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Supplier Name</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-on-surface placeholder:text-outline/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all" placeholder="e.g. Apex Glass Solutions" type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Contact Number</label>
+<div class="relative group">
+<div class="absolute left-5 top-1/2 -translate-y-1/2 text-sm font-semibold text-on-surface-variant">+92</div>
+<input class="w-full bg-surface-container-low border-none rounded-2xl py-4 pl-14 pr-5 text-on-surface placeholder:text-outline/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all" placeholder="300 1234567" type="tel"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Business Email</label>
+<input class="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-on-surface placeholder:text-outline/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all" placeholder="contact@apexglass.com" type="email"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1">Shipping/Business Address</label>
+<textarea class="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-on-surface placeholder:text-outline/50 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20 transition-all resize-none" placeholder="Enter the full legal business or warehouse address..." rows="4"></textarea>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 rounded-[2rem] flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Auto-Verification</h4>
+<p class="text-sm text-on-surface-variant">Enable automated PKR bank detail verification for this supplier.</p>
+</div>
+</div>
+<div class="w-14 h-8 bg-primary rounded-full relative flex items-center px-1">
+<div class="w-6 h-6 bg-white rounded-full ml-auto shadow-sm"></div>
+</div>
+</div>
+</div>
+<!-- Sidebar Metadata / Cards -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<div class="bg-surface-container-high p-6 rounded-[2rem]">
+<h4 class="text-sm font-bold uppercase tracking-tighter text-on-surface mb-4">Supplier Insights</h4>
+<div class="space-y-4">
+<div class="bg-surface-container-lowest p-4 rounded-2xl flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-3xl">account_balance_wallet</span>
+<div>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase">Currency</p>
+<p class="font-bold">Pakistani Rupee (PKR)</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-3xl">local_shipping</span>
+<div>
+<p class="text-[10px] font-bold text-on-surface-variant uppercase">Lead Time</p>
+<p class="font-bold text-sm">Requires manual entry</p>
+</div>
+</div>
+</div>
+</div>
+<div class="relative group h-64 rounded-[2rem] overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="modern logistics warehouse with blue aesthetic lighting and neat industrial shelving" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATCxxOZHbj7dXZdOC1evt30ZIIq5_7n5tmoMqIebEF2Rjlvo-wjFZEadb-9F_RfiMfUPipM77RTFBua-glRuqmlRKtq3b9_rlxfqAuRFCH03v2Pwj_8X5aEF_-zm1xS5XNSOkPHD7QIkOoIMpm-SagB5uv5xNftS3cj110hpITGEp-fkrrUjqQeM6A9O_QrGmS9DeIHDGRsVqIZj5N2hOJJZnZ8akIZBTfuHQXZAVOPcGm9EPazhc1nBBAl8t845RBKmlgOxSF04bc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent flex items-end p-6">
+<p class="text-white text-xs font-medium leading-relaxed">Suppliers with complete profiles experience 40% fewer shipping delays in the Flashvision network.</p>
+</div>
+</div>
+<div class="p-2">
+<h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4 ml-2">Quick Actions</h4>
+<ul class="space-y-1">
+<li><button class="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container text-sm font-semibold flex items-center gap-3 transition-all"><span class="material-symbols-outlined text-lg">upload_file</span> Import from CSV</button></li>
+<li><button class="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container text-sm font-semibold flex items-center gap-3 transition-all"><span class="material-symbols-outlined text-lg">contact_page</span> Add Contact Person</button></li>
+<li><button class="w-full text-left px-4 py-3 rounded-xl hover:bg-surface-container text-sm font-semibold flex items-center gap-3 transition-all"><span class="material-symbols-outlined text-lg">policy</span> Review Terms</button></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB Suppression Rule Applied: No FAB on Settings/Details screen -->
+</body></html>

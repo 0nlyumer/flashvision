@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-container": "#005a9e",
+              "on-surface-variant": "#414750",
+              "on-secondary-fixed-variant": "#2d4867",
+              "surface": "#f8f9ff",
+              "on-tertiary-fixed": "#321300",
+              "inverse-surface": "#2e3035",
+              "surface-bright": "#f8f9ff",
+              "on-primary-fixed": "#001c38",
+              "outline": "#727782",
+              "tertiary": "#6b3000",
+              "surface-container-highest": "#e1e2e8",
+              "on-primary-fixed-variant": "#004881",
+              "background": "#f8f9ff",
+              "secondary-container": "#bed9ff",
+              "on-error": "#ffffff",
+              "on-background": "#191c20",
+              "tertiary-fixed-dim": "#ffb68a",
+              "primary": "#004277",
+              "on-secondary-container": "#445f7f",
+              "surface-container-high": "#e7e8ee",
+              "secondary": "#456080",
+              "tertiary-container": "#8e4302",
+              "on-secondary-fixed": "#001d36",
+              "surface-variant": "#e1e2e8",
+              "on-tertiary": "#ffffff",
+              "surface-tint": "#1260a5",
+              "outline-variant": "#c1c7d2",
+              "secondary-fixed-dim": "#adc9ed",
+              "on-tertiary-fixed-variant": "#743500",
+              "error-container": "#ffdad6",
+              "inverse-primary": "#a2c9ff",
+              "surface-container-low": "#f2f3fa",
+              "surface-container": "#ecedf4",
+              "tertiary-fixed": "#ffdbc8",
+              "secondary-fixed": "#d1e4ff",
+              "surface-container-lowest": "#ffffff",
+              "primary-fixed": "#d3e4ff",
+              "error": "#ba1a1a",
+              "primary-fixed-dim": "#a2c9ff",
+              "on-surface": "#191c20",
+              "on-secondary": "#ffffff",
+              "inverse-on-surface": "#eff0f7",
+              "on-error-container": "#93000a",
+              "surface-dim": "#d8dae0",
+              "on-primary-container": "#b1d1ff",
+              "on-primary": "#ffffff",
+              "on-tertiary-container": "#ffc29d"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #004277 0%, #005a9e 100%);
+        }
+        .brand-gradient {
+            background: linear-gradient(135deg, #001c38 0%, #004277 100%);
+        }
+        .ambient-shadow {
+            box-shadow: 0 20px 40px rgba(0, 28, 56, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface min-h-screen flex selection:bg-secondary-container selection:text-on-secondary-fixed">
+<main class="flex-grow flex w-full min-h-screen overflow-hidden">
+<!-- Left Side: Brand Area (60%) -->
+<div class="hidden lg:flex lg:w-[60%] brand-gradient relative items-center justify-center p-12 overflow-hidden">
+<!-- Decorative subtle patterns -->
+<div class="absolute top-0 left-0 w-full h-full opacity-10">
+<div class="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full border border-white/20"></div>
+<div class="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] rounded-full border border-white/10"></div>
+</div>
+<div class="relative z-10 flex flex-col items-center text-center">
+<div class="w-24 h-24 bg-white/10 backdrop-blur-xl rounded-3xl flex items-center justify-center mb-8 border border-white/20">
+<span class="material-symbols-outlined text-white text-5xl" style="font-variation-settings: 'FILL' 1;">deployed_code</span>
+</div>
+<h1 class="text-6xl font-extrabold font-headline tracking-tight text-white mb-4">AJ Synthetic</h1>
+<p class="text-primary-fixed text-xl max-w-md font-medium opacity-80">
+                Next-generation synthetic intelligence for global logistics networks.
+            </p>
+<div class="mt-16 flex gap-12 opacity-40">
+<div class="flex flex-col items-center">
+<span class="text-white text-2xl font-bold">99.9%</span>
+<span class="text-white text-[10px] uppercase tracking-widest mt-1">Uptime</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-white text-2xl font-bold">256-bit</span>
+<span class="text-white text-[10px] uppercase tracking-widest mt-1">Encrypted</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="text-white text-2xl font-bold">Real-time</span>
+<span class="text-white text-[10px] uppercase tracking-widest mt-1">Analysis</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Side: Login Form (40%) -->
+<div class="w-full lg:w-[40%] bg-surface flex flex-col relative">
+<div class="flex-grow flex flex-col justify-center px-8 sm:px-12 md:px-16 lg:px-20 py-12">
+<!-- Mobile Brand Header -->
+<div class="lg:hidden flex items-center gap-3 mb-12">
+<div class="w-10 h-10 brand-gradient rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-2xl">deployed_code</span>
+</div>
+<span class="text-2xl font-extrabold font-headline tracking-tight text-primary">AJ Synthetic</span>
+</div>
+<!-- Login Form Header -->
+<div class="mb-10">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] font-bold tracking-[0.2em] uppercase text-outline">Powered by</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="text-xs font-extrabold font-headline text-primary">Flashvision</span>
+</div>
+</div>
+<h2 class="text-3xl font-bold font-headline text-on-surface tracking-tight mb-2">Precision Access</h2>
+<p class="text-on-surface-variant text-sm">Enter your credentials to manage your synthetic assets.</p>
+</div>
+<!-- Form Section -->
+<form class="space-y-6" onsubmit="return false;">
+<div class="space-y-2">
+<label class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1" for="username">Username or Email</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg group-focus-within:text-primary transition-colors">person</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container-low border border-outline-variant/20 rounded-xl focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-outline/40" id="username" placeholder="user@ajsynthetic.com" type="text"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-semibold uppercase tracking-widest text-on-surface-variant ml-1" for="password">Password</label>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-lg group-focus-within:text-primary transition-colors">lock</span>
+<input class="w-full pl-12 pr-12 py-4 bg-surface-container-low border border-outline-variant/20 rounded-xl focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-outline/40" id="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between py-1">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative">
+<input class="peer sr-only" type="checkbox"/>
+<div class="w-5 h-5 border-2 border-outline-variant rounded group-hover:border-primary peer-checked:bg-primary peer-checked:border-primary transition-all"></div>
+<span class="material-symbols-outlined absolute inset-0 text-white text-[14px] flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity">check</span>
+</div>
+<span class="text-sm text-on-surface-variant font-medium">Remember Me</span>
+</label>
+<a class="text-sm font-semibold text-primary hover:opacity-80 transition-opacity" href="#">Forgot Password?</a>
+</div>
+<div class="pt-2 space-y-4">
+<button class="w-full primary-gradient text-on-primary py-4 rounded-xl font-bold tracking-wide active:scale-[0.98] transition-all ambient-shadow" type="submit">
+                        Sign In
+                    </button>
+<button class="w-full bg-surface-container text-on-surface-variant py-4 rounded-xl font-semibold hover:bg-surface-container-high transition-all" type="button">
+                        Contact System Admin
+                    </button>
+</div>
+</form>
+<!-- Bottom Branding -->
+<div class="mt-12 flex items-center gap-4 opacity-30">
+<div class="h-[1px] flex-grow bg-outline"></div>
+<span class="text-[9px] font-bold tracking-[0.2em] uppercase whitespace-nowrap">Security Protocol v4.2</span>
+<div class="h-[1px] flex-grow bg-outline"></div>
+</div>
+</div>
+<!-- Right Side Footer -->
+<footer class="w-full px-8 py-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] text-outline font-medium uppercase tracking-widest border-t border-outline-variant/10">
+<div>© 2024 AJ Synthetic</div>
+<nav class="flex gap-6">
+<a class="hover:text-primary transition-colors" href="#">Privacy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms</a>
+<a class="hover:text-primary transition-colors" href="#">Status</a>
+</nav>
+</footer>
+</div>
+</main>
+</body></html>
