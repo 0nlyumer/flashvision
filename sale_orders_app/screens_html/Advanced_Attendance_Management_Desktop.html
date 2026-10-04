@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Advanced Attendance &amp; Workforce Management | Digital Concierge</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "tertiary-container": "#8e4302",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-tertiary-container": "#ffc29d",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d8dae0",
+                        "on-error-container": "#93000a",
+                        "secondary": "#456080",
+                        "on-primary-fixed-variant": "#004881",
+                        "primary-fixed": "#d3e4ff",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "on-primary-fixed": "#001c38",
+                        "on-primary-container": "#b1d1ff",
+                        "surface-bright": "#f8f9ff",
+                        "primary": "#004277",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#ecedf4",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#445f7f",
+                        "surface-container-low": "#f2f3fa",
+                        "on-tertiary-fixed": "#321300",
+                        "on-surface-variant": "#414750",
+                        "inverse-primary": "#a2c9ff",
+                        "secondary-fixed": "#d1e4ff",
+                        "tertiary-fixed": "#ffdbc8",
+                        "primary-container": "#005a9e",
+                        "on-background": "#191c20",
+                        "on-primary": "#ffffff",
+                        "outline": "#727782",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#001d36",
+                        "secondary-container": "#bed9ff",
+                        "outline-variant": "#c1c7d2",
+                        "surface-variant": "#e1e2e8",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "inverse-surface": "#2e3035",
+                        "background": "#f8f9ff",
+                        "surface-tint": "#1260a5",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c20",
+                        "tertiary": "#6b3000",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "inverse-on-surface": "#eff0f7",
+                        "surface-container-high": "#e7e8ee"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .sticky-col { position: sticky; left: 0; z-index: 20; }
+        .table-shadow { box-shadow: 10px 0 15px -3px rgba(0, 28, 56, 0.04); }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col md:flex-row">
+<!-- SideNavBar Component -->
+<aside class="fixed left-0 top-0 h-full w-72 bg-slate-50 dark:bg-slate-950 flex flex-col py-8 px-6 overflow-y-auto hidden md:flex z-50">
+<div class="flex items-center gap-3 mb-10 px-2">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+</div>
+<div>
+<h2 class="text-lg font-extrabold text-blue-950 dark:text-white leading-tight">Logistics Portal</h2>
+<p class="text-xs text-slate-500 font-medium">Admin Console</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-500 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-manrope tracking-tight font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-blue-900 dark:text-blue-200 font-bold border-r-4 border-blue-900 dark:border-blue-400 bg-slate-100 dark:bg-slate-900 rounded-l-xl transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-manrope tracking-tight">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-500 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-manrope tracking-tight font-medium">Departments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-500 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="font-manrope tracking-tight font-medium">Security</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-500 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 rounded-xl transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-manrope tracking-tight font-medium">Audit Logs</span>
+</a>
+</nav>
+<div class="mt-auto pt-8 space-y-1">
+<button class="w-full bg-primary text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 mb-6 shadow-lg shadow-primary/20 hover:scale-[0.99] transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                New Request
+            </button>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-200/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="font-manrope tracking-tight font-medium">Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-200/50 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-manrope tracking-tight font-medium">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-72 flex flex-col min-w-0 bg-surface">
+<!-- TopNavBar Component -->
+<header class="w-full h-16 sticky top-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl flex justify-between items-center px-10 z-40 shadow-[0_20px_40px_rgba(0,28,56,0.06)]">
+<div class="flex items-center gap-6">
+<nav class="flex items-center text-xs font-semibold tracking-wide text-slate-400 font-manrope">
+<span class="hover:text-primary transition-colors cursor-pointer">HR Module</span>
+<span class="material-symbols-outlined mx-2 text-[10px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-blue-900">Attendance Management</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" data-icon="search">search</span>
+<input class="bg-slate-100 border-none rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all outline-none" placeholder="Quick search employees..." type="text"/>
+</div>
+<div class="flex items-center gap-2 border-l border-slate-100 pl-4">
+<button class="p-2 text-slate-500 hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+</button>
+<button class="p-2 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-slate-200 cursor-pointer ml-2">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a senior workforce manager in a high-end corporate setting. The lighting is crisp and modern with a soft-focus office background, conveying expertise and authority. The manager is wearing a tailored navy blazer, reflecting a sophisticated and trusted professional persona." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBM-_AHudj9e30N8lW9s0rLA9kwqJErQCMYNU5Eg0TTeZ__KZwjlTgZwYvFd87Fh6JDvkda8-vYPsF0Da7V7D1J6cpYqn8Gpe0A4QdOZTA1_tlGLbMrndcuJHsGQjhW1-rpBhNcpsSZn-Bx-_txHE_8xYwARAwzdxrfaNtcTEhwC-pIUtXxuBrfVrDa9Va21takyF5KqUsyjiHbS0lsPVeJEOBzX8JGGg_TPOcaGVljjH3CdyaVqPtuE_CESClO4tjmE7NgU1LJ_FwG"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Dynamic Filter & Action Bar -->
+<section class="p-8 bg-surface-container-low border-b border-surface-container-highest flex flex-col gap-6">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div>
+<h1 class="text-2xl font-bold text-on-surface font-headline tracking-tight">Workforce Verification Grid</h1>
+<p class="text-on-surface-variant text-sm mt-1">Review and reconcile attendance data for manufacturing teams.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 text-sm font-semibold text-secondary flex items-center gap-2 hover:bg-secondary-container/20 rounded-xl transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="upload_file">upload_file</span>
+                        Upload CSV/Excel
+                    </button>
+<a class="text-xs font-semibold text-primary underline underline-offset-4 decoration-primary/30 hover:decoration-primary transition-all" href="#">Download Template</a>
+<button class="px-6 py-2.5 bg-gradient-to-br from-primary to-primary-container text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[0.98] transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="verified_user">verified_user</span>
+                        Verify &amp; Reconcile
+                    </button>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-4 bg-surface-container-lowest p-4 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+<div class="flex items-center gap-2 px-3 py-2 bg-surface rounded-xl border border-outline-variant/30">
+<span class="material-symbols-outlined text-slate-400 text-sm" data-icon="calendar_month">calendar_month</span>
+<span class="text-sm font-medium text-on-surface">Oct 20, 2023 - Oct 26, 2023</span>
+<span class="material-symbols-outlined text-slate-400 text-sm cursor-pointer" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant/30 hidden md:block"></div>
+<div class="flex items-center gap-3">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">View Conditions:</span>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed text-xs font-bold rounded-full flex items-center gap-1.5 cursor-pointer">
+                            Attendance <span class="material-symbols-outlined text-[10px]" data-icon="close">close</span>
+</span>
+<span class="px-3 py-1 bg-primary-fixed text-on-primary-fixed text-xs font-bold rounded-full flex items-center gap-1.5 cursor-pointer">
+                            Overtime <span class="material-symbols-outlined text-[10px]" data-icon="close">close</span>
+</span>
+<span class="px-3 py-1 bg-surface-container text-on-surface-variant text-xs font-bold rounded-full flex items-center gap-1.5 cursor-pointer hover:bg-primary-fixed transition-colors">
+                            Fines
+                        </span>
+<span class="px-3 py-1 bg-surface-container text-on-surface-variant text-xs font-bold rounded-full flex items-center gap-1.5 cursor-pointer hover:bg-primary-fixed transition-colors">
+                            Deductions
+                        </span>
+</div>
+</div>
+<div class="ml-auto flex items-center gap-2">
+<button class="p-2 bg-surface hover:bg-surface-container rounded-lg text-slate-500 transition-colors">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+</button>
+<button class="p-2 bg-surface hover:bg-surface-container rounded-lg text-slate-500 transition-colors">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Main Data Grid Section -->
+<section class="flex-1 p-8 overflow-hidden flex flex-col">
+<div class="flex-1 border border-outline-variant/20 rounded-2xl overflow-hidden bg-white shadow-sm flex flex-col">
+<div class="flex-1 overflow-auto no-scrollbar relative">
+<table class="w-full border-collapse">
+<thead class="sticky top-0 z-30">
+<tr class="bg-surface-container-low">
+<!-- Sticky Employee Headers -->
+<th class="sticky-col bg-surface-container-low px-6 py-4 text-left border-b border-outline-variant/30 min-w-[280px]">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Employee Details</span>
+</th>
+<!-- Dynamic Date Columns -->
+<th class="px-6 py-4 border-b border-outline-variant/30 border-l border-outline-variant/30 min-w-[200px]">
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mon</span>
+<span class="text-lg font-extrabold text-on-surface">20</span>
+</div>
+</th>
+<th class="px-6 py-4 border-b border-outline-variant/30 border-l border-outline-variant/30 min-w-[200px]">
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tue</span>
+<span class="text-lg font-extrabold text-on-surface">21</span>
+</div>
+</th>
+<th class="px-6 py-4 border-b border-outline-variant/30 border-l border-outline-variant/30 min-w-[200px]">
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wed</span>
+<span class="text-lg font-extrabold text-on-surface">22</span>
+</div>
+</th>
+<th class="px-6 py-4 border-b border-outline-variant/30 border-l border-outline-variant/30 min-w-[200px]">
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Thu</span>
+<span class="text-lg font-extrabold text-on-surface">23</span>
+</div>
+</th>
+<th class="px-6 py-4 border-b border-outline-variant/30 border-l border-outline-variant/30 min-w-[200px]">
+<div class="flex flex-col items-center">
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fri</span>
+<span class="text-lg font-extrabold text-on-surface">24</span>
+</div>
+</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="sticky-col bg-white group-hover:bg-surface-container-low transition-colors px-6 py-5 table-shadow">
+<div class="flex items-center gap-4">
+<img class="w-12 h-12 rounded-full object-cover border-2 border-surface shadow-sm" data-alt="A portrait of a male production supervisor in his late 30s, looking focused and capable. He is set against a clean, modern industrial backdrop with subtle blue and gray tones. The style is professional and editorial, with soft ambient lighting highlighting a sense of reliable leadership and industrial precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsz5H0cp9hoPoPVskVsvUfHMqIHmeWbtlBrIdYUCimhnno7YGAiG5d7F7zYy0PXDAocaUjVshC68njgvEADE6D1Dpa0idVxYuECc-INlCIY3fRLWtHd8g_GVOjNJAmLC96ANO1Sp3B2pHXA-9Eh1JSgPej1Ed_pPvBsOSqMEncFNCwQOiv2hvDs3_8r2jkygIf8obv1dEo-lHdr3bJZ5OlotUmPuoykyXOFZkeqxgxtp_i-6Y3VN7wnwYMDVqpGPmvB8dh8_fvHbT0"/>
+<div>
+<h4 class="font-bold text-on-surface text-sm leading-tight">Alexander Wright</h4>
+<p class="text-[10px] text-primary font-bold mt-1">EMP-4012</p>
+<p class="text-[11px] text-on-surface-variant font-medium">Foam Mixing Lead</p>
+</div>
+</div>
+</td>
+<!-- Date Sub-columns (Attendance & Overtime) -->
+<td class="px-4 py-5 border-l border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer shadow-inner shadow-primary-container/20">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full transition-all"></div>
+</div>
+</div>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/30 rounded bg-surface-container-lowest focus:ring-1 focus:ring-primary outline-none transition-all" type="text" value="2.5h"/>
+</div>
+</div>
+</td>
+<td class="px-4 py-5 border-l border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/30 rounded bg-surface-container-lowest" type="text" value="0.0h"/>
+</div>
+</div>
+</td>
+<td class="px-4 py-5 border-l border-outline-variant/30 bg-error-container/10">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-error uppercase">Status</span>
+<div class="w-8 h-4 bg-slate-300 rounded-full relative cursor-pointer">
+<div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative opacity-50">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/10 rounded bg-slate-50 cursor-not-allowed" disabled="" type="text" value="-"/>
+</div>
+</div>
+</td>
+<td class="px-4 py-5 border-l border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/30 rounded bg-surface-container-lowest" type="text" value="1.0h"/>
+</div>
+</div>
+</td>
+<td class="px-4 py-5 border-l border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/30 rounded bg-surface-container-lowest" type="text" value="3.5h"/>
+</div>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors group">
+<td class="sticky-col bg-white group-hover:bg-surface-container-low transition-colors px-6 py-5 table-shadow">
+<div class="flex items-center gap-4">
+<img class="w-12 h-12 rounded-full object-cover border-2 border-surface shadow-sm" data-alt="A portrait of a skilled industrial worker in his mid-20s, with a focused and determined expression. The background shows soft, blurred elements of a high-tech factory floor, with cool blue and slate grey tones. The visual style is modern, sharp, and reflects the efficiency and precision of advanced manufacturing logistics." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbCqv6w6aruYEFdHi3gWMj9wdjy8-IR2IN6rbJMupNyrtR3gf56L1Aly5WDj7lzUNWgjVMSSnywdGCayp1KlI9uzoZPfscGMp-Uc6q5uQCguiG4jg7T5465bU9T3PumuFwaTySjM9rEGuZPx_8tHCDPZu4uJrehyjXdPHhi-j2fGNiVZ8y3_oXwmG2WMBFg56Z0pSDsUHSm2LubleVMg4JXxrBcvCBfkHAofESCfbaJKhYxo2XJdHqTG0dLHR9VIVsbkDz-lfv4WMY"/>
+<div>
+<h4 class="font-bold text-on-surface text-sm leading-tight">Sarah Jenkins</h4>
+<p class="text-[10px] text-primary font-bold mt-1">EMP-4088</p>
+<p class="text-[11px] text-on-surface-variant font-medium">Quality Assurance Specialist</p>
+</div>
+</div>
+</td>
+<!-- Date Sub-columns -->
+<td class="px-4 py-5 border-l border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/30 rounded bg-surface-container-lowest" type="text" value="0.0h"/>
+</div>
+</div>
+</td>
+<td class="px-4 py-5 border-l border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/30 rounded bg-surface-container-lowest" type="text" value="1.5h"/>
+</div>
+</div>
+</td>
+<td class="px-4 py-5 border-l border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/30 rounded bg-surface-container-lowest" type="text" value="0.5h"/>
+</div>
+</div>
+</td>
+<td class="px-4 py-5 border-l border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/30 rounded bg-surface-container-lowest" type="text" value="0.0h"/>
+</div>
+</div>
+</td>
+<td class="px-4 py-5 border-l border-outline-variant/30">
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-bold text-slate-400 uppercase">Status</span>
+<div class="w-8 h-4 bg-primary rounded-full relative cursor-pointer">
+<div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="relative">
+<span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">OT:</span>
+<input class="w-full pl-8 pr-2 py-1 text-xs border border-outline-variant/30 rounded bg-surface-container-lowest" type="text" value="0.0h"/>
+</div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination/Status Footer -->
+<div class="bg-surface-container px-6 py-3 flex items-center justify-between">
+<div class="flex items-center gap-6">
+<span class="text-xs text-on-surface-variant font-medium">Showing <b>48</b> employees in assembly</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-primary rounded-full"></span>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Attendance Tracked</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-error rounded-full"></span>
+<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Flagged Absences</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-1 hover:bg-white rounded transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="chevron_left">chevron_left</span>
+</button>
+<span class="text-xs font-bold text-on-surface">Page 1 of 4</span>
+<button class="p-1 hover:bg-white rounded transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Contextual FAB (Hidden on this detail view per requirements, but included as per platform logic if it were Home) -->
+<!-- Suppressed: Task-focused sub-page -->
+<script>
+        // Micro-interactions for table row highlights and toggles
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', (e) => {
+                if(e.target.closest('.w-8.h-4')) {
+                    const toggle = e.target.closest('.w-8.h-4');
+                    const knob = toggle.querySelector('div');
+                    if(toggle.classList.contains('bg-primary')) {
+                        toggle.classList.remove('bg-primary');
+                        toggle.classList.add('bg-slate-300');
+                        knob.style.transform = 'translateX(-16px)';
+                        knob.style.right = 'auto';
+                        knob.style.left = '2px';
+                    } else {
+                        toggle.classList.add('bg-primary');
+                        toggle.classList.remove('bg-slate-300');
+                        knob.style.transform = 'translateX(0)';
+                        knob.style.left = 'auto';
+                        knob.style.right = '2px';
+                    }
+                }
+            });
+        });
+
+        // Search Bar animation
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('w-80');
+            searchInput.classList.add('bg-white', 'shadow-md');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('w-80');
+            searchInput.classList.remove('bg-white', 'shadow-md');
+        });
+    </script>
+</body></html>

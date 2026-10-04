@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
+import GlobalPagination from '../ui/GlobalPagination';
 
 export default function OmsProgress({ activeRunItems, handleCompleteRun }) {
+    const { state } = useApp();
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
+
+    const displayedData = state?.isGlobalPaginated && activeRunItems
+        ? activeRunItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+        : activeRunItems || [];
     return (
         <div className="animate-in fade-in duration-500 max-w-[1920px] mx-auto">
             {/* Header / Module Title Area */}
@@ -93,7 +102,7 @@ export default function OmsProgress({ activeRunItems, handleCompleteRun }) {
                             </div>
                             <button className="text-sm font-semibold text-primary hover:bg-surface-container-high px-4 py-2 rounded-lg transition-colors">Export Log</button>
                         </div>
-                        <div className="overflow-x-auto">
+                        <div className="overflow-x-auto custom-scrollbar">
                             <table className="w-full text-left border-collapse min-w-[700px]">
                                 <thead className="bg-surface-container-lowest text-on-surface-variant text-[11px] font-extrabold uppercase tracking-widest">
                                     <tr>
@@ -105,7 +114,7 @@ export default function OmsProgress({ activeRunItems, handleCompleteRun }) {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-surface-container whitespace-nowrap">
-                                    {activeRunItems && activeRunItems.length > 0 ? activeRunItems.map((item, idx) => (
+                                    {displayedData && displayedData.length > 0 ? displayedData.map((item, idx) => (
                                         <tr key={idx} className="hover:bg-surface-container-low/30 transition-colors">
                                             <td className="py-5 px-6">
                                                 <div className="flex flex-col">
@@ -199,6 +208,14 @@ export default function OmsProgress({ activeRunItems, handleCompleteRun }) {
                                 </tbody>
                             </table>
                         </div>
+                        {activeRunItems && activeRunItems.length > 0 && (
+                            <GlobalPagination 
+                                totalItems={activeRunItems.length}
+                                itemsPerPage={itemsPerPage}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                            />
+                        )}
                     </div>
 
                     {/* Operational Notes / Constraints */}

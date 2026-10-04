@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Employee Onboarding Wizard - Flashvision ERP</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9ff",
+                        "surface-bright": "#f8f9ff",
+                        "outline": "#727782",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#ffc29d",
+                        "tertiary-container": "#8e4302",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-surface": "#191c20",
+                        "on-tertiary": "#ffffff",
+                        "outline-variant": "#c1c7d2",
+                        "on-primary-fixed": "#001c38",
+                        "on-primary-container": "#b1d1ff",
+                        "surface-container-high": "#e7e8ee",
+                        "on-secondary-container": "#445f7f",
+                        "inverse-surface": "#2e3035",
+                        "surface-container-low": "#f2f3fa",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "tertiary": "#6b3000",
+                        "error": "#ba1a1a",
+                        "background": "#f8f9ff",
+                        "on-background": "#191c20",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#001d36",
+                        "secondary-fixed": "#d1e4ff",
+                        "tertiary-fixed": "#ffdbc8",
+                        "surface-variant": "#e1e2e8",
+                        "on-surface-variant": "#414750",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "inverse-on-surface": "#eff0f7",
+                        "surface-dim": "#d8dae0",
+                        "secondary-container": "#bed9ff",
+                        "primary": "#004277",
+                        "on-tertiary-fixed": "#321300",
+                        "on-primary-fixed-variant": "#004881",
+                        "secondary": "#456080",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "surface-tint": "#1260a5",
+                        "surface-container": "#ecedf4",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#a2c9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#005a9e",
+                        "on-error": "#ffffff",
+                        "primary-fixed": "#d3e4ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: theme('colors.background'); color: theme('colors.on-surface'); }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Manrope', sans-serif; }
+        .glass-panel { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .gradient-text { background: linear-gradient(135deg, theme('colors.primary'), theme('colors.primary-container')); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .primary-gradient-bg { background: linear-gradient(135deg, theme('colors.primary'), theme('colors.primary-container')); }
+        
+        /* Custom Input Styles */
+        .erp-input {
+            width: 100%;
+            background-color: theme('colors.surface-container-low');
+            border: none;
+            border-bottom: 1px solid theme('colors.outline-variant');
+            color: theme('colors.on-surface');
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            border-radius: theme('borderRadius.DEFAULT') theme('borderRadius.DEFAULT') 0 0;
+        }
+        .erp-input:focus {
+            outline: none;
+            background-color: theme('colors.surface-container-lowest');
+            border-bottom-color: theme('colors.primary');
+            box-shadow: 0 1px 0 0 theme('colors.primary');
+        }
+        .erp-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: theme('colors.on-surface-variant');
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .required-mark { color: theme('colors.tertiary'); margin-left: 2px; }
+        
+        /* Smooth scrolling for anchor links */
+        html { scroll-behavior: smooth; }
+        
+        /* Wizard Section Styling */
+        .wizard-section {
+            background-color: theme('colors.surface-container-lowest');
+            border-radius: theme('borderRadius.xl');
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 28, 56, 0.03);
+            border: 1px solid rgba(193, 199, 210, 0.15); /* Ghost border */
+            position: relative;
+            overflow: hidden;
+        }
+        .wizard-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: theme('colors.primary-fixed');
+            border-radius: 4px 0 0 4px;
+        }
+        
+        /* Custom Checkbox/Toggle */
+        .erp-toggle {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .erp-toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: theme('colors.surface-variant');
+            transition: .3s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider { background-color: theme('colors.primary'); }
+        input:checked + .toggle-slider:before { transform: translateX(20px); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden bg-background font-body text-body-md text-on-surface">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] z-40 bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-xl shadow-sm dark:shadow-none border-b-0 flex justify-between items-center px-8 h-16">
+<div class="flex items-center gap-8">
+<h1 class="font-headline text-lg font-extrabold text-on-surface">Flashvision</h1>
+<div class="hidden md:flex items-center gap-6">
+<!-- Navigation links from JSON -->
+<a class="text-on-surface-variant hover:text-primary transition-all font-body text-body-md" href="#">Home</a>
+<a class="text-on-surface-variant hover:text-primary transition-all font-body text-body-md" href="#">Analytics</a>
+<a class="text-on-surface-variant hover:text-primary transition-all font-body text-body-md" href="#">Reports</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container focus-within:ring-2 focus-within:ring-primary/20">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container focus-within:ring-2 focus-within:ring-primary/20">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container focus-within:ring-2 focus-within:ring-primary/20">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center overflow-hidden border border-outline-variant/20 ml-2">
+<img alt="Administrator Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate administrator in a modern office setting. Soft, natural lighting. The mood is confident and welcoming. A high-end business portrait aesthetic with deep blue corporate undertones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDG__0P4T6hror-vCHiRpSqP6WHrzFlsfyPfV-h0xSlwPUrzKRj94fEqTfct9f2OsJTwNjSJU_dxCItXniNMgE02yWPAWAv7BtSgMKQwM0k6ltYRhP-sX-YkJFmKyXrf9lMkkuCK0e1o-skZszMgFNtrHkD7EDsnfBv0fyeL2Xc7YGBYvBvFtK0T9kNSJvJ3grwZi340chVZmaVyh6qMqB5H4I_161XW4o83aSCth4U4Gm07mQ-wKk3-Te6wxhPblisYK9LU98RyyWi"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation Bar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container border-r border-surface-container-low z-50 flex flex-col h-full py-6 px-4">
+<div class="mb-8 px-4 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg primary-gradient-bg flex items-center justify-center text-on-primary font-bold shadow-md">
+                FV
+            </div>
+<div>
+<h2 class="font-headline text-xl font-bold text-primary">Flashvision</h2>
+<p class="text-[0.65rem] text-on-surface-variant uppercase tracking-wider font-semibold">Enterprise Resource Planning</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:scale-95 duration-150 font-body text-label-md" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-semibold border-r-4 border-primary bg-surface-container-highest cursor-pointer active:scale-95 duration-150 font-body text-label-md" href="#">
+<span class="material-symbols-outlined">group</span>
+                Users
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:scale-95 duration-150 font-body text-label-md" href="#">
+<span class="material-symbols-outlined">domain</span>
+                Departments
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:scale-95 duration-150 font-body text-label-md" href="#">
+<span class="material-symbols-outlined">security</span>
+                Security
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest transition-colors cursor-pointer active:scale-95 duration-150 font-body text-label-md" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+                Audit Logs
+            </a>
+</nav>
+<div class="mt-auto px-4 pt-4 border-t border-outline-variant/10">
+<button class="w-full primary-gradient-bg text-on-primary py-3 rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span>
+                New Entry
+            </button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 mt-16 p-8 w-full h-[calc(100vh-4rem)] overflow-y-auto bg-surface">
+<div class="max-w-5xl mx-auto">
+<!-- Header -->
+<div class="mb-10 flex justify-between items-end">
+<div>
+<h1 class="font-display text-display-md font-bold text-on-surface tracking-tight mb-2">Employee Onboarding Wizard</h1>
+<p class="text-on-surface-variant text-body-md max-w-2xl">Complete the comprehensive profile setup for new personnel. Ensure all mandatory fields marked with an asterisk are accurately populated before submission.</p>
+</div>
+<div class="hidden lg:flex items-center gap-2 bg-surface-container-low py-2 px-4 rounded-full border border-outline-variant/20">
+<div class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></div>
+<span class="text-label-md font-semibold text-on-surface-variant">Draft Auto-saved at 10:42 AM</span>
+</div>
+</div>
+<form action="#" class="space-y-8" method="POST">
+<!-- SECTION 1: Personal Info -->
+<section class="wizard-section" id="section-1">
+<div class="flex items-center gap-3 mb-6 pb-4 border-b border-outline-variant/10">
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-bold">1</div>
+<h2 class="font-headline text-xl font-bold text-on-surface">Personal Information</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Photo Upload Area -->
+<div class="md:col-span-3 flex flex-col items-center gap-4">
+<div class="w-32 h-32 rounded-full bg-surface-container border-2 border-dashed border-outline-variant flex flex-col items-center justify-center text-on-surface-variant overflow-hidden relative group">
+<span class="material-symbols-outlined text-4xl mb-1 text-outline">person</span>
+<span class="text-[0.65rem] uppercase font-bold tracking-wider">No Photo</span>
+<div class="absolute inset-0 bg-inverse-surface/80 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+<span class="material-symbols-outlined text-on-inverse-surface">photo_camera</span>
+</div>
+</div>
+<div class="flex flex-col w-full gap-2">
+<button class="w-full bg-secondary-container text-on-secondary-container py-2 rounded-lg text-sm font-semibold hover:bg-secondary-fixed transition-colors" type="button">Upload Image</button>
+<button class="w-full border border-outline-variant text-on-surface-variant py-2 rounded-lg text-sm font-semibold hover:bg-surface-container transition-colors" type="button">Capture Photo</button>
+</div>
+</div>
+<!-- Form Fields -->
+<div class="md:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="erp-label">Full Name <span class="required-mark">*</span></label>
+<input class="erp-input" placeholder="e.g. Jane Doe" required="" type="text"/>
+</div>
+<div>
+<label class="erp-label">Father's Name <span class="required-mark">*</span></label>
+<input class="erp-input" placeholder="e.g. John Doe" required="" type="text"/>
+</div>
+<div>
+<label class="erp-label">Date of Birth <span class="required-mark">*</span></label>
+<div class="relative">
+<input class="erp-input" required="" type="date"/>
+</div>
+</div>
+<div>
+<label class="erp-label">Marital Status <span class="required-mark">*</span></label>
+<select class="erp-input cursor-pointer" required="">
+<option disabled="" selected="" value="">Select status...</option>
+<option value="single">Single</option>
+<option value="married">Married</option>
+<option value="divorced">Divorced</option>
+<option value="widowed">Widowed</option>
+</select>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 2: Contact Info -->
+<section class="wizard-section" id="section-2">
+<div class="flex items-center gap-3 mb-6 pb-4 border-b border-outline-variant/10">
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-bold">2</div>
+<h2 class="font-headline text-xl font-bold text-on-surface">Contact Information</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+<label class="erp-label">Phone Number <span class="required-mark">*</span></label>
+<input class="erp-input" placeholder="+1 (555) 000-0000" required="" type="tel"/>
+</div>
+<div>
+<label class="erp-label">National ID Card Number (CNIC) <span class="required-mark">*</span></label>
+<input class="erp-input" pattern="^\d{5}-\d{7}-\d{1}$" placeholder="00000-0000000-0" required="" type="text"/>
+<p class="text-xs text-on-surface-variant mt-1">Format: XXXXX-XXXXXXX-X</p>
+</div>
+</div>
+</section>
+<!-- SECTION 3: Education -->
+<section class="wizard-section" id="section-3">
+<div class="flex items-center gap-3 mb-6 pb-4 border-b border-outline-variant/10">
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-bold">3</div>
+<h2 class="font-headline text-xl font-bold text-on-surface">Education &amp; Academic History</h2>
+</div>
+<div>
+<label class="erp-label mb-2">Academic Details</label>
+<div class="border border-outline-variant/30 rounded-t-lg bg-surface-container-low p-2 flex gap-2">
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container" type="button"><span class="material-symbols-outlined text-sm">format_bold</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container" type="button"><span class="material-symbols-outlined text-sm">format_italic</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container" type="button"><span class="material-symbols-outlined text-sm">format_list_bulleted</span></button>
+</div>
+<textarea class="w-full h-32 bg-surface-container-lowest border-x border-b border-outline-variant/30 p-4 text-sm focus:outline-none focus:border-primary rounded-b-lg resize-y" placeholder="Enter degree, institution, graduation year, and any notable academic achievements..."></textarea>
+</div>
+</section>
+<!-- SECTION 4: Work History -->
+<section class="wizard-section" id="section-4">
+<div class="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant/10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-bold">4</div>
+<h2 class="font-headline text-xl font-bold text-on-surface">Work History</h2>
+</div>
+<button class="text-primary font-semibold text-sm flex items-center gap-1 hover:text-primary-container transition-colors" type="button">
+<span class="material-symbols-outlined text-sm">add_circle</span> Add Row
+                        </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b-2 border-surface-container-high text-xs uppercase tracking-wider text-on-surface-variant">
+<th class="pb-3 font-semibold">Previous Company Name</th>
+<th class="pb-3 font-semibold">Designation / Role</th>
+<th class="pb-3 font-semibold">Start Date</th>
+<th class="pb-3 font-semibold">End Date</th>
+<th class="pb-3 font-semibold w-10"></th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="border-b border-surface-container group hover:bg-surface-container-low transition-colors">
+<td class="py-3 pr-4"><input class="erp-input bg-transparent border-none p-1" placeholder="Company Name" type="text"/></td>
+<td class="py-3 pr-4"><input class="erp-input bg-transparent border-none p-1" placeholder="Job Title" type="text"/></td>
+<td class="py-3 pr-4"><input class="erp-input bg-transparent border-none p-1 text-xs" type="date"/></td>
+<td class="py-3 pr-4"><input class="erp-input bg-transparent border-none p-1 text-xs" type="date"/></td>
+<td class="py-3"><button class="text-outline hover:text-error opacity-0 group-hover:opacity-100 transition-opacity" type="button"><span class="material-symbols-outlined text-sm">delete</span></button></td>
+</tr>
+<tr class="border-b border-surface-container group hover:bg-surface-container-low transition-colors">
+<td class="py-3 pr-4"><input class="erp-input bg-transparent border-none p-1" placeholder="Company Name" type="text"/></td>
+<td class="py-3 pr-4"><input class="erp-input bg-transparent border-none p-1" placeholder="Job Title" type="text"/></td>
+<td class="py-3 pr-4"><input class="erp-input bg-transparent border-none p-1 text-xs" type="date"/></td>
+<td class="py-3 pr-4"><input class="erp-input bg-transparent border-none p-1 text-xs" type="date"/></td>
+<td class="py-3"><button class="text-outline hover:text-error opacity-0 group-hover:opacity-100 transition-opacity" type="button"><span class="material-symbols-outlined text-sm">delete</span></button></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- SECTION 5: Offers & Pay Structure -->
+<section class="wizard-section" id="section-5">
+<div class="flex items-center gap-3 mb-6 pb-4 border-b border-outline-variant/10">
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-bold">5</div>
+<h2 class="font-headline text-xl font-bold text-on-surface">Offers &amp; Pay Structure</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-6">
+<div>
+<label class="erp-label">Gross Salary (Annual)</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">$</span>
+<input class="erp-input pl-8" placeholder="0.00" type="number"/>
+</div>
+</div>
+<div>
+<label class="erp-label">Basic Salary (Monthly)</label>
+<div class="relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">$</span>
+<input class="erp-input pl-8" placeholder="0.00" type="number"/>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 space-y-4">
+<h3 class="text-sm font-bold text-on-surface uppercase tracking-wider mb-4">Eligibility Criteria</h3>
+<div class="flex items-center justify-between">
+<div>
+<p class="font-semibold text-sm text-on-surface">Overtime Allowed</p>
+<p class="text-xs text-on-surface-variant">Eligible for 1.5x pay after 40 hours.</p>
+</div>
+<label class="erp-toggle">
+<input type="checkbox"/>
+<span class="toggle-slider"></span>
+</label>
+</div>
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/10">
+<div>
+<p class="font-semibold text-sm text-on-surface">Bonuses Eligible</p>
+<p class="text-xs text-on-surface-variant">Qualifies for annual performance bonus.</p>
+</div>
+<label class="erp-toggle">
+<input checked="" type="checkbox"/>
+<span class="toggle-slider"></span>
+</label>
+</div>
+<div class="flex items-center justify-between pt-3 border-t border-outline-variant/10">
+<div>
+<p class="font-semibold text-sm text-on-surface">Allowances Eligible</p>
+<p class="text-xs text-on-surface-variant">Housing, transport, and medical.</p>
+</div>
+<label class="erp-toggle">
+<input checked="" type="checkbox"/>
+<span class="toggle-slider"></span>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 6: Joining Details -->
+<section class="wizard-section" id="section-6">
+<div class="flex items-center gap-3 mb-6 pb-4 border-b border-outline-variant/10">
+<div class="w-8 h-8 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-bold">6</div>
+<h2 class="font-headline text-xl font-bold text-on-surface">Joining Details</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div>
+<label class="erp-label">Joining Date <span class="required-mark">*</span></label>
+<input class="erp-input" required="" type="date"/>
+</div>
+<div>
+<label class="erp-label">Reporting Manager</label>
+<select class="erp-input">
+<option disabled="" selected="" value="">Select Manager...</option>
+<option>Sarah Jenkins (Director of Ops)</option>
+<option>Michael Chang (Tech Lead)</option>
+<option>Robert Fox (HR Manager)</option>
+</select>
+</div>
+<div>
+<label class="erp-label">Shift Selection</label>
+<select class="erp-input">
+<option disabled="" selected="" value="">Select Shift...</option>
+<option>Morning (09:00 AM - 05:00 PM)</option>
+<option>Evening (02:00 PM - 10:00 PM)</option>
+<option>Night (10:00 PM - 06:00 AM)</option>
+</select>
+</div>
+<div>
+<label class="erp-label">Department Assignment</label>
+<select class="erp-input">
+<option disabled="" selected="" value="">Select Department...</option>
+<option>Engineering</option>
+<option>Human Resources</option>
+<option>Finance</option>
+<option>Operations</option>
+</select>
+</div>
+<div>
+<label class="erp-label">Department Section</label>
+<select class="erp-input">
+<option disabled="" selected="" value="">Select Section...</option>
+<option>Frontend Development</option>
+<option>Backend Infrastructure</option>
+<option>Quality Assurance</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Action Footer -->
+<div class="sticky bottom-8 mt-12 bg-surface-container-lowest/90 backdrop-blur-md p-4 rounded-2xl shadow-[0_20px_40px_rgba(0,28,56,0.06)] border border-outline-variant/20 flex justify-between items-center z-30">
+<button class="text-on-surface-variant font-semibold hover:text-on-surface px-6 py-2 transition-colors" type="button">Cancel</button>
+<div class="flex gap-4">
+<button class="bg-secondary-container text-on-secondary-container px-6 py-3 rounded-xl font-bold hover:bg-secondary-fixed transition-colors" type="button">Save Draft</button>
+<button class="primary-gradient-bg text-on-primary px-8 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 flex items-center gap-2" type="submit">
+<span class="material-symbols-outlined">person_add</span>
+                            Submit Profile
+                        </button>
+</div>
+</div>
+<!-- Bottom padding to ensure last section isn't hidden by sticky footer -->
+<div class="h-24"></div>
+</form>
+</div>
+</main>
+</body></html>

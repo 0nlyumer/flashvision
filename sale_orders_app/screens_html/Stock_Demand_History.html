@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stock Demand History - Flashvision</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: theme('colors.surface');
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.surface-variant');
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.outline-variant');
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#ffc29d",
+                        "outline-variant": "#c1c7d2",
+                        "outline": "#727782",
+                        "surface-container": "#ecedf4",
+                        "on-primary-fixed": "#001c38",
+                        "inverse-primary": "#a2c9ff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#004881",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#8e4302",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#445f7f",
+                        "secondary-container": "#bed9ff",
+                        "surface-variant": "#e1e2e8",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbc8",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "surface-dim": "#d8dae0",
+                        "on-tertiary-fixed": "#321300",
+                        "on-primary": "#ffffff",
+                        "secondary": "#456080",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "surface-bright": "#f8f9ff",
+                        "inverse-on-surface": "#eff0f7",
+                        "on-surface": "#191c20",
+                        "surface-container-low": "#f2f3fa",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "on-error": "#ffffff",
+                        "on-background": "#191c20",
+                        "inverse-surface": "#2e3035",
+                        "secondary-fixed": "#d1e4ff",
+                        "error": "#ba1a1a",
+                        "surface": "#f8f9ff",
+                        "primary-fixed": "#d3e4ff",
+                        "on-secondary-fixed": "#001d36",
+                        "surface-tint": "#1260a5",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "primary-container": "#005a9e",
+                        "primary": "#004277",
+                        "background": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e7e8ee",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-surface-variant": "#414750",
+                        "on-primary-container": "#b1d1ff",
+                        "tertiary": "#6b3000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Manrope", "sans-serif"],
+                        "display": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {}
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body h-screen flex overflow-hidden">
+<!-- SideNavBar (from JSON) -->
+<nav class="bg-surface-container-low h-screen w-72 flex flex-col fixed left-0 top-0 z-50 py-8 shadow-sm">
+<div class="px-6 mb-8 flex items-center gap-3">
+<img alt="Inventory Dashboard" class="w-10 h-10 rounded-lg object-cover" data-alt="A sleek, modern corporate logo icon representing synthetic logistics. The design features geometric shapes in oceanic blues and earth-toned ambers, floating in a clean, minimalist 3D space with soft studio lighting. High-end, premium aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0ui0ws5suY4J0sC7Zah29dgwD6PiUkdzO27Z6wd-J5o5fAlDeLxRJQ3ArhVV58mXNx-rrpw4-sSM607gSsJyA9MCyJiSYN3YAnkCxpKn1PrY0bDT_-1KY2G5NVh96A6TIlT-tWxmc__3-yLxDV0m4vjg5qLRpPl9Bbq6Xy2Q9HHDFLhs4ro-wY79tuNLacQu9yqefZOoRmjmb-ekdoRGVKaRlJsM8piNqGYVTCN_6jiKmySi7Ch1lnFoTM7zQi6pWqKYW2R52D7zJ4o"/>
+<div>
+<h1 class="font-headline text-lg font-extrabold text-on-primary-fixed-variant tracking-tight">Global Operations</h1>
+<p class="font-body text-xs tracking-wide text-on-surface-variant mt-0.5">Synth-Logistics v4.2</p>
+</div>
+</div>
+<div class="flex flex-col flex-1 gap-1 px-4">
+<!-- Inactive -->
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">factory</span>
+<span class="font-body text-sm font-medium">Production</span>
+</a>
+<!-- Inactive -->
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-body text-sm font-medium">Scheduling</span>
+</a>
+<!-- Active (Semantic match for "Production Department Requisitions" / "Stock Demand") -->
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer bg-secondary-container text-on-secondary-container rounded-lg font-semibold" href="#">
+<span class="material-symbols-outlined fill-icon">verified</span>
+<span class="font-body text-sm">Quality Control</span>
+</a>
+<!-- Inactive -->
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">local_shipping</span>
+<span class="font-body text-sm font-medium">Shipping</span>
+</a>
+<!-- Inactive -->
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body text-sm font-medium">Analytics</span>
+</a>
+</div>
+<div class="mt-auto px-4 flex flex-col gap-1">
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-body text-sm font-medium">Support</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body text-sm font-medium">Sign Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-72 flex-1 flex flex-col h-screen overflow-hidden bg-background">
+<!-- TopNavBar (from JSON) -->
+<header class="bg-surface h-16 w-full sticky top-0 z-40 flex justify-between items-center px-8 bg-surface-container-low transition-colors duration-200">
+<div class="flex items-center gap-4">
+<span class="font-headline text-xl font-bold tracking-tight text-primary">InventoryCore</span>
+</div>
+<div class="flex-1 max-w-md mx-8">
+<div class="relative bg-surface-container-low rounded-lg outline-variant border border-transparent outline-1 focus-within:bg-surface-container-lowest focus-within:border-outline-variant transition-colors">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-transparent border-none py-2 pl-10 pr-4 text-sm font-body text-on-surface placeholder:text-on-surface-variant focus:ring-0" placeholder="Search requisitions..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:bg-surface-container-highest/50 p-2 rounded-full transition-colors duration-200 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-highest/50 p-2 rounded-full transition-colors duration-200 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<img alt="Manager Profile" class="w-8 h-8 rounded-full object-cover cursor-pointer" data-alt="A professional headshot of a corporate logistics manager in a high-tech synthetic manufacturing environment. The lighting is bright and modern, highlighting a sharp, tailored business suit against a subtly blurred background of glowing control panels. Earth-toned and deep oceanic blue palette." src="https://lh3.googleusercontent.com/aida/ADBb0uhm70SzZUMd13FPFRF_H8r09DkYE9OPZXZrifDmN4GCBTL80sgEH4JLPs7tlu_sRsr1Y4BPI3ZeNCYHPPPqK3xR_M3sSivrY2Doc7ji8WwJ8BYANn5ql0flAv6OfIV39ZvfJKHrrsv5u2XvywTiW8jg4OvpcPPL5RAoCaWSpPQKWz6nJzIGfbSMcVN1CBxOW1ZDE5t9e_ttYoAWw25njhXXQuU4NFgQjbxoXkhgl7UyXeudaGPFfGtdxQ6_c-pZORCLZhXK-S7UrL4"/>
+</div>
+</header>
+<!-- Canvas -->
+<div class="flex-1 overflow-y-auto p-8 lg:p-12">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="font-headline text-[2.75rem] font-bold text-on-surface tracking-tight leading-tight">Stock Demand</h2>
+<p class="font-body text-sm text-on-surface-variant mt-2">Production Department Requisition History</p>
+</div>
+<button class="bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-3 rounded-lg font-body font-semibold text-sm shadow-[0_20px_40px_rgba(0,28,56,0.06)] hover:opacity-90 transition-opacity">
+                    New Requisition
+                </button>
+</div>
+<!-- Dashboard Bento Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+<!-- Stat Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15 shadow-[0_20px_40px_rgba(0,28,56,0.06)]">
+<p class="font-body text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-2">Pending Requests</p>
+<div class="flex items-end gap-3">
+<span class="font-headline text-4xl font-bold text-on-surface">24</span>
+<span class="font-body text-sm text-tertiary mb-1 flex items-center"><span class="material-symbols-outlined text-sm mr-1">trending_up</span> +12%</span>
+</div>
+</div>
+<!-- Stat Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15 shadow-[0_20px_40px_rgba(0,28,56,0.06)] relative overflow-hidden">
+<div class="relative z-10">
+<p class="font-body text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-2">Critical Shortages</p>
+<div class="flex items-end gap-3">
+<span class="font-headline text-4xl font-bold text-tertiary">3</span>
+<span class="font-body text-sm text-on-surface-variant mb-1">Requires immediate action</span>
+</div>
+</div>
+<!-- Decorative subtle gradient blob -->
+<div class="absolute -right-10 -bottom-10 w-32 h-32 bg-tertiary-fixed opacity-20 rounded-full blur-2xl"></div>
+</div>
+<!-- Stat Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15 shadow-[0_20px_40px_rgba(0,28,56,0.06)]">
+<p class="font-body text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-2">Fulfillment Rate</p>
+<div class="flex items-end gap-3">
+<span class="font-headline text-4xl font-bold text-primary">94.2%</span>
+<span class="font-body text-sm text-secondary mb-1">This week</span>
+</div>
+<div class="mt-4 w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 94.2%"></div>
+</div>
+</div>
+</div>
+<!-- Table Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)] border border-outline-variant/15 overflow-hidden">
+<div class="p-6 bg-surface-container-low flex justify-between items-center">
+<h3 class="font-headline text-lg font-bold text-on-surface">Recent Requisitions</h3>
+<div class="flex gap-2">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest rounded-lg transition-colors">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest rounded-lg transition-colors">
+<span class="material-symbols-outlined text-sm">more_vert</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface">
+<th class="font-body text-xs font-semibold text-on-surface-variant tracking-wider py-4 px-6 border-b border-surface-container-highest uppercase">Demand ID</th>
+<th class="font-body text-xs font-semibold text-on-surface-variant tracking-wider py-4 px-6 border-b border-surface-container-highest uppercase">Requested By</th>
+<th class="font-body text-xs font-semibold text-on-surface-variant tracking-wider py-4 px-6 border-b border-surface-container-highest uppercase">Date</th>
+<th class="font-body text-xs font-semibold text-on-surface-variant tracking-wider py-4 px-6 border-b border-surface-container-highest uppercase">Urgency</th>
+<th class="font-body text-xs font-semibold text-on-surface-variant tracking-wider py-4 px-6 border-b border-surface-container-highest uppercase">Status</th>
+<th class="font-body text-xs font-semibold text-on-surface-variant tracking-wider py-4 px-6 border-b border-surface-container-highest uppercase text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body text-sm divide-y divide-surface-container-highest">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-4 px-6 text-on-surface font-medium">REQ-7842</td>
+<td class="py-4 px-6 text-on-surface-variant">Sarah Jenkins (Line 4)</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 24, 09:15 AM</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-tertiary-container/10 text-tertiary text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> High
+                                    </span>
+</td>
+<td class="py-4 px-6">
+<span class="text-on-surface-variant font-medium">Pending</span>
+</td>
+<td class="py-4 px-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-secondary hover:bg-secondary-container hover:text-on-secondary-container rounded-md transition-colors" title="View">
+<span class="material-symbols-outlined text-[1.25rem]">visibility</span>
+</button>
+<button class="p-1.5 text-secondary hover:bg-secondary-container hover:text-on-secondary-container rounded-md transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[1.25rem]">edit</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:bg-error-container hover:text-on-error-container rounded-md transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[1.25rem]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group bg-surface-container-low/30">
+<td class="py-4 px-6 text-on-surface font-medium">REQ-7841</td>
+<td class="py-4 px-6 text-on-surface-variant">Mike Chen (Mixing)</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 24, 08:30 AM</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-variant text-on-surface-variant text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Normal
+                                    </span>
+</td>
+<td class="py-4 px-6">
+<span class="text-primary font-semibold">Approved</span>
+</td>
+<td class="py-4 px-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-secondary hover:bg-secondary-container hover:text-on-secondary-container rounded-md transition-colors" title="View">
+<span class="material-symbols-outlined text-[1.25rem]">visibility</span>
+</button>
+<button class="p-1.5 text-secondary hover:bg-secondary-container hover:text-on-secondary-container rounded-md transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[1.25rem]">edit</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:bg-error-container hover:text-on-error-container rounded-md transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[1.25rem]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-4 px-6 text-on-surface font-medium">REQ-7839</td>
+<td class="py-4 px-6 text-on-surface-variant">Elena Rossi (Assembly)</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 23, 16:45 PM</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-variant text-on-surface-variant text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Normal
+                                    </span>
+</td>
+<td class="py-4 px-6">
+<span class="text-outline font-medium">Fulfilled</span>
+</td>
+<td class="py-4 px-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-secondary hover:bg-secondary-container hover:text-on-secondary-container rounded-md transition-colors" title="View">
+<span class="material-symbols-outlined text-[1.25rem]">visibility</span>
+</button>
+<button class="p-1.5 text-secondary hover:bg-secondary-container hover:text-on-secondary-container rounded-md transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[1.25rem]">edit</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:bg-error-container hover:text-on-error-container rounded-md transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[1.25rem]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group bg-surface-container-low/30">
+<td class="py-4 px-6 text-on-surface font-medium">REQ-7835</td>
+<td class="py-4 px-6 text-on-surface-variant">David Kim (Testing)</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 23, 14:10 PM</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-tertiary-container/10 text-tertiary text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Critical
+                                    </span>
+</td>
+<td class="py-4 px-6">
+<span class="text-primary font-semibold">Approved</span>
+</td>
+<td class="py-4 px-6 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-secondary hover:bg-secondary-container hover:text-on-secondary-container rounded-md transition-colors" title="View">
+<span class="material-symbols-outlined text-[1.25rem]">visibility</span>
+</button>
+<button class="p-1.5 text-secondary hover:bg-secondary-container hover:text-on-secondary-container rounded-md transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[1.25rem]">edit</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:bg-error-container hover:text-on-error-container rounded-md transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[1.25rem]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="p-4 border-t border-surface-container-highest bg-surface flex justify-between items-center">
+<span class="font-body text-xs text-on-surface-variant">Showing 1 to 4 of 128 entries</span>
+<div class="flex gap-1">
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:bg-surface-container-highest disabled:opacity-50 text-sm font-medium">Previous</button>
+<button class="px-3 py-1.5 rounded-md bg-secondary-container text-on-secondary-container text-sm font-medium">1</button>
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:bg-surface-container-highest text-sm font-medium">2</button>
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:bg-surface-container-highest text-sm font-medium">3</button>
+<span class="px-3 py-1.5 text-on-surface-variant text-sm">...</span>
+<button class="px-3 py-1.5 rounded-md text-on-surface-variant hover:bg-surface-container-highest text-sm font-medium">Next</button>
+</div>
+</div>
+</div>
+<!-- Contextual Details Area (Asymmetric Layout element) -->
+<div class="mt-12 p-8 bg-gradient-to-br from-surface-container-low to-surface rounded-2xl border border-outline-variant/15 flex flex-col lg:flex-row gap-8 items-center relative overflow-hidden">
+<!-- Background accent -->
+<div class="absolute -left-20 -top-20 w-64 h-64 bg-primary-fixed opacity-30 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex-1 z-10">
+<h4 class="font-headline text-xl font-bold text-on-surface mb-2">Automated Reorder Trigger</h4>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed mb-6 max-w-2xl">
+                        Synthetic compound Alpha-7 inventory levels have dropped below the 15% safety threshold in Sector 4. The predictive analytics engine suggests initiating a bulk replenishment request to avoid production delays next week.
+                    </p>
+<button class="bg-surface-container text-primary font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-surface-container-highest transition-colors flex items-center gap-2 w-fit">
+<span class="material-symbols-outlined text-sm">bolt</span> Auto-Draft Requisition
+                    </button>
+</div>
+<div class="w-full lg:w-1/3 h-40 rounded-xl overflow-hidden shadow-sm z-10">
+<img alt="Warehouse Analytics" class="w-full h-full object-cover" data-alt="A sophisticated data visualization dashboard displaying warehouse inventory levels. The chart uses sleek, minimal lines in deep oceanic blues and subtle ambers against a clean, light-mode background. It feels modern, high-tech, and perfectly aligned with a premium digital concierge interface." src="https://lh3.googleusercontent.com/aida/ADBb0uhCXs7mc8ChFloWd-UGbyivvd8CoXKpQfMzEbwjHP-lv6YGiAYYbEF_jzUig1EcMS0acDrnBEqxL-IT80aA97A5i7oCqUjhcqq54ZUPWHMIWG3jfuPXWRatraA43VND2iE_5KO2U6kRy16sNrZrf741wyzNFT_nTZPEChXNxIHRO81U6GkCjwpFh77LKKsLBuMTrNrBsuBSpFSZg6g3bNb3j7XncbQ4ZJWRZYSE9TkUGq44qN0bMiUt8FPCX8V8UTcZ_yxr71MNyqI"/>
+</div>
+</div>
+</div>
+</main>
+</body></html>

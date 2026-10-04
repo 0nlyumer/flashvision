@@ -2,17 +2,29 @@ import React, { useState, useRef, useEffect } from 'react';
 import BulkUploadModal from './BulkUploadModal';
 import ProfileCardModal from './ProfileCardModal';
 import { useApp } from '../../context/AppContext';
+import { useDialog } from '../../context/DialogContext';
+import CustomSelect from '../ui/CustomSelect';
+import GlobalPagination from '../ui/GlobalPagination';
 
 export default function AddNewSupplier() {
   const { state, setCollection } = useApp();
+  const { appConfirm, appAlert } = useDialog();
   const [showHistory, setShowHistory] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [viewProfileData, setViewProfileData] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
   const fileInputRef = useRef(null);
 
   const generateTrackingCode = () => {
-    return `SUP-${String(state.suppliers.length + 1).padStart(3, '0')}`;
+    const ids = (state.suppliers || []).map(s => {
+      const match = s.id?.match(/\d+/);
+      return match ? parseInt(match[0], 10) : 0;
+    });
+    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
+    return `SUP-${String(maxId + 1).padStart(3, '0')}`;
   };
 
   const [formData, setFormData] = useState({
@@ -25,6 +37,10 @@ export default function AddNewSupplier() {
     }
   }, [state.suppliers, showHistory]);
 
+  const displayedSuppliers = state?.isGlobalPaginated
+    ? state.suppliers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : state.suppliers;
+
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleImageUpload = (e) => {
@@ -35,8 +51,9 @@ export default function AddNewSupplier() {
   };
 
   const handleSave = () => {
-    if (!formData.name) return alert("Supplier name is required");
+    if (!formData.name) { appAlert("Supplier name is required"); return; }
     let updated = [...state.suppliers];
+    const isNew = !state.suppliers.some(s => s.id === formData.id);
     if (!formData.id.startsWith('SUP-')) {
       updated.push({ ...formData, id: formData.id || generateTrackingCode() });
     } else {
@@ -48,6 +65,24 @@ export default function AddNewSupplier() {
       }
     }
     setCollection('suppliers', updated);
+
+    // Auto-generate Chart of Account if new supplier
+    if (isNew) {
+      const accounts = state.chartOfAccounts || [];
+      const accountExists = accounts.some(acc => acc.name.toLowerCase() === formData.name.toLowerCase());
+      if (!accountExists) {
+        const nextAccId = 'ACC-' + (4800 + accounts.length + 1);
+        const newAccount = {
+          id: nextAccId,
+          name: formData.name,
+          category: 'Vendor',
+          debit: 0,
+          credit: 0
+        };
+        setCollection('chartOfAccounts', [...accounts, newAccount]);
+      }
+    }
+
     handleReset();
     setShowHistory(true);
   };
@@ -56,15 +91,104 @@ export default function AddNewSupplier() {
     setFormData({ id: generateTrackingCode(), name: '', contactPerson: '', contact: '', address: '', type: 'Materials & Commodities', badges: '', reliability: 'High', rating: '4.8/5.0', image: null });
   };
 
-  const handleEdit = (supplier) => {
+  const handleEdit = async (supplier) => {
+    if (!(await appConfirm('Are you sure you want to edit this supplier?'))) return;
     setFormData(supplier);
     setShowHistory(false);
   };
 
-  const handleDelete = (id) => {
-    if(window.confirm('Are you sure you want to delete this supplier?')) {
+  const handleDelete = async (id) => {
+    if(await appConfirm('Are you sure you want to delete this supplier?')) {
       const updated = state.suppliers.filter(s => s.id !== id);
       setCollection('suppliers', updated);
+    }
+  };
+
+  const handleBulkUpload = (csvText) => {
+    const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
+    if (lines.length < 2) {
+      appAlert("No valid data found in CSV file.");
+      return;
+    }
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+    
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      const firstCell = line.split(',')[0]?.trim().replace(/^["']|["']$/g, '').toLowerCase();
+      if (firstCell === 'end' || line.trim().toLowerCase() === 'end') {
+        break;
+      }
+
+      const values = [];
+      let currentVal = '';
+      let inQuotes = false;
+      for (let char of line) {
+        if (char === '"' || char === "'") {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          values.push(currentVal.trim());
+          currentVal = '';
+        } else {
+          currentVal += char;
+        }
+      }
+      values.push(currentVal.trim());
+      
+      const rowData = {};
+      headers.forEach((header, index) => {
+        rowData[header] = values[index]?.replace(/^["']|["']$/g, '') || '';
+      });
+      
+      const name = (rowData['Supplier Name'] || rowData['Supplier name'] || '').trim();
+      if (/[a-zA-Z0-9]/.test(name)) {
+        rows.push(rowData);
+      }
+    }
+
+    let updated = [...state.suppliers];
+    let accounts = [...(state.chartOfAccounts || [])];
+    let addedCount = 0;
+    let supCount = updated.length;
+
+    rows.forEach(row => {
+      const name = row['Supplier Name'] || row['Supplier name'];
+      if (!name) return;
+
+      const contact = row['Contact Person'] || row['Contact person'] || '';
+      const email = row['Email'] || row['email'] || '';
+      const address = row['Address'] || row['address'] || '';
+      const category = row['Category'] || row['category'] || 'Materials & Commodities';
+      const badges = row['Badges'] || row['badges'] || '';
+
+      supCount++;
+      const id = `SUP-${String(supCount).padStart(3, '0')}`;
+
+      updated.push({
+        id, name, contactPerson: contact, contact: email, address, type: category, badges, reliability: 'High', rating: '4.8/5.0', image: null
+      });
+
+      // Auto chart of accounts
+      const accountExists = accounts.some(acc => acc.name.toLowerCase() === name.toLowerCase());
+      if (!accountExists) {
+        const nextAccId = 'ACC-' + (4800 + accounts.length + 1);
+        accounts.push({
+          id: nextAccId,
+          name: name,
+          category: 'Vendor',
+          debit: 0,
+          credit: 0
+        });
+      }
+      addedCount++;
+    });
+
+    if (addedCount > 0) {
+      setCollection('suppliers', updated);
+      setCollection('chartOfAccounts', accounts);
+      appAlert(`Successfully uploaded and created ${addedCount} suppliers!`);
+    } else {
+      appAlert("No valid supplier entries were found in the file.");
     }
   };
 
@@ -150,14 +274,18 @@ export default function AddNewSupplier() {
               </div>
 
               <div className="relative group">
-                 <select name="type" value={formData.type} onChange={handleInputChange} className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all appearance-none">
-                  <option value="Materials & Commodities">Materials & Commodities</option>
-                  <option value="Logistics & Freight">Logistics & Freight</option>
-                  <option value="Equipment Maintenance">Equipment Maintenance</option>
-                  <option value="Packaging & Consumables">Packaging & Consumables</option>
-                </select>
-                <label className="absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold text-primary uppercase tracking-wider">Supply Category</label>
-                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                <CustomSelect
+                  name="type"
+                  value={formData.type}
+                  onChange={handleInputChange}
+                  options={[
+                    { label: 'Materials & Commodities', value: 'Materials & Commodities' },
+                    { label: 'Logistics & Freight', value: 'Logistics & Freight' },
+                    { label: 'Equipment Maintenance', value: 'Equipment Maintenance' },
+                    { label: 'Packaging & Consumables', value: 'Packaging & Consumables' }
+                  ]}
+                  label="Supply Category"
+                />
               </div>
               
               <div className="relative group">
@@ -193,7 +321,7 @@ export default function AddNewSupplier() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/20 uppercase font-medium text-xs font-body text-on-surface">
-                  {state.suppliers.map((sup) => (
+                  {displayedSuppliers.map((sup) => (
                     <tr key={sup.id} className="hover:bg-surface/50 transition-colors">
                       <td className="py-4 px-6 font-bold flex items-center gap-2">
                         {sup.image ? (
@@ -234,6 +362,13 @@ export default function AddNewSupplier() {
                 </tbody>
               </table>
             </div>
+            
+            <GlobalPagination 
+              totalItems={state.suppliers.length}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
           </div>
         )}
       </div>
@@ -242,6 +377,7 @@ export default function AddNewSupplier() {
         isOpen={isBulkUploadOpen} 
         onClose={() => setIsBulkUploadOpen(false)} 
         entityName="Suppliers" 
+        onUpload={handleBulkUpload}
       />
       <ProfileCardModal 
         isOpen={!!viewProfileData} 

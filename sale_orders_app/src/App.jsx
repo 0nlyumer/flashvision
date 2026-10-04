@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { createBrowserRouter, RouterProvider, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import SaleOrderModule from './pages/SaleOrderModule';
@@ -6,26 +7,198 @@ import SaleOrderReturn from './pages/SaleOrderReturn';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import InventoryDashboard from './pages/InventoryDashboard';
 import ProductionOMS from './pages/ProductionOMS';
+import ProductionModule from './pages/ProductionModule';
 import UserControlDashboard from './pages/UserControlDashboard';
 import SettingsDashboard from './pages/SettingsDashboard';
+import ThemeSettings from './pages/ThemeSettings';
+import HRModule from './pages/HRModule';
+import DocumentWarehouse from './pages/DocumentWarehouse';
+import ChatModule from './pages/ChatModule';
+import FinanceModule from './pages/FinanceModule';
+import UserProfile from './pages/UserProfile';
+
+import { Outlet } from 'react-router-dom';
+import GlobalNavGuard from './components/GlobalNavGuard';
+import { useApp } from './context/AppContext';
+
+import CallingOverlay from './components/CallingOverlay';
+
+const RootLayout = () => {
+  const { isOnline, networkQuality, syncStatus } = useApp() || { isOnline: true, networkQuality: 'good', syncStatus: 'idle' };
+  const [showNotification, setShowNotification] = useState(false);
+  const [lastState, setLastState] = useState({ isOnline: true, networkQuality: 'good' });
+  const [notificationMsg, setNotificationMsg] = useState('');
+  const [notificationType, setNotificationType] = useState('info'); // 'info' | 'success' | 'warning'
+
+  const location = useLocation();
+  useEffect(() => {
+    window.dispatchEvent(new Event('fv_chat_scale_changed'));
+  }, [location.pathname]);
+
+  useEffect(() => {
+      // 1. Detect transition from Online -> Offline
+      if (!isOnline && lastState.isOnline) {
+          setNotificationMsg("Connection Lost. Working in local offline mode.");
+          setNotificationType("warning");
+          setShowNotification(true);
+          const t = setTimeout(() => setShowNotification(false), 5000);
+          setLastState(prev => ({ ...prev, isOnline: false }));
+          return () => clearTimeout(t);
+      }
+      
+      // 2. Detect transition from Offline -> Online
+      if (isOnline && !lastState.isOnline) {
+          setNotificationMsg("Back Online! Synchronizing all changes with cloud database...");
+          setNotificationType("success");
+          setShowNotification(true);
+          const t = setTimeout(() => setShowNotification(false), 5000);
+          setLastState(prev => ({ ...prev, isOnline: true }));
+          return () => clearTimeout(t);
+      }
+
+      // 3. Detect transition from Good -> Slow connection
+      if (isOnline && networkQuality === 'slow' && lastState.networkQuality === 'good') {
+          setNotificationMsg("Slow Connection Detected. Cloud synchronization might be delayed.");
+          setNotificationType("warning");
+          setShowNotification(true);
+          const t = setTimeout(() => setShowNotification(false), 5000);
+          setLastState(prev => ({ ...prev, networkQuality: 'slow' }));
+          return () => clearTimeout(t);
+      }
+
+      // 4. Detect transition from Slow -> Good connection
+      if (isOnline && networkQuality === 'good' && lastState.networkQuality === 'slow') {
+          setNotificationMsg("Connection stabilized. Syncing changes...");
+          setNotificationType("success");
+          setShowNotification(true);
+          const t = setTimeout(() => setShowNotification(false), 5000);
+          setLastState(prev => ({ ...prev, networkQuality: 'good' }));
+          return () => clearTimeout(t);
+      }
+  }, [isOnline, networkQuality]);
+
+  return (
+    <>
+      <GlobalNavGuard />
+      <Outlet />
+      <CallingOverlay />
+
+      {/* Floating Center Notification Alert */}
+      {showNotification && (
+          <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3.5 bg-surface-container-lowest/90 backdrop-blur-xl border border-outline-variant/30 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-6 duration-300">
+              <span className={`material-symbols-outlined text-[20px] ${notificationType === 'success' ? 'text-success' : 'text-warning animate-pulse'}`}>
+                  {notificationType === 'success' ? 'check_circle' : 'warning'}
+              </span>
+              <p className="text-sm font-semibold text-on-surface font-manrope">
+                  {notificationMsg}
+              </p>
+          </div>
+      )}
+
+      {/* Non-intrusive, auto-recovering Network Status Pill */}
+      {(syncStatus === 'slow_retry' || syncStatus === 'offline_retry' || !isOnline) && (
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] animate-in slide-in-from-top duration-300">
+              <div className="bg-slate-900/95 text-white border border-slate-700/60 rounded-full px-5 py-2.5 shadow-2xl backdrop-blur-md flex items-center gap-3">
+                  <span className="relative flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                  </span>
+                  <div className="text-xs font-semibold font-manrope flex items-center gap-2">
+                      <span>
+                          {syncStatus === 'offline_retry' || !isOnline 
+                              ? 'Connecting to cloud... (Working offline)' 
+                              : 'Slow Network detected... Retrying save'}
+                      </span>
+                  </div>
+                  <button
+                      onClick={() => {
+                          const { triggerSyncWrite } = useApp ? useApp() : {};
+                          if (triggerSyncWrite) triggerSyncWrite();
+                      }}
+                      className="ml-2 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1 rounded-full transition-colors active:scale-95 shadow-sm"
+                  >
+                      Retry Now
+                  </button>
+              </div>
+          </div>
+      )}
+    </>
+  );
+};
+
+const ProtectedRoute = ({ children, moduleName }) => {
+  const { hasPermission, state } = useApp();
+  const location = useLocation();
+  
+  if (!state.currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (state.currentUser?.requirePasswordChange && location.pathname !== '/profile') {
+    return <Navigate to="/profile?forceChange=true" replace />;
+  }
+
+  if (import.meta.env.VITE_APP_MODE === 'chat' && location.pathname !== '/chat' && location.pathname !== '/profile') {
+    return <Navigate to="/chat" replace />;
+  }
+
+  if (moduleName && !hasPermission(moduleName)) {
+    if (hasPermission('dashboard')) {
+      return <Navigate to="/dashboard" replace />;
+    }
+    return <Navigate to="/settings" replace />;
+  }
+
+  return children;
+};
+
+const IndexRedirect = () => {
+  const { state, hasPermission } = useApp();
+  if (state?.currentUser) {
+    if (state.currentUser.requirePasswordChange) {
+      return <Navigate to="/profile?forceChange=true" replace />;
+    }
+    if (import.meta.env.VITE_APP_MODE === 'chat' && hasPermission('chat')) {
+      return <Navigate to="/chat" replace />;
+    }
+    if (hasPermission('dashboard')) {
+      return <Navigate to="/dashboard" replace />;
+    }
+    if (hasPermission('chat')) {
+      return <Navigate to="/chat" replace />;
+    }
+    return <Navigate to="/settings" replace />;
+  }
+  return <Navigate to="/login" replace />;
+};
+
+const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    children: [
+      { path: "/", element: <IndexRedirect /> },
+      { path: "/login", element: <Login /> },
+      { path: "/dashboard", element: <ProtectedRoute moduleName="dashboard"><Dashboard /></ProtectedRoute> },
+      { path: "/sale-orders", element: <ProtectedRoute moduleName="salesOrders"><SaleOrderModule /></ProtectedRoute> },
+      { path: "/sale-order-return", element: <ProtectedRoute moduleName="salesOrders"><SaleOrderReturn /></ProtectedRoute> },
+      { path: "/delivery-dashboard", element: <ProtectedRoute moduleName="delivery"><DeliveryDashboard /></ProtectedRoute> },
+      { path: "/inventory", element: <ProtectedRoute moduleName="inventory"><InventoryDashboard /></ProtectedRoute> },
+      { path: "/production-flow", element: <ProtectedRoute moduleName="oms"><ProductionOMS /></ProtectedRoute> },
+      { path: "/production", element: <ProtectedRoute moduleName="productionPlanning"><ProductionModule /></ProtectedRoute> },
+      { path: "/finance", element: <ProtectedRoute moduleName="finance"><FinanceModule /></ProtectedRoute> },
+      { path: "/admin-setup", element: <ProtectedRoute moduleName="userManagement"><UserControlDashboard /></ProtectedRoute> },
+      { path: "/settings", element: <ProtectedRoute moduleName="settings"><SettingsDashboard /></ProtectedRoute> },
+      { path: "/theme", element: <ProtectedRoute moduleName="settings"><ThemeSettings /></ProtectedRoute> },
+      { path: "/hr", element: <ProtectedRoute moduleName="hr"><HRModule /></ProtectedRoute> },
+      { path: "/document-warehouse", element: <ProtectedRoute><DocumentWarehouse /></ProtectedRoute> },
+      { path: "/chat", element: <ProtectedRoute moduleName="chat"><ChatModule /></ProtectedRoute> },
+      { path: "/profile", element: <ProtectedRoute><UserProfile /></ProtectedRoute> }
+    ]
+  }
+]);
 
 function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/sale-orders" element={<SaleOrderModule />} />
-        <Route path="/sale-order-return" element={<SaleOrderReturn />} />
-        <Route path="/delivery-dashboard" element={<DeliveryDashboard />} />
-        <Route path="/inventory" element={<InventoryDashboard />} />
-        <Route path="/production-flow" element={<ProductionOMS />} />
-        <Route path="/admin-setup" element={<UserControlDashboard />} />
-        <Route path="/settings" element={<SettingsDashboard />} />
-      </Routes>
-    </Router>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

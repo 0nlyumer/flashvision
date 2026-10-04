@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stock Receiving History | Flashvision</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-tertiary-container": "#ffc29d",
+                    "outline-variant": "#c1c7d2",
+                    "outline": "#727782",
+                    "surface-container": "#ecedf4",
+                    "on-primary-fixed": "#001c38",
+                    "inverse-primary": "#a2c9ff",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#004881",
+                    "on-tertiary-fixed-variant": "#743500",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-container": "#8e4302",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#445f7f",
+                    "secondary-container": "#bed9ff",
+                    "surface-variant": "#e1e2e8",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#ffdbc8",
+                    "tertiary-fixed-dim": "#ffb68a",
+                    "surface-dim": "#d8dae0",
+                    "on-tertiary-fixed": "#321300",
+                    "on-primary": "#ffffff",
+                    "secondary": "#456080",
+                    "on-secondary-fixed-variant": "#2d4867",
+                    "surface-bright": "#f8f9ff",
+                    "inverse-on-surface": "#eff0f7",
+                    "on-surface": "#191c20",
+                    "surface-container-low": "#f2f3fa",
+                    "secondary-fixed-dim": "#adc9ed",
+                    "on-error": "#ffffff",
+                    "on-background": "#191c20",
+                    "inverse-surface": "#2e3035",
+                    "secondary-fixed": "#d1e4ff",
+                    "error": "#ba1a1a",
+                    "surface": "#f8f9ff",
+                    "primary-fixed": "#d3e4ff",
+                    "on-secondary-fixed": "#001d36",
+                    "surface-tint": "#1260a5",
+                    "primary-fixed-dim": "#a2c9ff",
+                    "primary-container": "#005a9e",
+                    "primary": "#004277",
+                    "background": "#f8f9ff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-high": "#e7e8ee",
+                    "surface-container-highest": "#e1e2e8",
+                    "on-surface-variant": "#414750",
+                    "on-primary-container": "#b1d1ff",
+                    "tertiary": "#6b3000"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Manrope"
+                    ],
+                    "display": [
+                            "Manrope"
+                    ],
+                    "body": [
+                            "Inter"
+                    ],
+                    "label": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {}
+    },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f4f9; }
+        h1, h2, h3, h4, h5, h6, .font-headline, .font-display { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full z-50 flex flex-col py-8 bg-surface-container-low shadow-sm h-screen w-72 flex flex-col">
+<div class="px-8 mb-10">
+<h1 class="font-headline text-xl font-bold tracking-tight text-primary">Flashvision</h1>
+</div>
+<div class="flex-1 px-4 space-y-2">
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body text-sm tracking-wide">Dashboard</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer bg-secondary-container text-on-secondary-container rounded-lg font-semibold" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2" data-weight="fill" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-body text-sm tracking-wide">Receiving History</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="inventory">inventory</span>
+<span class="font-body text-sm tracking-wide">Inventory</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+<span class="font-body text-sm tracking-wide">Transfers</span>
+</a>
+</div>
+<div class="px-4 mt-auto">
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body text-sm tracking-wide">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-72 flex-1 flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-8 w-full sticky top-0 z-40 bg-surface w-full h-16 bg-surface-container-low transition-colors duration-200">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-96 bg-surface-container-low rounded-lg outline-variant/20 focus-within:bg-surface-container-lowest focus-within:outline-variant/40 transition-all border border-transparent focus-within:border-outline-variant/20">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-transparent border-none text-sm font-body text-on-surface placeholder-on-surface-variant focus:ring-0" placeholder="Search receipt ID, ref..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:bg-surface-container-highest/50 rounded-full p-2 transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="flex items-center gap-3 border-l border-outline-variant/20 pl-6">
+<img alt="User Profile" class="w-8 h-8 rounded-full object-cover" data-alt="A professional headshot of a logistics manager in a high-end warehouse setting. The lighting is bright and modern, highlighting the subject's features with soft shadows. The overall mood is confident and authoritative, perfectly fitting the premium, precise aesthetic of the application." src="https://lh3.googleusercontent.com/aida/ADBb0ui0ws5suY4J0sC7Zah29dgwD6PiUkdzO27Z6wd-J5o5fAlDeLxRJQ3ArhVV58mXNx-rrpw4-sSM607gSsJyA9MCyJiSYN3YAnkCxpKn1PrY0bDT_-1KY2G5NVh96A6TIlT-tWxmc__3-yLxDV0m4vjg5qLRpPl9Bbq6Xy2Q9HHDFLhs4ro-wY79tuNLacQu9yqefZOoRmjmb-ekdoRGVKaRlJsM8piNqGYVTCN_6jiKmySi7Ch1lnFoTM7zQi6pWqKYW2R52D7zJ4o"/>
+<span class="font-body text-sm font-medium text-on-surface">J. Doe</span>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<div class="p-8 flex-1 flex flex-col gap-8 max-w-[1600px] mx-auto w-full">
+<!-- Header Section -->
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-headline text-[2.75rem] font-bold text-on-surface tracking-tight mb-2">Stock Receiving History</h2>
+<p class="font-body text-sm text-on-surface-variant">Review and manage past stock receipts securely.</p>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 bg-surface-container-low border border-outline-variant/20 px-4 py-2 rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="filter_list">filter_list</span>
+<span class="font-body text-sm font-medium text-on-surface">Filter</span>
+</button>
+<button class="flex items-center gap-2 bg-surface-container-low border border-outline-variant/20 px-4 py-2 rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="calendar_today">calendar_today</span>
+<span class="font-body text-sm font-medium text-on-surface">Last 30 Days</span>
+</button>
+<button class="flex items-center gap-2 bg-gradient-to-br from-primary to-primary-container text-on-primary px-6 py-2 rounded-lg shadow-[0_20px_40px_rgba(0,28,56,0.06)] hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+<span class="font-body text-sm font-semibold">New Receipt</span>
+</button>
+</div>
+</div>
+<!-- Bento Grid Stats (Optional but premium) -->
+<div class="grid grid-cols-3 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-body text-sm font-medium text-on-surface-variant">Total Receipts</span>
+<span class="material-symbols-outlined text-primary" data-icon="receipt_long">receipt_long</span>
+</div>
+<div class="font-headline text-3xl font-bold text-on-surface">1,248</div>
+<div class="mt-2 text-xs font-body text-primary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[1rem]" data-icon="trending_up">trending_up</span>
+                         +12% from last month
+                     </div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-tertiary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-body text-sm font-medium text-on-surface-variant">Pending Processing</span>
+<span class="material-symbols-outlined text-tertiary" data-icon="pending_actions">pending_actions</span>
+</div>
+<div class="font-headline text-3xl font-bold text-on-surface">24</div>
+<div class="mt-2 text-xs font-body text-tertiary font-medium flex items-center gap-1">
+                         Requires attention
+                     </div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary-container/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-body text-sm font-medium text-on-surface-variant">Items Received (YTD)</span>
+<span class="material-symbols-outlined text-primary-container" data-icon="inventory_2">inventory_2</span>
+</div>
+<div class="font-headline text-3xl font-bold text-on-surface">45.2k</div>
+</div>
+</div>
+<!-- Table Container -->
+<div class="bg-surface-container-lowest rounded-xl flex flex-col flex-1 shadow-[0_20px_40px_rgba(0,28,56,0.06)] overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-body text-xs uppercase tracking-wider">
+<th class="py-4 px-6 font-medium">Receipt ID</th>
+<th class="py-4 px-6 font-medium">Date</th>
+<th class="py-4 px-6 font-medium">Transfer Ref</th>
+<th class="py-4 px-6 font-medium text-right">Items Count</th>
+<th class="py-4 px-6 font-medium">Status</th>
+<th class="py-4 px-6 font-medium text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body text-sm text-on-surface">
+<tr class="border-b border-outline-variant/10 hover:bg-surface/50 transition-colors">
+<td class="py-4 px-6 font-semibold">RCV-2023-001</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 24, 2023</td>
+<td class="py-4 px-6">TRF-9921</td>
+<td class="py-4 px-6 text-right">150</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">Completed</span>
+</td>
+<td class="py-4 px-6 text-right">
+<div class="flex justify-end gap-2">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="View">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="border-b border-outline-variant/10 hover:bg-surface/50 transition-colors bg-surface-container-low/30">
+<td class="py-4 px-6 font-semibold">RCV-2023-002</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 23, 2023</td>
+<td class="py-4 px-6">TRF-9922</td>
+<td class="py-4 px-6 text-right">45</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-tertiary/10 text-tertiary">Processing</span>
+</td>
+<td class="py-4 px-6 text-right">
+<div class="flex justify-end gap-2">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="View">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="border-b border-outline-variant/10 hover:bg-surface/50 transition-colors">
+<td class="py-4 px-6 font-semibold">RCV-2023-003</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 21, 2023</td>
+<td class="py-4 px-6">TRF-9915</td>
+<td class="py-4 px-6 text-right">320</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">Completed</span>
+</td>
+<td class="py-4 px-6 text-right">
+<div class="flex justify-end gap-2">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="View">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface/50 transition-colors bg-surface-container-low/30">
+<td class="py-4 px-6 font-semibold">RCV-2023-004</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 20, 2023</td>
+<td class="py-4 px-6">TRF-9910</td>
+<td class="py-4 px-6 text-right">12</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-error-container text-on-error-container">Rejected</span>
+</td>
+<td class="py-4 px-6 text-right">
+<div class="flex justify-end gap-2">
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="View">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1" title="Edit">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+<button class="text-on-surface-variant hover:text-error transition-colors p-1" title="Delete">
+<span class="material-symbols-outlined text-sm" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="mt-auto border-t border-outline-variant/10 px-6 py-4 flex items-center justify-between bg-surface-container-lowest">
+<span class="font-body text-sm text-on-surface-variant">Showing 1 to 4 of 1,248 entries</span>
+<div class="flex gap-2">
+<button class="p-2 rounded hover:bg-surface-container transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="p-2 rounded hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

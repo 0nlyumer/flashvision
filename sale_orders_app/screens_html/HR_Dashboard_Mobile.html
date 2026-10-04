@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashvision ERP - HR Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e7e8ee",
+                        "outline-variant": "#c1c7d2",
+                        "on-primary-fixed": "#001c38",
+                        "inverse-on-surface": "#eff0f7",
+                        "primary-fixed": "#d3e4ff",
+                        "tertiary-fixed": "#ffdbc8",
+                        "surface": "#f8f9ff",
+                        "tertiary": "#6b3000",
+                        "on-primary-container": "#b1d1ff",
+                        "tertiary-container": "#8e4302",
+                        "secondary-fixed": "#d1e4ff",
+                        "on-tertiary-container": "#ffc29d",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "on-primary-fixed-variant": "#004881",
+                        "surface-container-highest": "#e1e2e8",
+                        "outline": "#727782",
+                        "error": "#ba1a1a",
+                        "primary": "#004277",
+                        "on-tertiary-fixed": "#321300",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#005a9e",
+                        "on-background": "#191c20",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "on-error": "#ffffff",
+                        "surface-container": "#ecedf4",
+                        "on-secondary-fixed": "#001d36",
+                        "inverse-primary": "#a2c9ff",
+                        "on-surface": "#191c20",
+                        "on-error-container": "#93000a",
+                        "surface-variant": "#e1e2e8",
+                        "on-primary": "#ffffff",
+                        "secondary": "#456080",
+                        "surface-tint": "#1260a5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f2f3fa",
+                        "error-container": "#ffdad6",
+                        "on-secondary-container": "#445f7f",
+                        "surface-dim": "#d8dae0",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "on-surface-variant": "#414750",
+                        "secondary-container": "#bed9ff",
+                        "inverse-surface": "#2e3035",
+                        "surface-bright": "#f8f9ff",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "display": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    "fontSize": {}
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Utility for the custom pulse tracker style from guidelines */
+        .progress-pulse {
+            position: relative;
+        }
+        .progress-pulse::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: theme('colors.primary-fixed');
+            border-radius: theme('borderRadius.full');
+            overflow: hidden;
+        }
+        .progress-pulse-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: theme('colors.primary');
+            border-radius: theme('borderRadius.full');
+            z-index: 10;
+        }
+        
+        /* Gradient rule for primary actions */
+        .btn-gradient {
+            background: linear-gradient(135deg, theme('colors.primary') 0%, theme('colors.primary-container') 100%);
+        }
+        
+        /* Glassmorphism nav */
+        .glass-nav {
+            background-color: rgba(225, 226, 232, 0.8); /* surface_variant */
+            backdrop-filter: blur(20px);
+        }
+        
+        /* Ambient shadow for floating elements */
+        .ambient-shadow {
+            box-shadow: 0 20px 40px rgba(0, 28, 56, 0.06);
+        }
+        
+        /* Ghost border */
+        .ghost-border {
+            border: 1px solid rgba(193, 199, 210, 0.15); /* outline_variant */
+        }
+        
+        body {
+            background-color: theme('colors.surface');
+            color: theme('colors.on-surface');
+            font-family: theme('fontFamily.body');
+            /* Hide scrollbar for cleaner look on mobile design */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen pb-24 md:pb-0 md:pl-72 flex flex-col md:flex-row relative">
+<!-- Mobile Top App Bar (Only visible on mobile) -->
+<header class="md:hidden sticky top-0 z-40 bg-surface/80 backdrop-blur-xl flex justify-between items-center px-6 h-16 shadow-sm">
+<div class="flex items-center gap-3">
+<img alt="HR Manager Profile" class="w-8 h-8 rounded-full object-cover ghost-border" data-alt="A close-up headshot of a confident corporate HR manager. They are wearing professional attire, set against a pristine white studio background with soft, even high-key lighting. The style is modern, hyper-realistic, and polished, reflecting a trustworthy digital concierge aesthetic in oceanic blues and crisp whites." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZal1iUBqK7gw3SVH_05MVaKh1FOMsrT6ZNFnsq_UMc_AKRZEZqEKsqJFUBymp44Y_Ld4kVhXZ7G9NO9kDUkjDjWRbP0yVIO2Krfb01vpDcseIdOj3LRUcayqNsbO0X46zwBDLM7alQNydN0OwV7J4DuZr0YhHA7AVda2zvxXfYvXoJwfgJSxIfWoNWkGmAeSfZn4j23q1jNAHsgwIkNdWvuMyipNbrE6ki6eM-wfEc7ukgn2aKMJw2qlL1RgVMocU7dk2JcctssUD"/>
+<span class="font-headline text-lg font-bold tracking-tight text-primary">Flashvision</span>
+</div>
+<div class="flex items-center gap-4 text-primary">
+<span class="material-symbols-outlined cursor-pointer">search</span>
+<div class="relative cursor-pointer">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-tertiary rounded-full border border-surface"></span>
+</div>
+</div>
+</header>
+<!-- Shared Component: SideNavBar (Hidden on Mobile, Visible on Web) -->
+<nav class="hidden md:flex fixed left-0 top-0 h-full flex-col pt-20 pb-8 z-30 bg-surface-container-low docked left-0 h-full w-72 flat no shadows">
+<div class="px-8 mb-10 flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary-container font-headline font-bold text-xl">FV</div>
+<div>
+<h1 class="font-headline font-bold text-on-surface tracking-tighter text-lg">HR Precision</h1>
+<p class="font-body text-xs text-on-surface-variant">Management Suite</p>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-2 mt-4">
+<!-- Active Tab: Dashboard -->
+<a class="bg-secondary-container text-on-secondary-container rounded-full ml-4 mr-4 py-3 px-4 flex items-center gap-4 font-body font-medium text-sm tracking-wide transition-all duration-200" href="#">
+<span class="material-symbols-outlined icon-fill text-primary">dashboard</span>
+                Dashboard
+            </a>
+<a class="text-on-surface-variant py-3 px-8 flex items-center gap-4 font-body font-medium text-sm tracking-wide hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">groups</span>
+                Directory
+            </a>
+<a class="text-on-surface-variant py-3 px-8 flex items-center gap-4 font-body font-medium text-sm tracking-wide hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+                Attendance
+            </a>
+<a class="text-on-surface-variant py-3 px-8 flex items-center gap-4 font-body font-medium text-sm tracking-wide hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">event_busy</span>
+                Leave Management
+            </a>
+<a class="text-on-surface-variant py-3 px-8 flex items-center gap-4 font-body font-medium text-sm tracking-wide hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">payments</span>
+                Payroll
+            </a>
+<a class="text-on-surface-variant py-3 px-8 flex items-center gap-4 font-body font-medium text-sm tracking-wide hover:bg-surface-container-high transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">person_add</span>
+                Recruitment
+            </a>
+</div>
+<div class="px-6 mt-auto">
+<button class="w-full btn-gradient text-on-primary rounded-lg py-3 px-4 font-headline font-semibold text-sm shadow-sm transition-transform active:scale-95 mb-6 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">assessment</span>
+                Generate Report
+            </button>
+<div class="flex flex-col gap-1">
+<a class="text-on-surface-variant py-2 px-4 flex items-center gap-4 font-body font-medium text-sm tracking-wide hover:bg-surface-container-high transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span>
+                    Help Center
+                </a>
+<a class="text-on-surface-variant py-2 px-4 flex items-center gap-4 font-body font-medium text-sm tracking-wide hover:bg-surface-container-high transition-all duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+                    Log Out
+                </a>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-5xl mx-auto p-6 md:p-10 pt-6 flex flex-col gap-8">
+<!-- Welcome Header -->
+<header class="flex flex-col gap-2">
+<p class="font-body text-sm text-on-surface-variant">Monday, October 16</p>
+<h1 class="font-headline text-3xl font-bold text-on-surface tracking-tight">Morning, Sarah</h1>
+<p class="font-body text-sm text-on-surface-variant max-w-md mt-1">You have 3 urgent verifications and 12 attendance exceptions to review today.</p>
+</header>
+<!-- KPI Cards (Asymmetric Bento Style) -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+<!-- Primary KPI -->
+<div class="col-span-2 bg-primary rounded-xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[160px] ambient-shadow">
+<!-- Decorative background pattern -->
+<div class="absolute -right-10 -top-10 opacity-20 pointer-events-none">
+<span class="material-symbols-outlined icon-fill text-[150px] text-primary-container">trending_up</span>
+</div>
+<div class="relative z-10 flex items-center gap-2 text-primary-fixed-dim">
+<span class="material-symbols-outlined text-[18px]">groups</span>
+<span class="font-label font-medium text-sm">Total Workforce</span>
+</div>
+<div class="relative z-10 mt-4">
+<div class="font-headline text-4xl font-bold text-on-primary">1,248</div>
+<div class="flex items-center gap-1 mt-1 text-on-primary-container font-label text-xs">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+<span>+12 this month</span>
+</div>
+</div>
+</div>
+<!-- Secondary KPI 1 -->
+<div class="bg-surface-container-low rounded-xl p-5 flex flex-col justify-between ghost-border min-h-[160px]">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label font-medium text-sm">On Leave</span>
+<span class="material-symbols-outlined text-[18px]">event_busy</span>
+</div>
+<div class="mt-4">
+<div class="font-headline text-2xl font-bold text-on-surface">42</div>
+<div class="text-tertiary-container font-label text-xs mt-1 font-medium">3 requiring approval</div>
+</div>
+</div>
+<!-- Secondary KPI 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-5 flex flex-col justify-between ghost-border min-h-[160px] relative">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label font-medium text-sm">Open Roles</span>
+<span class="material-symbols-outlined text-[18px]">work</span>
+</div>
+<div class="mt-4">
+<div class="font-headline text-2xl font-bold text-on-surface">18</div>
+<div class="text-primary font-label text-xs mt-1 font-medium">6 in final stage</div>
+</div>
+</div>
+</section>
+<!-- Attendance Pulse -->
+<section class="bg-surface-container-low rounded-xl p-6 ghost-border flex flex-col gap-6">
+<header class="flex justify-between items-end">
+<div>
+<h2 class="font-headline font-bold text-lg text-on-surface">Daily Attendance</h2>
+<p class="font-body text-xs text-on-surface-variant mt-1">Real-time presence tracking</p>
+</div>
+<div class="font-headline font-bold text-primary text-xl">94%</div>
+</header>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between text-xs font-label text-on-surface-variant mb-1">
+<span>1,173 Present</span>
+<span>75 Absent</span>
+</div>
+<!-- Custom Progress Tracker from Design System -->
+<div class="progress-pulse w-full">
+<div class="progress-pulse-fill" style="width: 94%;"></div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-4 pt-4 border-t border-outline-variant/10">
+<div class="flex flex-col">
+<span class="font-label text-[10px] uppercase tracking-wider text-on-surface-variant">On Time</span>
+<span class="font-headline font-semibold text-on-surface">1,020</span>
+</div>
+<div class="flex flex-col border-l border-outline-variant/10 pl-4">
+<span class="font-label text-[10px] uppercase tracking-wider text-on-surface-variant">Late</span>
+<span class="font-headline font-semibold text-tertiary">153</span>
+</div>
+<div class="flex flex-col border-l border-outline-variant/10 pl-4">
+<span class="font-label text-[10px] uppercase tracking-wider text-on-surface-variant">Remote</span>
+<span class="font-headline font-semibold text-on-surface">312</span>
+</div>
+</div>
+</section>
+<!-- Pending Verifications (List View) -->
+<section class="flex flex-col gap-4">
+<header class="flex justify-between items-center px-1">
+<h2 class="font-headline font-bold text-lg text-on-surface">Pending Verifications</h2>
+<button class="text-primary font-label font-semibold text-xs flex items-center gap-1 hover:text-primary-container transition-colors">
+                    View All <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</header>
+<div class="flex flex-col gap-3">
+<!-- List Item 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl ghost-border flex items-center justify-between hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant font-headline font-bold text-sm">
+<span class="material-symbols-outlined text-[20px]">badge</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline font-semibold text-sm text-on-surface">Marcus Chen</span>
+<span class="font-body text-xs text-on-surface-variant">Expense Report #ER-2094</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label text-[10px] font-medium px-2 py-1 bg-tertiary-fixed text-on-tertiary-fixed-variant rounded-full">High Priority</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</div>
+<!-- List Item 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl ghost-border flex items-center justify-between hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant font-headline font-bold text-sm">
+<span class="material-symbols-outlined text-[20px]">event</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline font-semibold text-sm text-on-surface">Elena Rodriguez</span>
+<span class="font-body text-xs text-on-surface-variant">Paternity Leave Request</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label text-[10px] font-medium px-2 py-1 bg-surface-variant text-on-surface-variant rounded-full">Standard</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</div>
+<!-- List Item 3 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl ghost-border flex items-center justify-between hover:bg-surface-container-low transition-colors duration-200 cursor-pointer">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant font-headline font-bold text-sm">
+<span class="material-symbols-outlined text-[20px]">contract</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline font-semibold text-sm text-on-surface">Tech Dept</span>
+<span class="font-body text-xs text-on-surface-variant">Q3 Bonus Allocation</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label text-[10px] font-medium px-2 py-1 bg-surface-variant text-on-surface-variant rounded-full">Standard</span>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom spacing for mobile nav -->
+<div class="h-8 md:h-0"></div>
+</main>
+<!-- Mobile Bottom Nav Bar (Only visible on mobile) -->
+<nav class="md:hidden glass-nav fixed bottom-0 left-0 w-full z-40 px-6 py-3 flex justify-between items-center rounded-t-xl ambient-shadow">
+<!-- Active Tab -->
+<a class="flex flex-col items-center gap-1 text-primary cursor-pointer active:scale-95 transition-transform" href="#">
+<div class="bg-secondary-container px-4 py-1 rounded-full">
+<span class="material-symbols-outlined icon-fill">dashboard</span>
+</div>
+<span class="font-label text-[10px] font-medium">Dashboard</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary cursor-pointer active:scale-95 transition-transform" href="#">
+<div class="px-4 py-1">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<span class="font-label text-[10px] font-medium">Directory</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary cursor-pointer active:scale-95 transition-transform" href="#">
+<div class="px-4 py-1">
+<span class="material-symbols-outlined">fact_check</span>
+</div>
+<span class="font-label text-[10px] font-medium">Attendance</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary cursor-pointer active:scale-95 transition-transform" href="#">
+<div class="px-4 py-1">
+<span class="material-symbols-outlined">menu</span>
+</div>
+<span class="font-label text-[10px] font-medium">More</span>
+</a>
+</nav>
+</body></html>

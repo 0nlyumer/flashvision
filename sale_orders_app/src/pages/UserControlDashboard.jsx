@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
+import { useSearchParams } from 'react-router-dom';
 import UserControl from '../components/usercontrol/UserControl';
 import AuditLog from '../components/usercontrol/AuditLog';
 import AdminSetup from '../components/settings/AdminSetup';
@@ -20,13 +21,40 @@ export default function UserControlDashboard() {
     }
   };
 
+  const tabs = [
+    { id: 'user_control', label: 'User Control & Permissions', icon: 'manage_accounts' },
+    { id: 'admin_setup', label: 'Administrative Setup', icon: 'settings_suggest' },
+    { id: 'audit_log', label: 'System Audit Log', icon: 'policy' }
+  ];
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+     const tab = searchParams.get('tab');
+     if (tab && tabs.find(t => t.id === tab)) {
+         setActiveTab(tab);
+     }
+  }, [searchParams]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId });
+  };
+
+  const subNavConfig = {
+      title: "User Control",
+      items: tabs,
+      activeId: activeTab,
+      onSelect: handleTabChange
+  };
+
   return (
-    <Layout>
+    <Layout subNavConfig={subNavConfig}>
       <div className="flex flex-col h-full w-full">
         {/* Module Header & Navigation */}
-        <header className="sticky top-0 z-30 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/20 pt-4 px-4 sm:px-8 shrink-0">
-          <div className="max-w-[1440px] mx-auto w-full">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <header className="sticky top-0 z-30 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/20 pt-4 px-4 sm:px-8 shrink-0 pb-4">
+          <div className="max-w-full w-full">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-sm shrink-0">
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>admin_panel_settings</span>
@@ -37,34 +65,12 @@ export default function UserControlDashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Tab Navigation */}
-            <nav className="flex items-center gap-6 overflow-x-auto custom-scrollbar">
-              <button 
-                onClick={() => setActiveTab('user_control')}
-                className={`pb-3 px-1 border-b-2 font-bold text-sm transition-colors whitespace-nowrap outline-none ${activeTab === 'user_control' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
-              >
-                User Control & Permissions
-              </button>
-              <button 
-                onClick={() => setActiveTab('admin_setup')}
-                className={`pb-3 px-1 border-b-2 font-bold text-sm transition-colors whitespace-nowrap outline-none ${activeTab === 'admin_setup' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
-              >
-                Administrative Setup
-              </button>
-              <button 
-                onClick={() => setActiveTab('audit_log')}
-                className={`pb-3 px-1 border-b-2 font-bold text-sm transition-colors whitespace-nowrap outline-none ${activeTab === 'audit_log' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
-              >
-                System Audit Log
-              </button>
-            </nav>
           </div>
         </header>
 
         {/* Dynamic Content Canvas */}
         <main className="flex-1 overflow-y-auto px-4 sm:px-8 pt-8 pb-12 w-full custom-scrollbar">
-          <div className="max-w-[1440px] mx-auto w-full">
+          <div className="max-w-full w-full">
             {renderContent()}
           </div>
         </main>

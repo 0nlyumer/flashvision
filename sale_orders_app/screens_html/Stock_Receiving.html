@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stock Receiving - Flashvision</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#ffc29d",
+                        "outline-variant": "#c1c7d2",
+                        "outline": "#727782",
+                        "surface-container": "#ecedf4",
+                        "on-primary-fixed": "#001c38",
+                        "inverse-primary": "#a2c9ff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#004881",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#8e4302",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#445f7f",
+                        "secondary-container": "#bed9ff",
+                        "surface-variant": "#e1e2e8",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbc8",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "surface-dim": "#d8dae0",
+                        "on-tertiary-fixed": "#321300",
+                        "on-primary": "#ffffff",
+                        "secondary": "#456080",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "surface-bright": "#f8f9ff",
+                        "inverse-on-surface": "#eff0f7",
+                        "on-surface": "#191c20",
+                        "surface-container-low": "#f2f3fa",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "on-error": "#ffffff",
+                        "on-background": "#191c20",
+                        "inverse-surface": "#2e3035",
+                        "secondary-fixed": "#d1e4ff",
+                        "error": "#ba1a1a",
+                        "surface": "#f8f9ff",
+                        "primary-fixed": "#d3e4ff",
+                        "on-secondary-fixed": "#001d36",
+                        "surface-tint": "#1260a5",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "primary-container": "#005a9e",
+                        "primary": "#004277",
+                        "background": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e7e8ee",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-surface-variant": "#414750",
+                        "on-primary-container": "#b1d1ff",
+                        "tertiary": "#6b3000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": ["Manrope", "sans-serif"],
+                        "display": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {}
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, theme('colors.primary'), theme('colors.primary-container'));
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body h-screen flex overflow-hidden">
+<!-- SideNavBar (JSON Component) -->
+<nav class="h-screen w-72 flex flex-col fixed left-0 top-0 z-50 py-8 bg-surface-container-low dark:bg-surface-container-low shadow-sm">
+<div class="px-8 mb-12">
+<h1 class="font-headline text-lg font-extrabold tracking-tight text-on-primary-fixed-variant dark:text-primary-fixed-dim flex items-center gap-3">
+<span class="material-symbols-outlined fill text-2xl">warehouse</span>
+                Global Operations
+            </h1>
+<p class="text-xs font-label text-on-surface-variant mt-1 tracking-widest uppercase">Synth-Logistics v4.2</p>
+</div>
+<div class="flex-1 px-4 space-y-2">
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-surface-bright hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">factory</span>
+<span class="font-label text-sm tracking-wide">Production</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-surface-bright hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label text-sm tracking-wide">Scheduling</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-surface-bright hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">verified</span>
+<span class="font-label text-sm tracking-wide">Quality Control</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-lg font-semibold" href="#">
+<span class="material-symbols-outlined fill">local_shipping</span>
+<span class="font-label text-sm tracking-wide">Shipping</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-surface-bright hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label text-sm tracking-wide">Analytics</span>
+</a>
+</div>
+<div class="px-4 mt-auto space-y-2">
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-surface-bright hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-label text-sm tracking-wide">Support</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:text-on-surface dark:hover:text-surface-bright hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label text-sm tracking-wide">Sign Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="ml-72 flex-1 flex flex-col h-full overflow-hidden bg-background">
+<!-- TopNavBar (JSON Component) -->
+<header class="flex justify-between items-center px-8 w-full sticky top-0 z-40 bg-surface dark:bg-surface w-full h-16 bg-surface-container-low dark:bg-surface-container no shadows">
+<div class="flex items-center gap-6">
+<!-- Search -->
+<div class="relative flex items-center w-64 h-10 rounded-full bg-surface-container-low border border-outline-variant/20 focus-within:bg-surface-container-lowest focus-within:border-outline-variant/40 transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant ml-3">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm font-body text-on-surface w-full placeholder-on-surface-variant/50" placeholder="Search InventoryCore..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest/50 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-highest/50 rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary-container overflow-hidden border-2 border-surface cursor-pointer">
+<img alt="Manager Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a logistics manager in a high-tech synthetic logistics warehouse. The lighting is bright, cool, and crisp, emphasizing a clean, modern aesthetic. Deep blue and pristine white tones dominate the background, conveying trust and precision." src="https://lh3.googleusercontent.com/aida/ADBb0ui0ws5suY4J0sC7Zah29dgwD6PiUkdzO27Z6wd-J5o5fAlDeLxRJQ3ArhVV58mXNx-rrpw4-sSM607gSsJyA9MCyJiSYN3YAnkCxpKn1PrY0bDT_-1KY2G5NVh96A6TIlT-tWxmc__3-yLxDV0m4vjg5qLRpPl9Bbq6Xy2Q9HHDFLhs4ro-wY79tuNLacQu9yqefZOoRmjmb-ekdoRGVKaRlJsM8piNqGYVTCN_6jiKmySi7Ch1lnFoTM7zQi6pWqKYW2R52D7zJ4o"/>
+</div>
+</div>
+</header>
+<!-- Canvas Area -->
+<div class="flex-1 overflow-y-auto p-8 2xl:p-12 space-y-8">
+<!-- Page Header -->
+<div class="flex flex-col gap-2">
+<h2 class="font-headline text-[2.75rem] font-bold tracking-tight text-on-surface leading-tight">Stock Receiving</h2>
+<p class="font-body text-on-surface-variant text-sm max-w-2xl">Enter the Stock Transfer ID to pull manifest details. Verify incoming quantities against the physical shipment before finalizing receipt into inventory.</p>
+</div>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+<!-- Left Column: Search & Details (Bento/Glass style) -->
+<div class="xl:col-span-4 flex flex-col gap-8">
+<!-- Search Card -->
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-[0_20px_40px_rgba(0,28,56,0.06)] border border-outline-variant/15 flex flex-col gap-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">document_scanner</span>
+</div>
+<h3 class="font-headline font-semibold text-lg text-on-surface">Locate Transfer</h3>
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label text-xs text-on-surface-variant uppercase tracking-wider">Transfer ID</label>
+<div class="relative bg-surface-container-low rounded-lg p-1 border border-outline-variant/20 focus-within:bg-surface-container-lowest focus-within:border-primary/50 transition-all">
+<input class="w-full bg-transparent border-none focus:ring-0 font-body text-on-surface font-semibold py-2 px-3" placeholder="e.g. TRF-123-X" type="text" value="TRF-892-A"/>
+</div>
+</div>
+<button class="btn-primary w-full py-3 rounded-lg text-on-primary font-label font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined text-[20px]">search</span>
+                            Fetch Manifest
+                        </button>
+</div>
+<!-- Transfer Summary (Visible after search) -->
+<div class="bg-surface-container-low rounded-xl p-8 border border-outline-variant/10 flex flex-col gap-6 relative overflow-hidden">
+<!-- Decorative bg -->
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+<h3 class="font-headline font-semibold text-lg text-on-surface relative z-10">Manifest Details</h3>
+<div class="space-y-4 relative z-10">
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-label text-sm text-on-surface-variant">Origin</span>
+<span class="font-body text-sm font-semibold text-on-surface">Facility Alpha-C</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-label text-sm text-on-surface-variant">Expected Arrival</span>
+<span class="font-body text-sm font-semibold text-on-surface">Today, 09:00 AM</span>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-outline-variant/10">
+<span class="font-label text-sm text-on-surface-variant">Total Items</span>
+<span class="font-body text-sm font-semibold text-on-surface">3 Units</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-label text-sm text-on-surface-variant">Carrier</span>
+<span class="font-body text-sm font-semibold text-on-surface">Synth-Freight Heavy</span>
+</div>
+</div>
+<!-- Status Badge -->
+<div class="mt-2 inline-flex items-center gap-2 bg-tertiary-container/10 text-tertiary px-3 py-1.5 rounded-full self-start">
+<span class="material-symbols-outlined text-[16px]">info</span>
+<span class="font-label text-xs font-semibold">Action Required</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Verification List -->
+<div class="xl:col-span-8 flex flex-col gap-6">
+<!-- Table Header equivalent -->
+<div class="flex items-center justify-between px-2 mb-2">
+<h3 class="font-headline font-semibold text-xl text-on-surface">Items to Receive</h3>
+<span class="font-label text-sm text-on-surface-variant">Showing 3 of 3 items</span>
+</div>
+<!-- Item List (Cards instead of standard table) -->
+<div class="space-y-6">
+<!-- Item 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_10px_30px_rgba(0,28,56,0.03)] border border-outline-variant/15 flex flex-col md:flex-row gap-6 items-start md:items-center">
+<!-- Image -->
+<div class="w-24 h-24 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<img alt="Product Thumbnail" class="w-full h-full object-cover" data-alt="Close up product shot of a high-tech synthetic mechanical component, sleek metal with subtle blue glowing accents. Studio lighting on a clean white background, creating a pristine, premium industrial aesthetic." src="https://lh3.googleusercontent.com/aida/ADBb0uhm70SzZUMd13FPFRF_H8r09DkYE9OPZXZrifDmN4GCBTL80sgEH4JLPs7tlu_sRsr1Y4BPI3ZeNCYHPPPqK3xR_M3sSivrY2Doc7ji8WwJ8BYANn5ql0flAv6OfIV39ZvfJKHrrsv5u2XvywTiW8jg4OvpcPPL5RAoCaWSpPQKWz6nJzIGfbSMcVN1CBxOW1ZDE5t9e_ttYoAWw25njhXXQuU4NFgQjbxoXkhgl7UyXeudaGPFfGtdxQ6_c-pZORCLZhXK-S7UrL4"/>
+</div>
+<!-- Info -->
+<div class="flex-1 flex flex-col gap-1 min-w-0">
+<h4 class="font-headline font-semibold text-base text-on-surface truncate">Hyper-Conductive Core Array</h4>
+<p class="font-body text-xs text-on-surface-variant">SKU: HCA-9921-X</p>
+<p class="font-body text-xs text-on-surface-variant mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">inventory_2</span>
+                                    Expected: 14 Pallets
+                                </p>
+</div>
+<!-- Inputs -->
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+<div class="flex flex-col gap-1">
+<label class="font-label text-[10px] text-on-surface-variant uppercase tracking-wider">Rcvd Qty</label>
+<input class="w-20 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body text-sm px-3 py-2 text-on-surface focus:bg-surface-container-lowest focus:border-primary/50 transition-colors" type="number" value="14"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label text-[10px] text-on-surface-variant uppercase tracking-wider">Condition</label>
+<select class="w-32 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body text-sm px-3 py-2 text-on-surface focus:bg-surface-container-lowest focus:border-primary/50 transition-colors">
+<option>Undamaged</option>
+<option>Minor Damage</option>
+<option>Critical Damage</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label text-[10px] text-on-surface-variant uppercase tracking-wider">Location</label>
+<input class="w-28 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body text-sm px-3 py-2 text-on-surface focus:bg-surface-container-lowest focus:border-primary/50 transition-colors" type="text" value="Zone A-12"/>
+</div>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_10px_30px_rgba(0,28,56,0.03)] border border-outline-variant/15 flex flex-col md:flex-row gap-6 items-start md:items-center">
+<!-- Image -->
+<div class="w-24 h-24 rounded-lg bg-surface-container overflow-hidden flex-shrink-0">
+<div class="w-full h-full flex items-center justify-center bg-surface-container-low text-outline-variant">
+<span class="material-symbols-outlined text-3xl">image_not_supported</span>
+</div>
+</div>
+<!-- Info -->
+<div class="flex-1 flex flex-col gap-1 min-w-0">
+<h4 class="font-headline font-semibold text-base text-on-surface truncate">Synthetic Coolant Reserve</h4>
+<p class="font-body text-xs text-on-surface-variant">SKU: SCR-4410-B</p>
+<p class="font-body text-xs text-on-surface-variant mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">inventory_2</span>
+                                    Expected: 5 Drums
+                                </p>
+</div>
+<!-- Inputs -->
+<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+<div class="flex flex-col gap-1">
+<label class="font-label text-[10px] text-on-surface-variant uppercase tracking-wider">Rcvd Qty</label>
+<input class="w-20 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body text-sm px-3 py-2 text-on-surface focus:bg-surface-container-lowest focus:border-primary/50 transition-colors" placeholder="0" type="number" value=""/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label text-[10px] text-on-surface-variant uppercase tracking-wider">Condition</label>
+<select class="w-32 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body text-sm px-3 py-2 text-on-surface focus:bg-surface-container-lowest focus:border-primary/50 transition-colors text-on-surface-variant">
+<option disabled="" selected="" value="">Select...</option>
+<option>Undamaged</option>
+<option>Minor Damage</option>
+<option>Critical Damage</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label text-[10px] text-on-surface-variant uppercase tracking-wider">Location</label>
+<input class="w-28 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body text-sm px-3 py-2 text-on-surface focus:bg-surface-container-lowest focus:border-primary/50 transition-colors" placeholder="Scan Bin" type="text" value=""/>
+</div>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="mt-8 flex justify-end gap-4 border-t border-outline-variant/10 pt-8">
+<button class="px-6 py-3 rounded-lg font-label font-semibold text-primary hover:bg-primary/5 transition-colors">
+                            Save Draft
+                        </button>
+<button class="btn-primary px-8 py-3 rounded-lg text-on-primary font-label font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity shadow-[0_8px_16px_rgba(0,66,119,0.2)]">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+                            Confirm Receipt
+                        </button>
+</div>
+</div>
+</div>
+<!-- Footer Image Banner for visual weight -->
+<div class="w-full h-32 rounded-xl overflow-hidden relative mt-12 opacity-80 mix-blend-multiply">
+<img alt="Warehouse Floor" class="w-full h-full object-cover" data-alt="A wide angle shot of a massive, immaculately clean synthetic logistics warehouse floor. Automated guided vehicles move smoothly. The lighting is bright and even, highlighting polished surfaces and precision engineering. Deep blues and whites create a sterile, high-end environment." src="https://lh3.googleusercontent.com/aida/ADBb0uh9gcF3wMmq-1L1rq9mORkr_3I3qaa6xkBnuQl90e_4pQwzHC075ml_qtbiGrTbNridfZzqmLN5jPYihfjxzePYsSj8KVVuDuAsswg_WhVteYFoD-ip5KCxqvQ0ggpXyTDCQarLxuA1_H2VVDf4FbS5-oFw-o7Ka2Tn-GDRrPwjxfRizAwUWFHEKY0DfXLxAEo-4xgKv4fxyTlhUuCYAxWYpQIv4hECbc24UPOwVUrMl_pkn6n_SC3S0TrxQHiS_pspBNloN_w35Q"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+</div>
+</div>
+</main>
+</body></html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Production Order Details - Precision Control</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#1260a5",
+                    "tertiary": "#6b3000",
+                    "secondary-container": "#bed9ff",
+                    "tertiary-fixed-dim": "#ffb68a",
+                    "secondary-fixed-dim": "#adc9ed",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#f8f9ff",
+                    "error-container": "#ffdad6",
+                    "surface-variant": "#e1e2e8",
+                    "surface-container-high": "#e7e8ee",
+                    "on-tertiary-container": "#ffc29d",
+                    "on-secondary-container": "#445f7f",
+                    "on-surface": "#191c20",
+                    "inverse-primary": "#a2c9ff",
+                    "background": "#f8f9ff",
+                    "surface": "#f8f9ff",
+                    "inverse-on-surface": "#eff0f7",
+                    "on-surface-variant": "#414750",
+                    "tertiary-container": "#8e4302",
+                    "primary-fixed-dim": "#a2c9ff",
+                    "on-primary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#e1e2e8",
+                    "primary": "#004277",
+                    "on-primary-container": "#b1d1ff",
+                    "outline-variant": "#c1c7d2",
+                    "inverse-surface": "#2e3035",
+                    "on-tertiary-fixed": "#321300",
+                    "error": "#ba1a1a",
+                    "surface-container": "#ecedf4",
+                    "on-background": "#191c20",
+                    "outline": "#727782",
+                    "on-primary-fixed": "#001c38",
+                    "secondary-fixed": "#d1e4ff",
+                    "primary-container": "#005a9e",
+                    "primary-fixed": "#d3e4ff",
+                    "on-error": "#ffffff",
+                    "surface-container-low": "#f2f3fa",
+                    "on-tertiary-fixed-variant": "#743500",
+                    "on-secondary-fixed-variant": "#2d4867",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#004881",
+                    "tertiary-fixed": "#ffdbc8",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed": "#001d36",
+                    "secondary": "#456080",
+                    "surface-dim": "#d8dae0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Manrope"
+                    ],
+                    "body": [
+                            "Inter"
+                    ],
+                    "label": [
+                            "Inter"
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface flex min-h-screen">
+<!-- User Avatar (Fixed top right desktop) -->
+<div class="fixed top-8 right-12 w-10 h-10 rounded-full border-2 border-surface overflow-hidden shadow-sm hidden md:block z-50">
+<img alt="Production Manager Avatar" class="w-full h-full object-cover" data-alt="professional headshot of an executive in a bright modern office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZLqsjXEtNttqk03wKV03FZkwtyAzlBG-J5_TTcPGHo4YdmXcqewqQQtnsdF5EjNKJ8ekVHo20s1iCYeclVNJtg7cK72Zg1zEFZ-b7zYq52xaM2Oy95ieMulV9moAFF1Zu2S5Y3fjVjk6XRR7Da-Qekmt-dCETtEqpq6zt2IcnuB8YgixDvZwO0-704s7S9SbW2S9hwIKdFWtlO-2SjhySuNqj4-KSiqcACd4JL4oQDfA3eLIhKVd-8giS08FoZShGvT13eOfjUwTl"/>
+</div>
+<!-- SideNavBar -->
+<aside class="bg-surface-container-low text-primary font-body text-sm font-medium h-screen w-64 fixed left-0 top-0 flex flex-col p-6 pt-24 z-40">
+<!-- Header -->
+<div class="mb-10">
+<h1 class="font-headline text-xl font-black text-primary mb-1 tracking-tight">Precision Control</h1>
+<p class="text-on-surface-variant text-xs font-semibold">Order #SO-9482</p>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant opacity-70 hover:bg-surface-container hover:rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">factory</span>
+<span>Production</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-primary font-bold border-r-4 border-primary bg-surface-container transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px] fill-icon">event_note</span>
+<span>Scheduling</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant opacity-70 hover:bg-surface-container hover:rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+<span>Quality Control</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant opacity-70 hover:bg-surface-container hover:rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">local_shipping</span>
+<span>Shipping</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant opacity-70 hover:bg-surface-container hover:rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span>Analytics</span>
+</a>
+</nav>
+<!-- Footer Tabs -->
+<div class="space-y-2 mt-auto border-t border-outline-variant/15 pt-4">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant opacity-70 hover:bg-surface-container hover:rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant opacity-70 hover:bg-surface-container hover:rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined text-[20px]">archive</span>
+<span>Archive</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar (Mobile Only) -->
+<header class="bg-surface/80 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 md:hidden shadow-[0_20px_40px_rgba(0,28,56,0.06)]">
+<h1 class="font-headline text-xl font-black text-primary tracking-tighter">SyntheticLogistics</h1>
+<div class="flex items-center gap-4 text-primary">
+<span class="material-symbols-outlined">notifications</span>
+<span class="material-symbols-outlined">settings</span>
+<img alt="User profile avatar" class="w-8 h-8 rounded-full object-cover border border-outline-variant/20" data-alt="professional headshot of an executive in a bright modern office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3qYMyPgUuJpMutCWMpOBeVd-TG78AYaCuhb0baxFc0lh6_G282yK_Tap1P_R2WRidEAenpcR39IKYRejVQAnFoyh4zq_m0pGfE12Xn2_hHCdfFFP_GeIQJLpcb5v9z0_u6mI8wLWQA5neDmf1ndVPzgsCuWJShu27OZBUb-ebcHNteA3t-sHbmTGechQVbVCMWg098_W3m26glTxiAfYDDO-6GPVT1HOok-xAsbMbJ-ueS0QuMmAYKpy_6IoG0tczfmK3B0BIpISi"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 pt-20 md:pt-12 px-6 md:px-12 pb-24 md:pb-12 max-w-7xl mx-auto w-full relative">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-8">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<h2 class="font-headline text-display-md text-on-surface tracking-tight" style="font-size: 2.75rem; line-height: 1.1;">PO-2024-0012</h2>
+<span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-tertiary-fixed text-on-tertiary-fixed">
+<span class="w-2 h-2 rounded-full bg-tertiary mr-2 animate-pulse"></span>
+                        In Process
+                    </span>
+</div>
+<p class="text-on-surface-variant font-medium text-lg">Production Order Details</p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-3 rounded-xl font-semibold text-primary border border-outline-variant/20 hover:bg-surface-container-low transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">print</span>
+                    Print Manifest
+                </button>
+<button class="px-6 py-3 rounded-xl font-semibold bg-gradient-to-br from-primary to-primary-container text-on-primary shadow-[0_10px_20px_rgba(0,66,119,0.15)] hover:shadow-[0_15px_30px_rgba(0,66,119,0.2)] transition-shadow flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">save</span>
+                    Update Plan
+                </button>
+</div>
+</div>
+<!-- Table Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.02)] overflow-hidden">
+<div class="flex justify-between items-center p-6 border-b border-outline-variant/10">
+<h3 class="text-on-surface font-bold text-lg">Production Manifest</h3>
+<button class="text-primary font-semibold text-sm hover:text-primary-container transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+                    Add New Item
+                </button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="py-4 px-6 text-on-surface-variant text-xs font-semibold uppercase tracking-wider">Sale Order #</th>
+<th class="py-4 px-6 text-on-surface-variant text-xs font-semibold uppercase tracking-wider">Order Date</th>
+<th class="py-4 px-6 text-on-surface-variant text-xs font-semibold uppercase tracking-wider">Item Code</th>
+<th class="py-4 px-6 text-on-surface-variant text-xs font-semibold uppercase tracking-wider">Item Name</th>
+<th class="py-4 px-6 text-on-surface-variant text-xs font-semibold uppercase tracking-wider">Customer Name</th>
+<th class="py-4 px-6 text-on-surface-variant text-xs font-semibold uppercase tracking-wider text-right">Production Meters</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="border-b border-outline-variant/5 hover:bg-surface-container-low/30 transition-colors">
+<td class="py-4 px-6 font-medium text-on-surface">SO-9482-A</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 12, 2024</td>
+<td class="py-4 px-6 font-mono text-xs text-secondary">FX-109</td>
+<td class="py-4 px-6 font-medium text-on-surface">Acoustic Glazing Sheet</td>
+<td class="py-4 px-6 text-on-surface-variant">Stark Industries</td>
+<td class="py-4 px-6 text-right">
+<div class="inline-flex items-center bg-surface-container-low rounded-lg p-1 border border-outline-variant/20 focus-within:border-primary focus-within:bg-surface-container-lowest transition-all">
+<input class="w-24 bg-transparent border-none text-right font-semibold text-on-surface focus:ring-0 text-sm p-1" type="number" value="1250"/>
+<span class="text-xs text-outline px-2">m</span>
+</div>
+</td>
+</tr>
+<tr class="border-b border-outline-variant/5 hover:bg-surface-container-low/30 transition-colors">
+<td class="py-4 px-6 font-medium text-on-surface">SO-9482-B</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 12, 2024</td>
+<td class="py-4 px-6 font-mono text-xs text-secondary">FX-224</td>
+<td class="py-4 px-6 font-medium text-on-surface">Thermal Barrier Film</td>
+<td class="py-4 px-6 text-on-surface-variant">Wayne Enterprises</td>
+<td class="py-4 px-6 text-right">
+<div class="inline-flex items-center bg-surface-container-low rounded-lg p-1 border border-outline-variant/20 focus-within:border-primary focus-within:bg-surface-container-lowest transition-all">
+<input class="w-24 bg-transparent border-none text-right font-semibold text-on-surface focus:ring-0 text-sm p-1" type="number" value="800"/>
+<span class="text-xs text-outline px-2">m</span>
+</div>
+</td>
+</tr>
+<tr class="border-b border-outline-variant/5 hover:bg-surface-container-low/30 transition-colors">
+<td class="py-4 px-6 font-medium text-on-surface">SO-9485-A</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 14, 2024</td>
+<td class="py-4 px-6 font-mono text-xs text-secondary">UV-008</td>
+<td class="py-4 px-6 font-medium text-on-surface">UV Protective Coating</td>
+<td class="py-4 px-6 text-on-surface-variant">Oscorp</td>
+<td class="py-4 px-6 text-right">
+<div class="inline-flex items-center bg-surface-container-low rounded-lg p-1 border border-outline-variant/20 focus-within:border-primary focus-within:bg-surface-container-lowest transition-all">
+<input class="w-24 bg-transparent border-none text-right font-semibold text-on-surface focus:ring-0 text-sm p-1" type="number" value="3400"/>
+<span class="text-xs text-outline px-2">m</span>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="py-4 px-6 font-medium text-on-surface">SO-9488-C</td>
+<td class="py-4 px-6 text-on-surface-variant">Oct 15, 2024</td>
+<td class="py-4 px-6 font-mono text-xs text-secondary">FX-109</td>
+<td class="py-4 px-6 font-medium text-on-surface">Acoustic Glazing Sheet</td>
+<td class="py-4 px-6 text-on-surface-variant">Cyberdyne Systems</td>
+<td class="py-4 px-6 text-right">
+<div class="inline-flex items-center bg-surface-container-low rounded-lg p-1 border border-outline-variant/20 focus-within:border-primary focus-within:bg-surface-container-lowest transition-all">
+<input class="w-24 bg-transparent border-none text-right font-semibold text-on-surface focus:ring-0 text-sm p-1" type="number" value="450"/>
+<span class="text-xs text-outline px-2">m</span>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination / Footer of table -->
+<div class="bg-surface-container-low/30 p-4 border-t border-outline-variant/10 flex justify-between items-center text-xs text-on-surface-variant">
+<span>Showing 4 of 4 entries</span>
+<div class="flex gap-2 text-primary font-semibold">
+<button class="px-3 py-1 hover:bg-surface-container rounded transition-colors disabled:opacity-50">Previous</button>
+<button class="px-3 py-1 hover:bg-surface-container rounded transition-colors disabled:opacity-50">Next</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="bg-surface/90 backdrop-blur-md fixed bottom-0 w-full z-50 rounded-t-3xl border-t border-outline-variant/15 shadow-[0_-10px_30px_rgba(0,28,56,0.04)] fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-4 md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 hover:bg-surface-container transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="font-label text-[10px] font-bold mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 hover:bg-surface-container transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined text-[24px]">list_alt</span>
+<span class="font-label text-[10px] font-bold mt-1">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-2xl p-3 mx-2 scale-110 shadow-md" href="#">
+<span class="material-symbols-outlined text-[24px] fill-icon">precision_manufacturing</span>
+<span class="font-label text-[10px] font-bold mt-1">Production</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant p-3 hover:bg-surface-container transition-all rounded-xl" href="#">
+<span class="material-symbols-outlined text-[24px]">assignment</span>
+<span class="font-label text-[10px] font-bold mt-1">Tasks</span>
+</a>
+</nav>
+</body></html>

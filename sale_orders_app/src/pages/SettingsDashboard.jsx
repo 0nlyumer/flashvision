@@ -3,34 +3,64 @@ import Layout from '../components/Layout';
 import AddNewItem from '../components/settings/AddNewItem';
 import AddNewCustomer from '../components/settings/AddNewCustomer';
 import AddNewSupplier from '../components/settings/AddNewSupplier';
-import { useNavigate, useLocation } from 'react-router-dom';
+import PrintSettings from '../components/settings/PrintSettings';
+import DocumentRoutingCenter from '../components/settings/DocumentRoutingCenter';
+import DisplaySettings from '../components/settings/DisplaySettings';
+import DepartmentSettings from '../components/settings/DepartmentSettings';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
 
 export default function SettingsDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState('add_item');
+  const { hasPermission } = useApp();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const allSubNavItems = [
+    { id: 'add_item', screenId: 'masterData', label: 'Item Master Setup', icon: 'category' },
+    { id: 'add_customer', screenId: 'masterData', label: 'Customer Accounts', icon: 'group_add' },
+    { id: 'add_supplier', screenId: 'masterData', label: 'Supplier Onboarding', icon: 'storefront' },
+    { id: 'department_settings', screenId: 'departmentSettings', label: 'Department Settings', icon: 'corporate_fare' },
+    { id: 'print_settings', screenId: 'systemConfig', label: 'Print Settings & Layout', icon: 'print' },
+    { id: 'document_routing', screenId: 'documentRouting', label: 'Document Routing Center', icon: 'account_tree' },
+    { id: 'display', screenId: 'displayScale', label: 'Display Settings', icon: 'aspect_ratio' }
+  ];
+
+  const permittedItems = allSubNavItems.filter(item => hasPermission('settings', item.screenId));
+  const defaultTab = permittedItems.length > 0 ? permittedItems[0].id : 'display';
+
+  const tabParam = searchParams.get('tab');
+  const initialActiveTab = (tabParam && permittedItems.some(i => i.id === tabParam))
+    ? tabParam
+    : defaultTab;
+
+  const [activeTab, setActiveTab] = useState(initialActiveTab);
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tabParam = params.get('tab');
-    if (tabParam === 'finish-good') {
-        setActiveTab('add_item');
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl === 'finish-good' && permittedItems.some(i => i.id === 'add_item')) {
+      setActiveTab('add_item');
+    } else if (tabFromUrl && permittedItems.some(i => i.id === tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    } else if (!tabFromUrl && defaultTab && activeTab !== defaultTab) {
+      setActiveTab(defaultTab);
     }
-    // ...other tabs could be handled here if needed...
-  }, [location]);
+  }, [searchParams, defaultTab, permittedItems]);
 
-  const tabs = ['add_item', 'add_customer', 'add_supplier'];
-  
-  const handlePrev = () => {
-    const currentIndex = tabs.indexOf(activeTab);
-    const prevIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
-    setActiveTab(tabs[prevIndex]);
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId });
   };
   
-  const handleNext = () => {
-    const currentIndex = tabs.indexOf(activeTab);
-    const nextIndex = currentIndex === tabs.length - 1 ? 0 : currentIndex + 1;
-    setActiveTab(tabs[nextIndex]);
+  const subNavConfig = {
+      title: 'Settings',
+      moduleName: 'settings',
+      items: permittedItems,
+      activeId: activeTab,
+      onSelect: handleTabChange
+  };
+  const handleBack = () => {
+    navigate(-1);
   };
 
   const renderContent = () => {
@@ -41,22 +71,29 @@ export default function SettingsDashboard() {
         return <AddNewCustomer />;
       case 'add_supplier':
         return <AddNewSupplier />;
+      case 'department_settings':
+        return <DepartmentSettings />;
+      case 'print_settings':
+        return <PrintSettings />;
+      case 'document_routing':
+        return <DocumentRoutingCenter />;
+      case 'display':
+        return <DisplaySettings />;
       default:
         return <AddNewItem />;
     }
   };
 
   return (
-    <Layout>
+    <Layout subNavConfig={subNavConfig}>
       <div className="flex flex-col h-full w-full">
         {/* Module Header & Navigation */}
-        <header className="sticky top-0 z-30 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/20 pt-4 px-4 sm:px-8 shrink-0">
-          <div className="max-w-[1440px] mx-auto w-full">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <header className="sticky top-0 z-30 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/20 pt-4 px-6 shrink-0 pb-4">
+          <div className="max-w-full mx-auto w-full">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="flex gap-1 mr-2">
-                  <button onClick={handlePrev} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
-                  <button onClick={handleNext} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm"><span className="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+                <div className="flex mr-2">
+                  <button onClick={handleBack} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-sm shrink-0">
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>
@@ -67,54 +104,13 @@ export default function SettingsDashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Tab Navigation */}
-            <nav className="flex items-center gap-6 overflow-x-auto custom-scrollbar">
-              <button 
-                onClick={() => setActiveTab('add_item')}
-                className={`pb-3 px-1 border-b-2 font-bold text-sm transition-colors whitespace-nowrap outline-none ${activeTab === 'add_item' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
-              >
-                Item Master Setup
-              </button>
-              <button 
-                onClick={() => setActiveTab('add_customer')}
-                className={`pb-3 px-1 border-b-2 font-bold text-sm transition-colors whitespace-nowrap outline-none ${activeTab === 'add_customer' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
-              >
-                Customer Accounts
-              </button>
-              <button 
-                onClick={() => setActiveTab('add_supplier')}
-                className={`pb-3 px-1 border-b-2 font-bold text-sm transition-colors whitespace-nowrap outline-none ${activeTab === 'add_supplier' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
-              >
-                Supplier Onboarding
-              </button>
-            </nav>
           </div>
         </header>
 
         {/* Dynamic Content Canvas */}
-        <main className="flex-1 overflow-y-auto px-4 sm:px-8 pt-8 pb-12 w-full custom-scrollbar relative">
-          <div className="max-w-[1440px] mx-auto w-full pb-20">
+        <main className="flex-1 overflow-y-auto px-6 pt-8 pb-12 w-full custom-scrollbar relative">
+          <div className="max-w-full mx-auto w-full pb-20">
             {renderContent()}
-          </div>
-          
-          <div className="fixed bottom-0 mt-8 py-4 left-0 w-full px-4 sm:px-8 bg-surface border-t border-outline-variant/20 shadow-md backdrop-blur-md z-40 pointer-events-none md:pl-72 lg:pl-80 transition-all">
-            <div className="max-w-[1440px] mx-auto w-full flex justify-between pointer-events-auto">
-              <button 
-                onClick={handlePrev}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-bold hover:bg-surface-container transition-colors shadow-sm border border-outline-variant/30"
-              >
-                <span className="material-symbols-outlined text-sm">arrow_back</span>
-                Previous
-              </button>
-              <button 
-                onClick={handleNext}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-bold hover:bg-primary/90 transition-colors shadow-md shadow-primary/20"
-              >
-                Next
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </button>
-            </div>
           </div>
         </main>
       </div>

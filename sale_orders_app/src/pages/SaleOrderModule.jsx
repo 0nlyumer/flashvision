@@ -1,7 +1,20 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Layout from '../components/Layout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { useDialog } from '../context/DialogContext';
+import ResizableHeader from '../components/ui/ResizableHeader';
+import PrintLayout from '../components/ui/PrintLayout';
+
+const PAPER_DIMENSIONS = {
+  A4: { width: '210mm', height: '297mm', widthLandscape: '297mm', heightLandscape: '210mm' },
+  A5: { width: '148mm', height: '210mm', widthLandscape: '210mm', heightLandscape: '148mm' },
+  Letter: { width: '8.5in', height: '11in', widthLandscape: '11in', heightLandscape: '8.5in' },
+  Legal: { width: '8.5in', height: '14in', widthLandscape: '14in', heightLandscape: '8.5in' },
+  Executive: { width: '7.25in', height: '10.5in', widthLandscape: '10.5in', heightLandscape: '7.25in' },
+  A3: { width: '297mm', height: '420mm', widthLandscape: '420mm', heightLandscape: '297mm' }
+};
 
 // Reusable status badge with popup for cancellation
 const StatusBadgeWithAction = ({ orderId, itemCode, status, updateStatus }) => {
@@ -23,15 +36,15 @@ const StatusBadgeWithAction = ({ orderId, itemCode, status, updateStatus }) => {
     setShowPopup(false);
   }
 
-  const getStatusColor = (s) => {
+    const getStatusColor = (s) => {
     switch (s) {
       case 'Completed':
-      case 'Ready': return 'bg-green-100 text-green-700';
+      case 'Ready': return 'bg-tertiary/10 text-tertiary ring-1 ring-tertiary/20';
       case 'In Process':
-      case 'In Production': return 'bg-blue-100 text-blue-700';
-      case 'Pending': return 'bg-amber-100 text-amber-700';
-      case 'Dispatched': return 'bg-slate-100 text-slate-700';
-      case 'Cancelled': return 'bg-red-100 text-red-700 decoration-red-700';
+      case 'In Production': return 'bg-primary/10 text-primary ring-1 ring-primary/20';
+      case 'Pending': return 'bg-warning/10 text-warning ring-1 ring-warning/20';
+      case 'Dispatched': return 'bg-surface-container-highest text-on-surface-variant';
+      case 'Cancelled': return 'bg-error/10 text-error ring-1 ring-error/20';
       default: return 'bg-surface-variant text-on-surface-variant';
     }
   };
@@ -58,12 +71,125 @@ const StatusBadgeWithAction = ({ orderId, itemCode, status, updateStatus }) => {
   );
 };
 
+const DEFAULT_SALE_ORDER_LAYOUT = {
+  paperSize: 'A4',
+  orientation: 'portrait',
+  headerTheme: 'classic_split',
+  repeatHeader: true,
+  repeatTableHeader: true,
+  showPageNumbers: true,
+  pageNumberFormat: 'Page X of Y',
+  wrapText: true,
+  footerAlign: 'left',
+  showCustomFooterText: true,
+  customFooterText: 'Computer Generated Copy. Powered by Flashvision ERP.',
+  showDisclaimer: true,
+  disclaimerText: 'Warranty: Goods once sold are subject to standard warehouse inspection prior to return.',
+  termsConditions: '1. All sales are final. Goods once sold will not be returned without a valid RMA.\n2. Please inspect goods before signing. The company is not responsible for transit damage after delivery.',
+  headerFields: [
+    { key: 'so_number', label: 'Sale Order Number', enabled: true, width: 'span-1', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'date', label: 'Date', enabled: true, width: 'span-1', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'status', label: 'Status', enabled: true, width: 'span-1', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'customer', label: 'Customer', enabled: true, width: 'span-2', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'contact', label: 'Contact', enabled: true, width: 'span-1', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'shipping_address', label: 'Shipping Address', enabled: true, width: 'span-3', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'salesperson', label: 'Salesperson', enabled: true, width: 'span-1', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'payment_terms', label: 'Net Payment Terms', enabled: true, width: 'span-1', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'delivery_date', label: 'Expected Delivery Date', enabled: true, width: 'span-1', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'notes', label: 'Order Note', enabled: false, width: 'span-3', style: { color: '#0f172a', bgColor: '#ffffff' } },
+    { key: 'type', label: 'Order Type', enabled: false, width: 'span-1', style: { color: '#0f172a', bgColor: '#ffffff' } }
+  ],
+  gridColumns: [
+    { key: 'serial_no', label: 'Sr #', enabled: true, width: '8%', align: 'center', style: { color: '#ffffff', bgColor: '#004277' } },
+    { key: 'item_code', label: 'Item Code', enabled: true, width: '15%', align: 'left', style: { color: '#ffffff', bgColor: '#004277' } },
+    { key: 'item_name', label: 'Item Name', enabled: true, width: '25%', align: 'left', style: { color: '#ffffff', bgColor: '#004277' } },
+    { key: 'qty', label: 'Order Quantity', enabled: true, width: '10%', align: 'right', style: { color: '#ffffff', bgColor: '#004277' } },
+    { key: 'rule', label: 'Rule', enabled: true, width: '8%', align: 'center', style: { color: '#ffffff', bgColor: '#004277' } },
+    { key: 'rate', label: 'Rate', enabled: true, width: '10%', align: 'right', style: { color: '#ffffff', bgColor: '#004277' } },
+    { key: 'discount', label: 'Discount', enabled: true, width: '8%', align: 'right', style: { color: '#ffffff', bgColor: '#004277' } },
+    { key: 'sub_total', label: 'Sub-Total', enabled: true, width: '16%', align: 'right', style: { color: '#ffffff', bgColor: '#004277' } },
+    { key: 'remarks', label: 'Line Remarks', enabled: false, width: '15%', align: 'left', style: { color: '#ffffff', bgColor: '#004277' } }
+  ],
+  signatures: [
+    { key: 'sig_prepared', label: 'Prepared By', size: '1/3', type: 'text' },
+    { key: 'sig_authorized', label: 'Authorized Signatory', size: '1/3', type: 'stamp' }
+  ],
+  totalsStyle: { width: '30%', bgColor: '#ffffff', textColor: '#0f172a', borderStyle: 'solid' }
+};
+
 export default function SaleOrderModule() {
   const navigate = useNavigate();
-  const { state, addSaleOrder, updateSaleOrderItemStatus } = useApp();
+  const { state, setState, setCollection, addSaleOrder, updateSaleOrderItemStatus, toggleGlobalPagination } = useApp();
+  const { appConfirm, appAlert } = useDialog();
+  const currencyCode = state.adminSetup?.baseCurrency ? state.adminSetup.baseCurrency.split(' ')[0] : 'PKR';
+  const currencySymbol = state.adminSetup?.baseCurrency ? (state.adminSetup.baseCurrency.match(/\(([^)]+)\)/)?.[1] || '$') : '$';
   const [activeTab, setActiveTab] = useState('dashboard');
   
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+
+  const getGlobalMaxItemIndex = (additionalItems = []) => {
+    let maxIdx = 0;
+    const checkCode = (code) => {
+        if (!code) return;
+        const match = code.match(/ITM-(\d+)$/);
+        if (match) {
+            const idx = parseInt(match[1], 10);
+            if (idx > maxIdx) maxIdx = idx;
+        }
+    };
+    (state.saleOrders || []).forEach(o => (o.items || []).forEach(i => checkCode(i.itemCode)));
+    additionalItems.forEach(i => checkCode(i.itemCode));
+    return maxIdx;
+  };
+  
   const tabs = ['dashboard', 'create', 'history'];
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+     const tab = searchParams.get('tab');
+     if (tab && tabs.includes(tab)) {
+         setActiveTab(tab);
+     }
+  }, [searchParams]);
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setSearchParams({ tab: tabId });
+  };
+
+  const subNavConfig = {
+      title: 'Sale Orders',
+      items: [
+          { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+          { id: 'create', label: 'Create Sale Order', icon: 'add_shopping_cart' },
+          { id: 'history', label: 'Order History', icon: 'history' }
+      ],
+      activeId: activeTab,
+      onSelect: handleTabChange
+  };
+
+  const [histCust, setHistCust] = useState('');
+  const [histDate, setHistDate] = useState('');
+  const [histSO, setHistSO] = useState('');
+
+  const filteredHistory = useMemo(() => {
+     let filtered = [...(state.saleOrders || [])].sort((a,b) => new Date(b.date) - new Date(a.date));
+     if (histCust) filtered = filtered.filter(o => {
+         const c = (state.customers || []).find(x => x.id === o.customerId);
+         return c && c.name.toLowerCase().includes(histCust.toLowerCase());
+     });
+     if (histDate) filtered = filtered.filter(o => o.date === histDate);
+     if (histSO) filtered = filtered.filter(o => o.id.toLowerCase().includes(histSO.toLowerCase()));
+     return filtered;
+  }, [state.saleOrders, state.customers, histCust, histDate, histSO]);
+
+  const isPaginated = state?.isGlobalPaginated;
+  const totalPages = Math.ceil(filteredHistory.length / itemsPerPage) || 1;
+  const displayedHistory = isPaginated 
+      ? filteredHistory.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+      : filteredHistory;
 
   const handlePrevTab = () => {
     const currentIndex = tabs.indexOf(activeTab);
@@ -77,10 +203,10 @@ export default function SaleOrderModule() {
     setActiveTab(tabs[nextIndex]);
   };
   
-  // --- Dashboard Logic ---
+  // --- Dashboard Logic & Widgets ---
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState({
-     Pending: true, 'In Process': true, Ready: true, Dispatched: true, Completed: true, Cancelled: true
+     Pending: true, 'In Process': true, 'In Production': true, Ready: true, Dispatched: true, Completed: true, Cancelled: true
   });
   const [showStatusFilter, setShowStatusFilter] = useState(false);
   const statusFilterRef = useRef(null);
@@ -102,8 +228,19 @@ export default function SaleOrderModule() {
   const [dashboardView, setDashboardView] = useState('order-wise'); // 'order-wise' | 'item-wise'
   const [showExportMenu, setShowExportMenu] = useState(false);
 
-  const filteredOrders = state.saleOrders.filter(order => {
-    const customer = state.customers.find(c => c.id === order.customerId)?.name || '';
+  // Widget Modal States
+  const [showTotalOrdersModal, setShowTotalOrdersModal] = useState(false);
+  const [showProcessingModal, setShowProcessingModal] = useState(false);
+  const [ordersHistoryOffset, setOrdersHistoryOffset] = useState(0); // 0 = months 1-6, 1 = months 7-12
+  const [processingHistoryOffset, setProcessingHistoryOffset] = useState(0);
+
+  // Timeline Modal State
+  const [showTimelineModal, setShowTimelineModal] = useState(false);
+  const [timelineOrderInfo, setTimelineOrderInfo] = useState(null); // { orderId, itemCode, type }
+  const [timelineSortOrder, setTimelineSortOrder] = useState('desc'); // 'asc' | 'desc'
+
+  const filteredOrders = (state.saleOrders || []).filter(order => {
+    const customer = (state.customers || []).find(c => c.id === order.customerId)?.name || '';
     const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           customer.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter[order.status] === true;
@@ -113,7 +250,7 @@ export default function SaleOrderModule() {
   const flattenedItems = useMemo(() => {
     const allItems = [];
     filteredOrders.forEach(order => {
-      const customer = state.customers.find(c => c.id === order.customerId)?.name || 'Unknown';
+      const customer = (state.customers || []).find(c => c.id === order.customerId)?.name || 'Unknown';
       order.items.forEach(item => {
         if (statusFilter[item.status] === true) {
           allItems.push({
@@ -128,13 +265,108 @@ export default function SaleOrderModule() {
     return allItems;
   }, [filteredOrders, state.customers, statusFilter]);
 
-  const activeSaleOrders = state.saleOrders.filter(o => o.status !== 'Deleted');
+  // Timeline Data Calculation
+  const timelineEvents = useMemo(() => {
+    if (!timelineOrderInfo) return [];
+    const events = [];
+    
+    // 1. Order Creation Event
+    const order = state.saleOrders.find(o => o.id === timelineOrderInfo.orderId);
+    if (order) {
+      if (timelineOrderInfo.type === 'order') {
+         events.push({
+           type: 'created',
+           date: new Date(order.date),
+           title: 'Sale Order Created',
+           desc: `Total Items: ${order.items.length}`,
+           icon: 'receipt_long',
+           color: 'text-primary'
+         });
+      } else {
+         const item = order.items.find(i => i.itemCode === timelineOrderInfo.itemCode);
+         events.push({
+           type: 'created',
+           date: new Date(order.date),
+           title: 'Item Added to Order',
+           desc: `Requested Qty: ${item?.quantity || 0}m`,
+           icon: 'add_circle',
+           color: 'text-primary'
+         });
+      }
+    }
+
+    // 2. Production Outputs
+    (state.productionPlans || []).forEach(plan => {
+      (plan.items || []).forEach(pItem => {
+         if (pItem.orderId === timelineOrderInfo.orderId && (!timelineOrderInfo.itemCode || pItem.itemCode === timelineOrderInfo.itemCode)) {
+            (pItem.outputs || []).forEach(out => {
+               events.push({
+                 type: 'production',
+                 date: new Date(out.date),
+                 title: 'Production Output',
+                 desc: `${out.quantity}m produced (Plan: ${plan.id})${out.typeName ? ` - ${out.typeName}` : ''}`,
+                 icon: 'precision_manufacturing',
+                 color: 'text-secondary'
+               });
+            });
+         }
+      });
+    });
+
+    // 3. Dispatch Events
+    const relatedDeliveries = state.deliveries.filter(d => (d.items || []).some(di => di.orderId === timelineOrderInfo.orderId));
+    relatedDeliveries.forEach(del => {
+      (del.items || []).forEach(delItem => {
+         if (delItem.orderId === timelineOrderInfo.orderId && (!timelineOrderInfo.itemCode || delItem.itemCode === timelineOrderInfo.itemCode || delItem.itemId === timelineOrderInfo.itemCode)) {
+           let remainingText = '';
+           if (delItem.itemCode || delItem.itemId) {
+             const soItem = state.saleOrders.find(o => o.id === timelineOrderInfo.orderId)?.items.find(i => i.itemCode === (delItem.itemCode || delItem.itemId) || i.itemId === (delItem.itemCode || delItem.itemId));
+             if (soItem) {
+                const remaining = Math.max(0, (soItem.quantity || 0) - (soItem.deliveredQty || 0));
+                remainingText = `. Remaining: ${remaining}m`;
+             }
+           }
+           events.push({
+             type: 'dispatch',
+             date: new Date(del.date),
+             title: 'Dispatched',
+             desc: `${delItem.dispatchedQty || delItem.editedQty || 0}m dispatched (DC: ${del.id})${remainingText}`,
+             icon: 'local_shipping',
+             color: 'text-tertiary'
+           });
+         }
+      });
+    });
+
+    // Sort events
+    events.sort((a, b) => timelineSortOrder === 'asc' ? a.date - b.date : b.date - a.date);
+    return events;
+  }, [timelineOrderInfo, state.saleOrders, state.productionPlans, state.deliveries, timelineSortOrder]);
+
+  const activeSaleOrders = (state.saleOrders || []).filter(o => o.status !== 'Deleted');
   const totalOrders = activeSaleOrders.length;
   
+  // M-o-M Calculation for Total Orders
+  const momPercentage = useMemo(() => {
+      const now = new Date();
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+      const currMonthOrders = activeSaleOrders.filter(o => new Date(o.date) >= currentMonthStart).length;
+      const lastMonthOrders = activeSaleOrders.filter(o => {
+          const d = new Date(o.date);
+          return d >= lastMonthStart && d < currentMonthStart;
+      }).length;
+
+      if (lastMonthOrders === 0) return currMonthOrders > 0 ? 100 : 0;
+      return Math.round(((currMonthOrders - lastMonthOrders) / lastMonthOrders) * 100);
+  }, [activeSaleOrders]);
+  
   const processingCount = activeSaleOrders.filter(o => {
-     // Order is in processing only if it exists in a production plan
+     if (o.status === 'Completed' || o.status === 'Cancelled') return false;
      const inProduction = state.productionPlans?.some(plan => plan.orderId === o.id);
-     return inProduction && (o.status === 'Processing' || o.status === 'In Process' || o.status === 'Pending' || o.status === 'In Production');
+     const hasOutput = o.items.some(i => (i.producedQty || 0) > 0);
+     return inProduction || hasOutput;
   }).length;
   
   const totalRevenue = useMemo(() => {
@@ -146,6 +378,9 @@ export default function SaleOrderModule() {
      }); 
      return rev.toLocaleString(undefined, {minimumFractionDigits: 2});
   }, [activeSaleOrders]);
+
+  const hasRevenuePermission = state.users?.[0]?.permissions?.includes('all') || state.users?.[0]?.permissions?.includes('view_revenue');
+
 
   const handleQuickReport = (format) => {
      let content = "";
@@ -177,8 +412,56 @@ export default function SaleOrderModule() {
      setShowExportMenu(false);
   };
 
-  // --- Print Editable Modal Logic ---
   const [printOrder, setPrintOrder] = useState(null);
+
+  // Sync body class for print isolation
+  useEffect(() => {
+    if (printOrder) {
+      document.body.classList.add('has-print-modal');
+    } else {
+      document.body.classList.remove('has-print-modal');
+    }
+    return () => {
+      document.body.classList.remove('has-print-modal');
+    };
+  }, [printOrder]);
+
+  // Cross-platform native print bridge
+  const triggerNativePrint = () => {
+    if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        action: 'print',
+        documentId: 'sale_order',
+        orderId: printOrder?.id
+      }));
+    } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.printHandler) {
+      window.webkit.messageHandlers.printHandler.postMessage({
+        action: 'print',
+        documentId: 'sale_order',
+        orderId: printOrder?.id
+      });
+    } else {
+      window.print();
+    }
+  };
+
+  const getSixMonthsData = (ordersList, offset, filterCondition) => {
+    const data = [];
+    const today = new Date();
+    today.setDate(1); // Set to 1st to avoid month length issues
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(today);
+        d.setMonth(today.getMonth() - (i + (offset * 6)));
+        const monthStr = d.toLocaleString('default', { month: 'short', year: 'numeric' });
+        
+        const count = ordersList.filter(o => {
+            const oDate = new Date(o.date);
+            return oDate.getMonth() === d.getMonth() && oDate.getFullYear() === d.getFullYear() && filterCondition(o);
+        }).length;
+        data.push({ month: monthStr, count });
+    }
+    return data;
+  };
 
   // --- Creation Logic ---
   const getNextOrderId = () => `SO-${String(state.saleOrders.length + 1).padStart(3, '0')}`;
@@ -201,18 +484,19 @@ export default function SaleOrderModule() {
       setOrderMeta(prev => ({ ...prev, id: getNextOrderId() }));
   }, [state.saleOrders.length]);
 
-  const [items, setItems] = useState([
-    {
+  const [items, setItems] = useState(() => {
+    let maxIdx = getGlobalMaxItemIndex();
+    return [{
       id: Date.now(),
-      itemCode: `${getNextOrderId()}-ITM-001`,
+      itemCode: `ITM-${String(maxIdx + 1).padStart(3, '0')}`,
       itemId: '',
       qty: 1,
       rolls: 1, // New field for rolls
       price: 0,
       discount: 0,
       remarks: ""
-    }
-  ]);
+    }];
+  });
 
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + ((item.qty * item.price) - (item.discount || 0)), 0), [items]);
 
@@ -229,13 +513,18 @@ export default function SaleOrderModule() {
               const prodPrice = selectedProd ? (selectedProd.price || parseFloat(selectedProd.price.replace(/[^\d.]/g, '')) || 0) : 0;
               updated.itemId = value;
               updated.price = prodPrice;
-              const rollSz = selectedProd?.rollSize || selectedProd?.packingSize || 0;
-              if (rollSz > 0) updated.rolls = Math.ceil(updated.qty / rollSz);
+              const rollSz = Number(selectedProd?.rollSize || selectedProd?.packingSize || 1);
+              updated.rolls = Math.ceil(updated.qty / rollSz);
           }
           if (field === 'qty') {
                const selectedProd = state.items.find(i => i.id === updated.itemId);
-               const rollSz = selectedProd?.rollSize || selectedProd?.packingSize || 0;
-               if (rollSz > 0) updated.rolls = Math.ceil(value / rollSz);
+               const rollSz = Number(selectedProd?.rollSize || selectedProd?.packingSize || 1);
+               updated.rolls = Math.ceil(value / rollSz);
+          }
+          if (field === 'rolls') {
+               const selectedProd = state.items.find(i => i.id === updated.itemId);
+               const rollSz = Number(selectedProd?.rollSize || selectedProd?.packingSize || 1);
+               updated.qty = value * rollSz;
           }
           return updated;
       }
@@ -244,17 +533,8 @@ export default function SaleOrderModule() {
   };
 
   const addNewItem = () => {
-    // Find highest ITM index to avoid repeats
-    let maxIdx = 0;
-    items.forEach(it => {
-        const match = it.itemCode.match(/-ITM-(\d+)$/);
-        if (match) {
-            const idx = parseInt(match[1], 10);
-            if (idx > maxIdx) maxIdx = idx;
-        }
-    });
-
-    const newItemCode = `${orderMeta.id}-ITM-${String(maxIdx + 1).padStart(3, '0')}`;
+    const maxIdx = getGlobalMaxItemIndex(items);
+    const newItemCode = `ITM-${String(maxIdx + 1).padStart(3, '0')}`;
     setItems([...items, {
       id: Date.now(),
       itemCode: newItemCode,
@@ -267,7 +547,10 @@ export default function SaleOrderModule() {
     }]);
   };
 
-  const handleEditOrder = (order) => {
+  const handleEditOrder = async (order) => {
+    if (!(await appConfirm('Are you sure you want to edit this order?'))) {
+        return;
+    }
     setOrderMeta({
        id: order.id,
        date: order.date,
@@ -293,30 +576,41 @@ export default function SaleOrderModule() {
     setActiveTab('create');
   };
 
-  const removeItem = (id) => {
+  const removeItem = async (id) => {
+    if (!(await appConfirm('Are you sure you want to remove this item?'))) return;
     if (items.length > 1) {
       // Do not re-number existing itemCodes to prevent repeats
       const newItems = items.filter(item => item.id !== id);
       setItems(newItems);
     } else {
-      alert("At least one line item is required.");
+      appAlert("At least one line item is required.");
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!orderMeta.customerId) {
-        alert("Please select a customer.");
+        appAlert("Please select a customer.");
         return;
     }
     const invalidItem = items.find(i => !i.itemId || i.qty <= 0);
     if(invalidItem) {
-        alert("Please select valid items and quantities greater than zero.");
+        appAlert("Please select valid items and quantities greater than zero.");
+        return;
+    }
+
+    const duplicateIds = items.map(i => i.itemId);
+    const hasDuplicates = new Set(duplicateIds).size !== duplicateIds.length;
+    if (hasDuplicates) {
+        appAlert("Duplicate items are not allowed in the same sale order.");
         return;
     }
 
     const newOrder = {
       ...orderMeta,
+      createdBy: orderMeta.createdBy || state?.users?.[0]?.name || 'Unknown',
+      modifiedBy: orderMeta.id.startsWith('SO-') && orderMeta.status !== 'Pending' ? (state?.users?.[0]?.name || 'Unknown') : null,
+      modifiedDate: orderMeta.id.startsWith('SO-') && orderMeta.status !== 'Pending' ? new Date().toISOString() : null,
       items: items.map(i => ({
         itemCode: i.itemCode,
         itemId: i.itemId,
@@ -325,12 +619,14 @@ export default function SaleOrderModule() {
         status: 'Pending',
         producedQty: 0,
         deliveredQty: 0, 
-        price: i.price
+        price: i.price,
+        discount: i.discount || 0,
+        remarks: i.remarks || ''
       }))
     };
 
     addSaleOrder(newOrder);
-    alert(`Order ${orderMeta.id} submitted successfully!`);
+    appAlert(`Order ${orderMeta.id} submitted successfully!`);
     
     // Reset form and switch tab
     const nextId = `SO-${String(state.saleOrders.length + 2).padStart(3, '0')}`;
@@ -338,9 +634,10 @@ export default function SaleOrderModule() {
         ...orderMeta,
         id: nextId,
     });
+    const nextMaxIdx = getGlobalMaxItemIndex(items); // Since we just submitted, those items are 'virtually' the latest max before state updates completely
     setItems([{
         id: Date.now(),
-        itemCode: `${nextId}-ITM-001`, 
+        itemCode: `ITM-${String(nextMaxIdx + 1).padStart(3, '0')}`, 
         itemId: '',
         qty: 1,
         rolls: 1,
@@ -372,127 +669,656 @@ export default function SaleOrderModule() {
     return () => document.removeEventListener('mousedown', handleClickOutsideItem);
   }, []);
 
-  // History Tab Filters
-  const [histCust, setHistCust] = useState('');
-  const [histDate, setHistDate] = useState('');
-  const [histSO,   setHistSO] = useState('');
-
-  const filteredHistory = state.saleOrders.slice().reverse().filter(order => {
-     const c = state.customers.find(cx => cx.id === order.customerId)?.name || '';
-     return (
-         (!histCust || c.toLowerCase().includes(histCust.toLowerCase())) &&
-         (!histDate || order.date === histDate) &&
-         (!histSO || order.id.toLowerCase().includes(histSO.toLowerCase()))
-     );
-  });
 
   return (
-    <div className="print:m-0 print:p-0">
+    <div className="h-full w-full print:m-0 print:p-0">
       
-    {/* PRINT MODAL (Invoice view) */}
-    {printOrder && (
-       <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-8 print:static print:bg-white print:p-0 print:block">
-         <div className="bg-white rounded-2xl p-10 w-full max-w-5xl max-h-[90vh] overflow-y-auto print:max-h-none print:shadow-none print:rounded-none">
-            <div className="flex justify-between items-start mb-10 print:mb-6 border-b pb-6">
-               <div>
-                  <h1 className="text-4xl font-extrabold text-[#004277]">SALE ORDER / INVOICE</h1>
-                  <input className="mt-2 bg-transparent text-sm font-semibold border-b border-dashed border-gray-300 focus:outline-none min-w-[300px]" defaultValue="Original for Recipient" />
-               </div>
-               <div className="text-right">
-                  <p className="text-2xl font-bold text-gray-800">{printOrder.id}</p>
-                  <p className="text-sm text-gray-500">Date: {new Date(printOrder.date).toLocaleDateString()}</p>
-               </div>
-            </div>
+    {/* PRINT ONLY UI & PREVIEW MODAL */}
+    {printOrder && (() => {
+        const printSettings = state.adminSetup?.printSettings || {};
+        const salesLayout = printSettings.documentLayouts?.sale_order || DEFAULT_SALE_ORDER_LAYOUT;
+        
+        // Load layout options with fallbacks
+        const headerTheme = salesLayout.headerTheme || DEFAULT_SALE_ORDER_LAYOUT.headerTheme;
+        const repeatHeader = salesLayout.repeatHeader !== false;
+        const repeatTableHeader = salesLayout.repeatTableHeader !== false;
+        const showPageNumbers = salesLayout.showPageNumbers !== false;
+        const pageNumberFormat = salesLayout.pageNumberFormat || DEFAULT_SALE_ORDER_LAYOUT.pageNumberFormat;
+        const wrapText = salesLayout.wrapText !== false;
+        const showCustomFooterText = salesLayout.showCustomFooterText !== false;
+        const customFooterText = salesLayout.customFooterText || DEFAULT_SALE_ORDER_LAYOUT.customFooterText;
+        const showDisclaimer = salesLayout.showDisclaimer !== false;
+        const disclaimerText = salesLayout.disclaimerText || DEFAULT_SALE_ORDER_LAYOUT.disclaimerText;
+        const termsConditions = salesLayout.termsConditions || DEFAULT_SALE_ORDER_LAYOUT.termsConditions;
+        
+        const headerFieldsList = salesLayout.headerFields || DEFAULT_SALE_ORDER_LAYOUT.headerFields;
+        const gridColumnsList = salesLayout.gridColumns || DEFAULT_SALE_ORDER_LAYOUT.gridColumns;
+        const signaturesList = salesLayout.signatures || DEFAULT_SALE_ORDER_LAYOUT.signatures;
+        const totalsStyle = salesLayout.totalsStyle || DEFAULT_SALE_ORDER_LAYOUT.totalsStyle;
 
-            <div className="grid grid-cols-2 gap-10 mb-8">
-               <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Bill To:</h3>
-                  <p className="font-bold text-lg text-gray-800">{state.customers.find(c => c.id === printOrder.customerId)?.name}</p>
-                  <textarea rows="3" className="w-full mt-2 p-2 border rounded resize-none text-sm" defaultValue={printOrder.shippingAddress || "No shipping address provided."} />
-               </div>
-               <div>
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Order Details:</h3>
-                  <div className="space-y-2 text-sm">
-                     <div className="flex justify-between"><span className="text-gray-500">Salesperson:</span> <input className="font-medium text-right border-b border-dashed border-gray-300 px-1 focus:outline-none" defaultValue={printOrder.salesperson} /></div>
-                     <div className="flex justify-between"><span className="text-gray-500">Terms:</span> <input className="font-medium text-right border-b border-dashed border-gray-300 px-1 focus:outline-none" defaultValue={printOrder.paymentTerms} /></div>
-                     <div className="flex justify-between"><span className="text-gray-500">Delivery:</span> <span className="font-medium">{printOrder.expectedDelivery || 'N/A'}</span></div>
+        const activeHeaderFields = headerFieldsList.filter(f => f.enabled);
+        const activeGridColumns = gridColumnsList.filter(c => c.enabled);
+        
+        // Load company info overrides
+        const logoUrl = printSettings.logoUrl || state.adminSetup?.logoUrl || '';
+        const address = printSettings.address || state.adminSetup?.address || '123 Logistics Avenue, Industrial Estate, TX 75001';
+        const phone = printSettings.phone || state.adminSetup?.phone || '+1 (555) 123-4567';
+        const email = printSettings.email || state.adminSetup?.email || 'operations@flashvision.com';
+        const companyName = state.adminSetup?.companyName || 'FLASHVISION LOGISTICS';
+
+        // Paper sizing details
+        const paperSize = salesLayout.paperSize || 'A4';
+        const orientation = salesLayout.orientation || 'portrait';
+        const isLandscape = orientation === 'landscape';
+        
+        const dimensions = PAPER_DIMENSIONS[paperSize] || PAPER_DIMENSIONS.A4;
+        const pageWidth = isLandscape ? dimensions.widthLandscape : dimensions.width;
+        const pageHeight = isLandscape ? dimensions.heightLandscape : dimensions.height;
+        const paperDetails = {
+          width: pageWidth,
+          height: pageHeight,
+          label: `${paperSize} ${isLandscape ? 'Landscape' : 'Portrait'}`
+        };
+
+        // Header field resolver
+        const getHeaderFieldValue = (fieldKey, order) => {
+          switch (fieldKey) {
+            case 'so_number':
+              return order.id;
+            case 'date':
+              return new Date(order.date).toLocaleDateString();
+            case 'status':
+              return order.status;
+            case 'customer': {
+              const c = state.customers?.find(cust => cust.id === order.customerId);
+              return c ? c.name : 'Unknown Customer';
+            }
+            case 'contact': {
+              const c = state.customers?.find(cust => cust.id === order.customerId);
+              return c ? c.contactPerson || 'N/A' : 'N/A';
+            }
+            case 'shipping_address':
+              return order.shippingAddress || 'No shipping address provided.';
+            case 'salesperson':
+              return order.salesperson || 'Alexander Pierce';
+            case 'payment_terms':
+              return order.paymentTerms || 'Net 30';
+            case 'delivery_date':
+              return order.expectedDelivery || 'N/A';
+            case 'notes':
+              return order.notes || '---';
+            case 'type':
+              return order.type || 'Standard';
+            default:
+              return '---';
+          }
+        };
+
+        // Table column resolver
+        const getColumnValue = (colKey, item, index) => {
+          switch (colKey) {
+            case 'serial_no':
+              return String(index + 1).padStart(2, '0');
+            case 'item_code':
+              return item.itemCode;
+            case 'item_name': {
+              const prod = state.items?.find(p => p.id === item.itemId);
+              return prod ? prod.name : 'Unknown Item';
+            }
+            case 'qty':
+              return `${item.quantity || item.qty} ${state.items?.find(p => p.id === item.itemId)?.unit === 'Meters' ? 'm' : ''}`;
+            case 'rule':
+              return item.rolls || '1';
+            case 'rate':
+              return Number(item.price || 0).toLocaleString();
+            case 'discount':
+              return Number(item.discount || 0).toLocaleString();
+            case 'sub_total': {
+              const sub = ((item.quantity || item.qty) * (item.price || 0)) - (item.discount || 0);
+              return Number(sub).toLocaleString();
+            }
+            case 'remarks':
+              return item.remarks || '---';
+            default:
+              return '---';
+          }
+        };
+
+        // Render header theme layout (10 designs matching PrintSettings.jsx)
+        const renderHeaderThemeLocal = (themeId, order) => {
+          const docTitle = "SALE ORDER";
+          const logoElement = logoUrl ? (
+            <img src={logoUrl} alt="Logo" className="h-12 max-h-16 object-contain" />
+          ) : (
+            <div className="border border-slate-200 border-dashed rounded flex flex-col items-center justify-center bg-slate-50 text-[8px] text-slate-400 font-bold select-none h-12 w-24">
+              <span className="material-symbols-outlined text-[12px]">image</span>
+              NO LOGO
+            </div>
+          );
+
+          const infoElement = (
+            <div className="text-[9px] text-slate-500 leading-tight">
+              <h3 className="font-bold text-slate-800 uppercase tracking-tight text-[10px]">{companyName}</h3>
+              <p className="truncate max-w-xs">{address}</p>
+              <p>{phone} | {email}</p>
+            </div>
+          );
+
+          const titleElement = (
+            <div className="text-right">
+              <h2 className="text-lg font-black uppercase tracking-wider text-slate-850">{docTitle}</h2>
+              <span className="text-[8px] text-slate-400 font-mono">Original Copy</span>
+            </div>
+          );
+
+          switch (themeId) {
+            case 'centered_brand':
+              return (
+                <div className="flex flex-col items-center text-center gap-2 pb-4 mb-4 border-b border-slate-250 w-full">
+                  <div className="flex justify-between w-full items-center">
+                    <span className="text-[8px] text-slate-400 font-mono">Original Copy</span>
+                    <h2 className="text-lg font-black uppercase text-slate-850">{docTitle}</h2>
                   </div>
-               </div>
-            </div>
+                  {logoElement}
+                  {infoElement}
+                </div>
+              );
+            case 'left_heavy':
+              return (
+                <div className="flex justify-between items-start pb-4 mb-4 border-b border-slate-250 w-full">
+                  <div className="max-w-[50%]">
+                    <h2 className="text-2xl font-black uppercase text-[#004277] tracking-tight leading-none mb-1">{docTitle}</h2>
+                    <span className="text-[8px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono">Ref: {order.id}</span>
+                  </div>
+                  <div className="flex flex-col items-end text-right gap-1.5">
+                    {logoElement}
+                    {infoElement}
+                  </div>
+                </div>
+              );
+            case 'right_heavy':
+              return (
+                <div className="flex justify-between items-start pb-4 mb-4 border-b border-slate-250 w-full">
+                  <div className="flex gap-3 items-center">
+                    {logoElement}
+                    {infoElement}
+                  </div>
+                  <div className="text-right">
+                    <h2 className="text-2xl font-black uppercase text-[#004277] tracking-tight leading-none mb-1">{docTitle}</h2>
+                    <p className="text-[9px] text-slate-400">System Generated Document</p>
+                  </div>
+                </div>
+              );
+            case 'modern_strip':
+              return (
+                <div className="flex flex-col gap-3 pb-4 mb-4 border-b border-slate-250 w-full">
+                  <div className="bg-[#004277] text-white py-1.5 px-3 rounded-lg flex justify-between items-center">
+                    <span className="text-xs font-black uppercase tracking-widest">{docTitle}</span>
+                    <span className="text-[8px] font-mono tracking-widest uppercase">Verified Outbound Copy</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2 items-center">{logoElement}{infoElement}</div>
+                    <span className="text-[9px] text-slate-400 font-mono">Date: {new Date(order.date).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              );
+            case 'minimalist_grid':
+              return (
+                <div className="grid grid-cols-3 gap-2 pb-4 mb-4 border-b border-slate-250 items-center w-full">
+                  <div>{logoElement}</div>
+                  <div className="text-center">{infoElement}</div>
+                  <div className="text-right">
+                    <h2 className="text-md font-bold uppercase text-slate-850">{docTitle}</h2>
+                    <span className="text-[8px] text-slate-400 font-mono">{order.id}</span>
+                  </div>
+                </div>
+              );
+            case 'elegant_divider':
+              return (
+                <div className="flex flex-col gap-2 pb-4 mb-4 w-full">
+                  <div className="flex justify-between items-end">
+                    <h2 className="text-xl font-bold uppercase tracking-wide text-slate-850">{docTitle}</h2>
+                    {logoElement}
+                  </div>
+                  <div className="h-0.5 bg-[#004277]/20 w-full mb-1"></div>
+                  <div className="text-left">{infoElement}</div>
+                </div>
+              );
+            case 'corporate_boxed':
+              return (
+                <div className="flex justify-between items-stretch gap-4 pb-4 mb-4 border-b border-slate-250 w-full">
+                  <div className="border border-slate-200 rounded-xl p-3 bg-slate-50/50 flex-1 flex gap-3 items-center">
+                    {logoElement}
+                    {infoElement}
+                  </div>
+                  <div className="flex flex-col justify-between text-right p-1 shrink-0">
+                    <h2 className="text-lg font-black uppercase tracking-wider text-[#004277]">{docTitle}</h2>
+                    <span className="text-[8px] text-slate-400 font-mono">Date: {new Date(order.date).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              );
+            case 'accent_stripe':
+              return (
+                <div className="flex justify-between items-center pb-4 mb-4 border-b border-slate-250 w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1.5 h-10 bg-[#004277] rounded-full"></div>
+                    <div>
+                      <h2 className="text-md font-black uppercase text-slate-850 tracking-wide leading-tight">{docTitle}</h2>
+                      <span className="text-[9px] text-slate-400">{companyName}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {infoElement}
+                    {logoElement}
+                  </div>
+                </div>
+              );
+            case 'invoice_editorial':
+              return (
+                <div className="flex flex-col pb-4 mb-4 border-b-2 border-slate-850 w-full">
+                  <div className="flex justify-between items-baseline">
+                    <h2 className="text-3xl font-black uppercase tracking-tighter text-slate-850 leading-none">{docTitle}</h2>
+                    <span className="text-[10px] text-slate-400 font-mono tracking-widest uppercase">SO Ref: {order.id}</span>
+                  </div>
+                  <div className="flex justify-between items-end mt-4">
+                    {logoElement}
+                    <div className="text-right text-[8px] text-slate-400 tracking-wider">
+                      <p className="font-bold text-slate-600 uppercase">{companyName}</p>
+                      <p>{address}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            case 'classic_split':
+            default:
+              return (
+                <div className="flex justify-between items-start pb-4 mb-4 border-b border-slate-250 w-full">
+                  <div className="flex items-center gap-3 max-w-[60%]">
+                    {logoElement}
+                    {infoElement}
+                  </div>
+                  {titleElement}
+                </div>
+              );
+          }
+        };
 
-            <table className="w-full text-left border-collapse mb-8 table-auto">
-               <thead>
-                 <tr className="bg-gray-100">
-                   <th className="p-3 text-xs font-bold uppercase text-gray-600">Item Code</th>
-                   <th className="p-3 text-xs font-bold uppercase text-gray-600">Description</th>
-                   <th className="p-3 text-xs font-bold uppercase text-gray-600 text-right">Rolls</th>
-                   <th className="p-3 text-xs font-bold uppercase text-gray-600 text-right">Meters</th>
-                   <th className="p-3 text-xs font-bold uppercase text-gray-600 text-right">Rate</th>
-                   <th className="p-3 text-xs font-bold uppercase text-gray-600 text-right">Amount (PKR)</th>
-                 </tr>
-               </thead>
-               <tbody className="divide-y divide-gray-200">
-                  {printOrder.items.map(it => {
-                     const p = state.items.find(x => x.id === it.itemId);
-                     return (
-                       <tr key={it.itemCode}>
-                          <td className="p-3 text-sm font-bold text-gray-800">{it.itemCode}</td>
-                          <td className="p-3 text-sm text-gray-600">{p?.name || 'Unknown'}</td>
-                          <td className="p-3 text-sm text-right font-medium">{it.rolls || '-'}</td>
-                          <td className="p-3 text-sm text-right font-medium">{it.quantity || '-'}</td>
-                          <td className="p-3 text-sm text-right font-medium">{it.price}</td>
-                          <td className="p-3 text-sm text-right font-bold text-gray-800">{(it.quantity * it.price).toLocaleString()}</td>
-                       </tr>
-                     );
-                  })}
-               </tbody>
-            </table>
+        // Chunk items list dynamically based on height constraints
+        const getPagesForPrint = (itemsList) => {
+          const pages = [];
+          const maxOnFirstPage = repeatHeader ? 6 : 8;
+          const maxOnSubsequentPages = repeatHeader ? 6 : 14;
 
-            <div className="flex justify-end">
-               <div className="w-64 space-y-3">
-                  <div className="flex justify-between text-sm"><span className="text-gray-500">Subtotal:</span> <span className="font-bold text-gray-800">{printOrder.items.reduce((a,b)=>a+(b.quantity*b.price),0).toLocaleString()}</span></div>
-                  <div className="flex justify-between text-sm items-center"><span className="text-gray-500">Discount:</span> <input type="text" defaultValue="0.00" className="w-24 text-right border-b focus:outline-none"/></div>
-                  <div className="flex justify-between text-lg font-extrabold pt-2 border-t"><span className="text-gray-800">Total:</span> <span>{printOrder.items.reduce((a,b)=>a+(b.quantity*b.price),0).toLocaleString()}</span></div>
-               </div>
-            </div>
+          let remainingItems = [...itemsList];
+          
+          // Page 1
+          const p1Items = remainingItems.splice(0, maxOnFirstPage);
+          pages.push(p1Items);
+          
+          // Subsequent pages
+          while (remainingItems.length > 0) {
+            const pItems = remainingItems.splice(0, maxOnSubsequentPages);
+            pages.push(pItems);
+          }
+          
+          return pages;
+        };
 
-            <div className="mt-10 flex justify-between items-end print:hidden">
-               <button onClick={() => setPrintOrder(null)} className="px-6 py-2 text-red-600 font-bold hover:bg-red-50 rounded transition-colors">Close Viewer</button>
-               <button onClick={() => window.print()} className="px-8 py-3 bg-[#004277] text-white font-bold rounded-lg shadow-lg flex items-center gap-2 hover:bg-[#003058] transition-colors">
-                  <span className="material-symbols-outlined">print</span> Print Document
-               </button>
-            </div>
-         </div>
-       </div>
-    )}
+        const pages = getPagesForPrint(printOrder.items);
+
+        return createPortal(
+          <>
+              {/* Styles for print overlay to hide everything except the print modal */}
+              <style dangerouslySetInnerHTML={{ __html: `
+                @media print {
+                  @page {
+                    size: ${paperDetails.width} ${paperDetails.height} !important;
+                    margin: 0 !important;
+                  }
+                  body {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #ffffff !important;
+                  }
+                  body > *:not(#antigravity-print-preview-modal) {
+                    display: none !important;
+                  }
+                  #antigravity-print-preview-modal, #antigravity-print-preview-modal * {
+                    visibility: visible !important;
+                  }
+                  #antigravity-print-preview-modal {
+                    position: static !important;
+                    background: transparent !important;
+                    backdrop-filter: none !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    overflow: visible !important;
+                    width: ${paperDetails.width} !important;
+                    height: auto !important;
+                    display: block !important;
+                  }
+                  .print-preview-control-header {
+                    display: none !important;
+                  }
+                  .print-preview-page-break {
+                    page-break-after: always !important;
+                    break-after: page !important;
+                  }
+                  .print-preview-page {
+                    box-shadow: none !important;
+                    border: none !important;
+                    margin: 0 !important;
+                    padding: ${printSettings.margin || '0.5in'} !important;
+                    width: ${paperDetails.width} !important;
+                    height: ${paperDetails.height} !important;
+                    page-break-after: always !important;
+                    break-after: page !important;
+                    page-break-inside: avoid !important;
+                    break-inside: avoid !important;
+                  }
+                }
+              ` }} />
+
+              {/* Digital Twin Print Preview Modal */}
+              <div 
+                id="antigravity-print-preview-modal"
+                className="fixed inset-0 z-[110] bg-slate-900/90 backdrop-blur-md flex flex-col items-center p-8 overflow-y-auto"
+              >
+                {/* Controls Bar at top */}
+                <div className="w-full max-w-[800px] bg-white border border-slate-200 rounded-2xl p-4 mb-6 shadow-xl flex justify-between items-center print-preview-control-header">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/10 text-primary p-2 rounded-xl">
+                      <span className="material-symbols-outlined text-[20px] font-bold">print</span>
+                    </div>
+                    <div className="text-left font-sans">
+                      <h4 className="text-sm font-black text-slate-800">Print Preview Digital Twin</h4>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        Doc: Sale Order ({paperDetails.label})
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 font-sans">
+                    <button
+                      type="button"
+                      onClick={() => setPrintOrder(null)}
+                      className="px-4 py-2 border border-slate-300 rounded-xl text-slate-600 font-bold text-xs hover:bg-slate-50 transition-all cursor-pointer"
+                    >
+                      Close Preview
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={triggerNativePrint}
+                      className="px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/95 transition-all shadow flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[16px] font-bold">print</span>
+                      Confirm &amp; Print
+                    </button>
+                  </div>
+                </div>
+
+                {/* Stacked Pages Mockup */}
+                <div className="w-full max-w-[800px] flex flex-col gap-8 items-center bg-transparent select-none">
+                   {pages.map((pageItems, pageIdx) => {
+                      const isFirstPage = pageIdx === 0;
+                      const isLastPage = pageIdx === pages.length - 1;
+                      
+                      return (
+                         <div 
+                           key={pageIdx}
+                           className="bg-white text-slate-850 p-8 flex flex-col relative transition-all duration-300 overflow-hidden print-preview-page"
+                           style={{ 
+                             width: paperDetails.width,
+                             height: paperDetails.height,
+                             minWidth: paperDetails.width,
+                             minHeight: paperDetails.height,
+                             fontSize: printSettings.fontSize || '12px',
+                             padding: printSettings.margin || '0.5in',
+                             boxSizing: 'border-box'
+                           }}
+                         >
+                            {/* Page Header Theme */}
+                            {(isFirstPage || repeatHeader) ? (
+                               renderHeaderThemeLocal(headerTheme, printOrder)
+                            ) : (
+                               <div className="pb-2 mb-4 border-b border-dashed border-slate-100 flex justify-between items-center text-[8px] text-slate-400 italic font-sans w-full">
+                                 <span>Sale Order - Continuation sheet ({printOrder.id})</span>
+                                 <span>Page {pageIdx + 1} of {pages.length}</span>
+                                </div>
+                            )}
+
+                            {/* Metadata Grid (only on first page) */}
+                            {isFirstPage && (
+                              <div className="mb-6 w-full">
+                                <div className="grid grid-cols-3 gap-2 w-full">
+                                  {activeHeaderFields.map(field => {
+                                    const spanClass = field.width === 'span-2' ? 'col-span-2' : (field.width === 'span-3' ? 'col-span-3' : 'col-span-1');
+                                    return (
+                                      <div
+                                        key={field.key}
+                                        className={`border p-2 rounded-lg flex flex-col ${spanClass}`}
+                                        style={{
+                                          backgroundColor: field.style?.bgColor || '#ffffff',
+                                          color: field.style?.color || '#0f172a'
+                                        }}
+                                      >
+                                        <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider font-sans">{field.label}</span>
+                                        <span className="text-[10px] font-bold mt-0.5 truncate font-mono text-slate-850">
+                                          {getHeaderFieldValue(field.key, printOrder)}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Items Grid Table */}
+                            <div className="flex-grow border border-slate-200 rounded-lg overflow-hidden bg-white mb-4 w-full">
+                              <table className="w-full border-collapse text-left font-sans">
+                                 {/* Table Header Row */}
+                                 {(isFirstPage || repeatTableHeader) && (
+                                    <thead>
+                                      <tr>
+                                        {activeGridColumns.map(col => {
+                                          const alignClass = col.align === 'right' ? 'text-right' : (col.align === 'center' ? 'text-center' : 'text-left');
+                                          return (
+                                            <th 
+                                              key={col.key} 
+                                              className={`p-2 border border-slate-200 text-[9px] ${alignClass}`}
+                                              style={{ 
+                                                width: col.width,
+                                                backgroundColor: col.style?.bgColor || '#004277',
+                                                color: col.style?.color || '#ffffff'
+                                              }}
+                                            >
+                                              {col.label}
+                                            </th>
+                                          );
+                                        })}
+                                      </tr>
+                                    </thead>
+                                 )}
+                                 <tbody>
+                                    {pageItems.map((item, itemIdx) => {
+                                       const absIndex = pages.slice(0, pageIdx).reduce((acc, p) => acc + p.length, 0) + itemIdx;
+                                       return (
+                                          <tr key={absIndex} className="hover:bg-slate-50/50">
+                                            {activeGridColumns.map(col => {
+                                              const alignClass = col.align === 'right' ? 'text-right' : (col.align === 'center' ? 'text-center' : 'text-left');
+                                              return (
+                                                <td key={col.key} className={`p-2 border border-slate-100 text-[8px] text-slate-700 font-mono ${alignClass}`}>
+                                                  {getColumnValue(col.key, item, absIndex)}
+                                                </td>
+                                              );
+                                            })}
+                                          </tr>
+                                       );
+                                    })}
+                                 </tbody>
+                              </table>
+                            </div>
+
+                            {/* Totals, Disclaimers, Signatures (Only on last page) */}
+                            {isLastPage && (
+                              <div className="mt-auto w-full">
+                                {/* Totals calculation and styling */}
+                                <div 
+                                  className="ml-auto border p-3 rounded-xl bg-white mb-4"
+                                  style={{
+                                    width: totalsStyle?.width || '30%',
+                                    backgroundColor: totalsStyle?.bgColor || '#ffffff',
+                                    color: totalsStyle?.textColor || '#0f172a',
+                                    borderStyle: totalsStyle?.borderStyle || 'solid'
+                                  }}
+                                >
+                                  <div className="space-y-1 text-[9px] font-sans">
+                                    <div className="flex justify-between text-slate-500">
+                                      <span>Subtotal:</span>
+                                      <span className="font-mono font-bold">
+                                        {currencyCode} {printOrder.items.reduce((sum, item) => sum + (item.quantity * item.price), 0).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between text-slate-500">
+                                      <span>Discount:</span>
+                                      <span className="font-mono font-bold">
+                                        {currencyCode} {printOrder.items.reduce((sum, item) => sum + (item.discount || 0), 0).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between border-t border-slate-300 pt-1 font-bold text-slate-850">
+                                      <span>Grand Total:</span>
+                                      <span className="font-mono font-black">
+                                        {currencyCode} {(printOrder.items.reduce((sum, item) => sum + (item.quantity * item.price), 0) - printOrder.items.reduce((sum, item) => sum + (item.discount || 0), 0)).toLocaleString(undefined, {minimumFractionDigits: 2})}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Terms & Conditions and Disclaimer */}
+                                <div className="border-t border-slate-300 pt-3">
+                                  <div className="grid grid-cols-2 gap-4 mb-4 font-sans text-left">
+                                    <div className="text-[8px] leading-tight">
+                                      <span className="font-bold text-slate-400 block mb-1">Terms &amp; Conditions</span>
+                                      <p className={`text-slate-500 whitespace-pre-line ${wrapText ? 'break-all text-justify' : 'truncate'}`}>
+                                        {termsConditions}
+                                      </p>
+                                    </div>
+                                    {showDisclaimer && (
+                                      <div className="text-[8px] leading-tight border-l border-slate-200 pl-3">
+                                        <span className="font-bold text-slate-400 block mb-1">Disclaimer</span>
+                                        <p className={`text-slate-500 ${wrapText ? 'break-all text-justify' : 'truncate'}`}>
+                                          {disclaimerText}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Signatures */}
+                                  {signaturesList && signaturesList.length > 0 && (
+                                    <div className="flex gap-4 justify-between items-end mb-4 border-t border-slate-100 pt-3">
+                                      {signaturesList.map(sig => {
+                                        const widthClass = sig.size === 'full' ? 'w-full' : (sig.size === '1/2' ? 'w-1/2' : 'w-1/3');
+                                        return (
+                                          <div key={sig.key} className={`text-center flex flex-col items-center ${widthClass}`}>
+                                            {sig.type === 'stamp' ? (
+                                              <div className="w-14 h-8 rounded-full border border-dashed border-primary/30 flex items-center justify-center text-[7px] text-primary/45 font-bold uppercase mb-1">
+                                                STAMP ZONE
+                                              </div>
+                                            ) : (
+                                              <div className="h-6"></div>
+                                            )}
+                                            <div className="border-b border-slate-300 w-32 mb-1"></div>
+                                            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{sig.label}</span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Page Footer Attribution */}
+                            <div className="mt-auto pt-4 flex justify-between items-center border-t border-slate-100 text-[8px] text-slate-450 font-mono w-full">
+                              <span>{showCustomFooterText ? customFooterText : 'Digital Outbound Document.'}</span>
+                              {showPageNumbers && (
+                                <span>
+                                  {pageNumberFormat === 'X/Y' ? `${pageIdx + 1}/${pages.length}` : (pageNumberFormat === 'Page X' ? `Page ${pageIdx + 1}` : `Page ${pageIdx + 1} of ${pages.length}`)}
+                                </span>
+                              )}
+                            </div>
+                         </div>
+                      );
+                   })}
+                </div>
+             </div>
+          </>, document.body
+        );
+    })()}
 
     {/* MAIN APP (hidden during print) */}
-    <div className="print:hidden">
-    <Layout>
-      {/* Navigation Tabs */}
-      <div className="flex border-b border-outline-variant/20 mb-8 gap-6 animate-in slide-in-from-top-4 duration-500">
-        <button 
-           className={`pb-4 font-bold tracking-widest text-sm uppercase transition-all ${activeTab === 'dashboard' ? 'border-b-[3px] border-primary text-primary' : 'text-slate-400 hover:text-slate-600'}`}
-           onClick={() => setActiveTab('dashboard')}
-        >Dashboard</button>
-        <button 
-           className={`pb-4 font-bold tracking-widest text-sm uppercase transition-all ${activeTab === 'create' ? 'border-b-[3px] border-primary text-primary' : 'text-slate-400 hover:text-slate-600'}`}
-           onClick={() => setActiveTab('create')}
-        >Create Sale Order</button>
-        <button 
-           className={`pb-4 font-bold tracking-widest text-sm uppercase transition-all ${activeTab === 'history' ? 'border-b-[3px] border-primary text-primary' : 'text-slate-400 hover:text-slate-600'}`}
-           onClick={() => setActiveTab('history')}
-        >Order History</button>
+    <div className="h-full w-full print:hidden">
+
+    {/* Timeline Modal */}
+    {showTimelineModal && timelineOrderInfo && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+         <div className="bg-surface text-on-surface w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl shadow-2xl flex flex-col">
+             <div className="bg-surface-container-lowest px-8 py-6 border-b border-outline-variant/20 flex justify-between items-center">
+                 <div>
+                     <h2 className="text-2xl font-extrabold tracking-tight">Timeline & Tracking</h2>
+                     <p className="text-sm font-semibold text-on-surface-variant">Order <span className="font-mono bg-surface-container px-1 py-0.5 rounded mx-1 text-primary">{timelineOrderInfo.orderId}</span> {timelineOrderInfo.itemCode && <span>• Item <span className="font-mono bg-surface-container px-1 py-0.5 rounded ml-1 text-secondary">{timelineOrderInfo.itemCode}</span></span>}</p>
+                 </div>
+                 <button onClick={() => setShowTimelineModal(false)} className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container hover:bg-surface-container-high transition-colors">
+                     <span className="material-symbols-outlined">close</span>
+                 </button>
+             </div>
+             <div className="p-8 overflow-y-auto flex-1 bg-surface-container-lowest">
+                 <div className="flex justify-between items-center mb-6">
+                    <h3 className="font-bold text-on-surface">Event History</h3>
+                    <button onClick={() => setTimelineSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')} className="text-xs font-bold bg-surface-container px-3 py-1.5 rounded-lg flex items-center gap-1 hover:bg-surface-container-high transition-colors text-slate-600">
+                       <span className="material-symbols-outlined text-[14px]">swap_vert</span>
+                       {timelineSortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
+                    </button>
+                 </div>
+                 {timelineEvents && timelineEvents.length > 0 ? (
+                     <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-outline-variant/20 before:to-transparent">
+                         {timelineEvents.map((evt, idx) => (
+                             <div key={idx} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active animate-in fade-in slide-in-from-bottom-2 duration-300" style={{animationFillMode: 'both', animationDelay: `${idx * 50}ms`}}>
+                                 <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-surface ${evt.color.replace('text-', 'bg-')} text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2`}>
+                                     <span className="material-symbols-outlined text-[18px]">{evt.icon}</span>
+                                 </div>
+                                 <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-white p-4 rounded-xl border border-outline-variant/10 shadow-sm group-hover:border-primary/20 group-hover:shadow-md transition-all">
+                                     <div className="flex justify-between items-start mb-2">
+                                         <span className={`font-extrabold ${evt.color} text-base`}>{evt.title}</span>
+                                         <span className="text-[10px] font-bold text-on-surface-variant bg-surface-container px-2 py-1 rounded tracking-wider uppercase">{evt.date.toLocaleDateString()}</span>
+                                     </div>
+                                     <p className="text-sm font-semibold text-slate-600">{evt.desc}</p>
+                                 </div>
+                             </div>
+                         ))}
+                     </div>
+                 ) : (
+                     <div className="text-center py-10 bg-surface-container-lowest rounded-xl border border-outline-variant/10">
+                         <span className="material-symbols-outlined text-4xl text-outline mb-2">hourglass_empty</span>
+                         <p className="text-on-surface-variant font-medium text-sm">No tracking events recorded yet.</p>
+                     </div>
+                 )}
+             </div>
+         </div>
       </div>
+    )}
+
+    <Layout subNavConfig={subNavConfig}>
+      {/* Navigation Tabs Moved to Left Sidebar */}
 
       {activeTab === 'dashboard' && (
         <div className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
           {/* Header Section with Arrows */}
           <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="flex gap-1 mr-2">
-                <button onClick={handlePrevTab} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
-                <button onClick={handleNextTab} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm"><span className="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+              <div className="flex mr-2">
+                <button onClick={() => navigate('/')} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm" title="Back to Home"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
               </div>
               <div>
                 <h1 className="text-4xl font-extrabold tracking-tight text-on-surface font-headline">All Sale Orders</h1>
@@ -531,28 +1357,48 @@ export default function SaleOrderModule() {
           </div>
           
           {/* Bento Summary Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] border border-outline-variant/10 group hover:-translate-y-1 transition-transform">
-              <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Total Orders</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 select-none">
+            <div 
+              onDoubleClick={() => { setShowTotalOrdersModal(true); setOrdersHistoryOffset(0); }} 
+              className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] border border-outline-variant/10 group hover:-translate-y-1 transition-transform cursor-pointer"
+              title="Double click for 6-month history"
+            >
+              <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Total Sale Orders</p>
               <p className="text-3xl font-extrabold text-primary">{totalOrders}</p>
-              <div className="mt-4 flex items-center text-xs text-green-600 font-semibold">
-                <span className="material-symbols-outlined text-sm mr-1">trending_up</span> +12% from last month
+              <div className={`mt-4 flex items-center text-xs font-semibold ${momPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <span className="material-symbols-outlined text-sm mr-1">{momPercentage >= 0 ? 'trending_up' : 'trending_down'}</span> 
+                {momPercentage >= 0 ? '+' : ''}{momPercentage}% from last month
               </div>
             </div>
-            <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] border border-outline-variant/10 group hover:-translate-y-1 transition-transform">
+            
+            <div 
+              onClick={() => { setShowProcessingModal(true); setProcessingHistoryOffset(0); }}
+              className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] border border-outline-variant/10 group hover:-translate-y-1 transition-transform cursor-pointer"
+              title="Click for completed orders history"
+            >
               <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Processing</p>
               <p className="text-3xl font-extrabold text-on-surface">{processingCount}</p>
               <div className="mt-4 flex items-center text-xs text-secondary font-semibold">
-                <span className="material-symbols-outlined text-sm mr-1">pending</span> Average 2.4 hrs
+                <span className="material-symbols-outlined text-sm mr-1">bolt</span> Active in Production
               </div>
             </div>
-            <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] border border-outline-variant/10 group hover:-translate-y-1 transition-transform">
-              <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Revenue (Total)</p>
-              <p className="text-3xl font-extrabold text-tertiary">{totalRevenue}</p>
-              <div className="mt-4 flex items-center text-xs text-tertiary font-semibold">
-                <span className="material-symbols-outlined text-sm mr-1">payments</span> Live settlement estimation
+
+            {hasRevenuePermission ? (
+              <div className="bg-surface-container-lowest p-6 rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] border border-outline-variant/10 group hover:-translate-y-1 transition-transform">
+                <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Revenue (Total)</p>
+                <p className="text-3xl font-extrabold text-tertiary">{totalRevenue}</p>
+                <div className="mt-4 flex items-center text-xs text-tertiary font-semibold">
+                  <span className="material-symbols-outlined text-sm mr-1">payments</span> Live settlement estimation
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 flex items-center justify-center opacity-50">
+                 <div className="text-center">
+                    <span className="material-symbols-outlined text-2xl text-slate-400">lock</span>
+                    <p className="text-xs font-bold text-slate-400 mt-2">Restricted Access</p>
+                 </div>
+              </div>
+            )}
             <div className="bg-primary/5 p-6 rounded-xl border border-primary/10 flex items-center justify-between group hover:-translate-y-1 transition-transform relative">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-primary font-bold mb-1">Quick Report</p>
@@ -622,15 +1468,15 @@ export default function SaleOrderModule() {
                 <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
                   <thead>
                     <tr className="bg-surface-container-low/50 border-y border-outline-variant/10">
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Order ID</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Date</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Customer</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-24">Items</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-24">Output (m)</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-32">Dispatched</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-32">Value (PKR)</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-32">Status</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-1">Actions</th>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Order ID</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Date</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Customer</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-24">Order Metres</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-32">Output (m)</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-32">Dispatched (m)</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-32">Value ({currencyCode})</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-32">Status</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-1">Actions</ResizableHeader>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-surface-container-low font-body text-sm">
@@ -654,12 +1500,19 @@ export default function SaleOrderModule() {
                           </div>
                         </td>
                         <td className="px-6 py-5 text-right font-bold text-slate-600">{itemCount}</td>
-                        <td className="px-6 py-5 text-right font-bold text-slate-700">{outputCount}</td>
+                        <td className="px-6 py-5 text-right">
+                          <div className="flex flex-col items-end">
+                            <span className="font-bold text-slate-700 text-xs">{outputCount} / {itemCount}</span>
+                            <div className="w-16 h-1 mt-1.5 bg-surface-container rounded-full overflow-hidden">
+                              <div className="h-full bg-secondary" style={{ width: `${itemCount > 0 ? Math.min((outputCount/itemCount)*100, 100) : 0}%`}}></div>
+                            </div>
+                          </div>
+                        </td>
                         <td className="px-6 py-5 text-right">
                           <div className="flex flex-col items-end">
                             <span className="font-bold text-tertiary text-xs">{dispatchedCount} / {itemCount}</span>
                             <div className="w-16 h-1 mt-1.5 bg-surface-container rounded-full overflow-hidden">
-                              <div className="h-full bg-tertiary" style={{ width: `${itemCount > 0 ? (dispatchedCount/itemCount)*100 : 0}%`}}></div>
+                              <div className="h-full bg-tertiary" style={{ width: `${itemCount > 0 ? Math.min((dispatchedCount/itemCount)*100, 100) : 0}%`}}></div>
                             </div>
                           </div>
                         </td>
@@ -669,6 +1522,7 @@ export default function SaleOrderModule() {
                         </td>
                         <td className="px-6 py-5 text-right">
                           <div className="flex items-center justify-end space-x-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => { setTimelineOrderInfo({ orderId: order.id, itemCode: null, type: 'order' }); setShowTimelineModal(true); }} className="p-2 hover:text-primary transition-colors hover:bg-primary/10 rounded-lg" title="Timeline View"><span className="material-symbols-outlined text-[20px]">history</span></button>
                             <button onClick={() => handleEditOrder(order)} className="p-2 hover:text-primary transition-colors hover:bg-primary/10 rounded-lg" title="Modify"><span className="material-symbols-outlined text-[20px]">edit</span></button>
                             <button onClick={() => setPrintOrder(order)} className="p-2 hover:text-primary transition-colors hover:bg-primary/10 rounded-lg" title="Print"><span className="material-symbols-outlined text-[20px]">print</span></button>
                           </div>
@@ -687,14 +1541,15 @@ export default function SaleOrderModule() {
                 <table className="w-full text-left border-collapse table-auto whitespace-nowrap animate-in fade-in duration-300">
                   <thead>
                     <tr className="bg-surface-container-low/50 border-y border-outline-variant/10">
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Date</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Order Details</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Item Info</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-24">Order Qty</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-slate-700 text-right w-24">Output (m)</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-tertiary text-right w-24">Dispatched</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-24">Pending</th>
-                      <th className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-32">Item Status</th>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Date</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Order Details</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Item Info</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-24">Order Metres</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-slate-700 text-right w-32">Output (m)</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-tertiary text-right w-32">Dispatched (m)</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-24">Pending</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-32">Item Status</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-1">Actions</ResizableHeader>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-surface-container-low font-body text-sm">
@@ -714,13 +1569,30 @@ export default function SaleOrderModule() {
                           <div className="text-sm font-semibold text-slate-700">{prodObj?.name || 'Unknown Item'}</div>
                         </td>
                         <td className="px-6 py-5 text-right font-extrabold text-slate-800">{item.quantity}</td>
-                        <td className="px-6 py-5 text-right font-bold text-slate-700">{item.producedQty || 0}</td>
                         <td className="px-6 py-5 text-right">
-                          <span className="font-bold text-tertiary bg-tertiary/10 px-3 py-1 rounded-lg inline-block border border-tertiary/20">{item.deliveredQty || 0}</span>
+                          <div className="flex flex-col items-end">
+                            <span className="font-bold text-slate-700 text-xs">{item.producedQty || 0} / {item.quantity}</span>
+                            <div className="w-16 h-1 mt-1.5 bg-surface-container rounded-full overflow-hidden">
+                              <div className="h-full bg-secondary" style={{ width: `${item.quantity > 0 ? Math.min(((item.producedQty || 0)/item.quantity)*100, 100) : 0}%`}}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <div className="flex flex-col items-end">
+                            <span className="font-bold text-tertiary text-xs">{item.deliveredQty || 0} / {item.quantity}</span>
+                            <div className="w-16 h-1 mt-1.5 bg-surface-container rounded-full overflow-hidden">
+                              <div className="h-full bg-tertiary" style={{ width: `${item.quantity > 0 ? Math.min(((item.deliveredQty || 0)/item.quantity)*100, 100) : 0}%`}}></div>
+                            </div>
+                          </div>
                         </td>
                         <td className="px-6 py-5 text-right font-bold text-slate-500">{pendingQty}</td>
                         <td className="px-6 py-5 overflow-visible">
                            <StatusBadgeWithAction orderId={item.orderId} itemCode={item.itemCode} status={item.status} updateStatus={updateSaleOrderItemStatus} />
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <div className="flex items-center justify-end space-x-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => { setTimelineOrderInfo({ orderId: item.orderId, itemCode: item.itemCode, type: 'item' }); setShowTimelineModal(true); }} className="p-2 hover:text-primary transition-colors hover:bg-primary/10 rounded-lg" title="Timeline View"><span className="material-symbols-outlined text-[20px]">history</span></button>
+                          </div>
                         </td>
                       </tr>
                       );
@@ -746,6 +1618,90 @@ export default function SaleOrderModule() {
               </div>
             </div>
           </div>
+          
+          {/* --- Dashboard Modals --- */}
+          {showTotalOrdersModal && (() => {
+             const data = getSixMonthsData(activeSaleOrders, ordersHistoryOffset, () => true);
+             return (
+               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4">
+                 <div className="bg-surface-container-lowest w-full max-w-2xl rounded-3xl p-6 shadow-2xl animate-slide-up relative">
+                    <button onClick={() => setShowTotalOrdersModal(false)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors">
+                       <span className="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                    <h3 className="text-xl font-bold text-on-surface mb-2">Total Sale Orders History</h3>
+                    <p className="text-sm text-on-surface-variant mb-6">Showing historical trend for order volume.</p>
+                    
+                    <div className="flex justify-between items-end h-48 mb-6 border-b border-surface-container pb-2 px-2 gap-2">
+                       {data.map((item, idx) => {
+                          const maxCount = Math.max(...data.map(d => d.count), 1);
+                          const heightPct = Math.round((item.count / maxCount) * 100);
+                          return (
+                             <div key={idx} className="flex flex-col items-center flex-1 group">
+                                <div className="text-xs font-bold text-primary mb-2 opacity-0 group-hover:opacity-100 transition-opacity">{item.count}</div>
+                                <div className="w-full bg-primary/20 rounded-t-lg relative overflow-hidden group-hover:bg-primary/30 transition-colors" style={{ height: `${heightPct}%`, minHeight: '4px' }}>
+                                   <div className="absolute bottom-0 w-full bg-primary rounded-t-lg transition-all duration-500" style={{ height: '100%' }}></div>
+                                </div>
+                                <div className="text-[10px] font-bold text-on-surface-variant mt-2 uppercase">{item.month}</div>
+                             </div>
+                          );
+                       })}
+                    </div>
+                    
+                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-surface-container">
+                       <button onClick={() => setOrdersHistoryOffset(prev => prev + 1)} className="px-4 py-2 bg-surface border border-outline-variant/30 text-on-surface rounded-xl text-xs font-bold hover:bg-surface-container flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">arrow_back</span> Previous 6 Months
+                       </button>
+                       <span className="text-xs font-bold text-slate-400">Offset: {ordersHistoryOffset * 6} months</span>
+                       <button disabled={ordersHistoryOffset === 0} onClick={() => setOrdersHistoryOffset(prev => Math.max(0, prev - 1))} className={`px-4 py-2 bg-surface border border-outline-variant/30 text-on-surface rounded-xl text-xs font-bold flex items-center gap-1 ${ordersHistoryOffset === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-container'}`}>
+                          Next 6 Months <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                       </button>
+                    </div>
+                 </div>
+               </div>
+             );
+          })()}
+
+          {showProcessingModal && (() => {
+             const data = getSixMonthsData(activeSaleOrders, processingHistoryOffset, o => o.status === 'Completed');
+             return (
+               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4">
+                 <div className="bg-surface-container-lowest w-full max-w-2xl rounded-3xl p-6 shadow-2xl animate-slide-up relative">
+                    <button onClick={() => setShowProcessingModal(false)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors">
+                       <span className="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                    <h3 className="text-xl font-bold text-on-surface mb-2">Completed Orders History</h3>
+                    <p className="text-sm text-on-surface-variant mb-6">Showing historical trend for completed order processing.</p>
+                    
+                    <div className="flex justify-between items-end h-48 mb-6 border-b border-surface-container pb-2 px-2 gap-2">
+                       {data.map((item, idx) => {
+                          const maxCount = Math.max(...data.map(d => d.count), 1);
+                          const heightPct = Math.round((item.count / maxCount) * 100);
+                          return (
+                             <div key={idx} className="flex flex-col items-center flex-1 group">
+                                <div className="text-xs font-bold text-secondary mb-2 opacity-0 group-hover:opacity-100 transition-opacity">{item.count}</div>
+                                <div className="w-full bg-secondary/20 rounded-t-lg relative overflow-hidden group-hover:bg-secondary/30 transition-colors" style={{ height: `${heightPct}%`, minHeight: '4px' }}>
+                                   <div className="absolute bottom-0 w-full bg-secondary rounded-t-lg transition-all duration-500" style={{ height: '100%' }}></div>
+                                </div>
+                                <div className="text-[10px] font-bold text-on-surface-variant mt-2 uppercase">{item.month}</div>
+                             </div>
+                          );
+                       })}
+                    </div>
+                    
+                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-surface-container">
+                       <button onClick={() => setProcessingHistoryOffset(prev => prev + 1)} className="px-4 py-2 bg-surface border border-outline-variant/30 text-on-surface rounded-xl text-xs font-bold hover:bg-surface-container flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">arrow_back</span> Previous 6 Months
+                       </button>
+                       <span className="text-xs font-bold text-slate-400">Offset: {processingHistoryOffset * 6} months</span>
+                       <button disabled={processingHistoryOffset === 0} onClick={() => setProcessingHistoryOffset(prev => Math.max(0, prev - 1))} className={`px-4 py-2 bg-surface border border-outline-variant/30 text-on-surface rounded-xl text-xs font-bold flex items-center gap-1 ${processingHistoryOffset === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-container'}`}>
+                          Next 6 Months <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                       </button>
+                    </div>
+                 </div>
+               </div>
+             );
+          })()}
+
         </div>
       )}
 
@@ -754,9 +1710,8 @@ export default function SaleOrderModule() {
         <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-4">
           <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex items-center gap-4">
-               <div className="flex gap-1 mr-2">
-                  <button type="button" onClick={handlePrevTab} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
-                  <button type="button" onClick={handleNextTab} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm"><span className="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+               <div className="flex mr-2">
+                  <button type="button" onClick={() => setActiveTab('dashboard')} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm" title="Back to Dashboard"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
                </div>
                <div className="space-y-1">
                  <h1 className="text-3xl font-extrabold tracking-tight text-primary font-headline">New Sale Order</h1>
@@ -834,11 +1789,11 @@ export default function SaleOrderModule() {
                 </div>
                 <div className="space-y-2">
                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Contact Person</label>
-                   <input type="text" placeholder="Full Name" className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20 text-sm font-medium"/>
+                   <input type="text" readOnly value={state.customers.find(c => c.id === orderMeta.customerId)?.contactPerson || ''} placeholder="Full Name" className="w-full bg-surface-container-highest/50 border-none rounded-lg focus:ring-0 text-sm font-medium cursor-not-allowed text-slate-500"/>
                 </div>
                 <div className="space-y-2">
                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Contact Phone</label>
-                   <input type="tel" placeholder="+1 (555) 000-0000" className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20 text-sm font-medium"/>
+                   <input type="tel" readOnly value={state.customers.find(c => c.id === orderMeta.customerId)?.phone || ''} placeholder="+1 (555) 000-0000" className="w-full bg-surface-container-highest/50 border-none rounded-lg focus:ring-0 text-sm font-medium cursor-not-allowed text-slate-500"/>
                 </div>
                 <div className="space-y-2 col-span-full">
                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Shipping Address</label>
@@ -895,14 +1850,14 @@ export default function SaleOrderModule() {
               <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
                 <thead>
                   <tr className="bg-surface border-b border-outline-variant/10">
-                    <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant w-1">Sr.</th>
-                    <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant min-w-[350px]">Item Code / Selective Search</th>
-                    <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-28">Order Qty</th>
-                    <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-24">Rolls</th>
-                    <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-24">Rate (PKR)</th>
-                    <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-24">Disc. (PKR)</th>
-                    <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-32">Subtotal</th>
-                    <th className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant min-w-[200px]">Line Remarks</th>
+                    <ResizableHeader className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant w-1">Sr.</ResizableHeader>
+                    <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant min-w-[350px]">Item Code / Selective Search</ResizableHeader>
+                    <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-28">Order Qty</ResizableHeader>
+                    <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-24">Rolls</ResizableHeader>
+                    <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-24">Rate ({currencyCode})</ResizableHeader>
+                    <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-24">Disc. ({currencyCode})</ResizableHeader>
+                    <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-32">Subtotal</ResizableHeader>
+                    <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant min-w-[200px]">Line Remarks</ResizableHeader>
                     <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest w-1"></th>
                   </tr>
                 </thead>
@@ -911,7 +1866,11 @@ export default function SaleOrderModule() {
                      const itemSubtotal = (item.qty * item.price) - (item.discount || 0);
                      const prodObj = state.items.find(i => i.id === item.itemId);
                      const actRollSz = prodObj?.rollSize || prodObj?.packingSize || 0;
-                     const filteredItemsList = state.items.filter(i => (i.type === 'Finish Good' || i.category === 'Finished Goods') && (i.name.toLowerCase().includes((searchQueries[item.id] || '').toLowerCase()) || i.sku.toLowerCase().includes((searchQueries[item.id] || '').toLowerCase())));
+                     const filteredItemsList = state.items.filter(i => 
+                        (i.type === 'Finish Good' || i.category === 'Finished Goods') && 
+                        (i.name.toLowerCase().includes((searchQueries[item.id] || '').toLowerCase()) || i.sku.toLowerCase().includes((searchQueries[item.id] || '').toLowerCase())) &&
+                        !items.some(existingItem => existingItem.itemId === i.id && existingItem.id !== item.id)
+                     );
                      
                      return (
                       <tr key={item.id} className="group hover:bg-surface-container-low/50 transition-colors">
@@ -1022,7 +1981,7 @@ export default function SaleOrderModule() {
               </div>
               <div className="pt-6 border-t border-white/20 flex justify-between items-end relative z-10 w-full">
                  <span className="text-lg font-extrabold uppercase tracking-wide">Grand Total</span>
-                 <span className="text-4xl font-black tracking-tight">{subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})} <span className="text-lg opacity-70 ml-1">PKR</span></span>
+                 <span className="text-4xl font-black tracking-tight">{subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})} <span className="text-lg opacity-70 ml-1">{currencyCode}</span></span>
               </div>
             </section>
           </div>
@@ -1039,9 +1998,8 @@ export default function SaleOrderModule() {
         <div className="space-y-8 animate-in mt-10 fade-in slide-in-from-bottom-4 duration-500">
            <div className="flex flex-col md:flex-row items-start md:items-end gap-4 justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex gap-1 mr-2">
-                   <button onClick={handlePrevTab} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
-                   <button onClick={handleNextTab} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm"><span className="material-symbols-outlined text-[18px]">arrow_forward</span></button>
+                <div className="flex mr-2">
+                   <button onClick={() => setActiveTab('dashboard')} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm" title="Back to Dashboard"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
                 </div>
                 <div>
                   <h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-headline">Sale Order History</h1>
@@ -1060,16 +2018,19 @@ export default function SaleOrderModule() {
                 <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
                     <thead>
                       <tr className="bg-surface-container-low/50 border-y border-outline-variant/10">
-                        <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Order ID & Date</th>
-                        <th className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Customer</th>
-                        <th className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Order Items Overview</th>
-                        <th className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right">Value (PKR)</th>
-                        <th className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Status</th>
-                        <th className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-1">Audit Details</th>
+                        <ResizableHeader className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Order ID & Date</ResizableHeader>
+                        <ResizableHeader className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Customer</ResizableHeader>
+                        <ResizableHeader className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Order Items Overview</ResizableHeader>
+                        <ResizableHeader className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Created By</ResizableHeader>
+                        <ResizableHeader className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Modified By</ResizableHeader>
+                        <ResizableHeader className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Modified Date</ResizableHeader>
+                        <ResizableHeader className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right">Value ({currencyCode})</ResizableHeader>
+                        <ResizableHeader className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Status</ResizableHeader>
+                        <ResizableHeader className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant text-right w-1">Audit Details</ResizableHeader>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-surface-container-low font-body text-sm">
-                      {filteredHistory.map(order => {
+                      {displayedHistory.map(order => {
                          const customer = state.customers.find(c => c.id === order.customerId);
                          const orderValue = order.items.reduce((sum, item) => sum + (item.quantity * item.price), 0);
                          
@@ -1082,30 +2043,92 @@ export default function SaleOrderModule() {
                                 <td className="px-6 py-6 font-extrabold text-slate-700">{customer?.name || 'Unknown'}</td>
                                 <td className="px-6 py-6">
                                    <div className="flex flex-wrap gap-2 max-w-[350px]">
-                                      <span className="text-sm font-bold text-slate-700">{order.items.map(it => it.quantity).join(', ')}</span>
+                                      <span className="text-sm font-bold text-slate-700">{order.items.length} {order.items.length === 1 ? 'Item' : 'Items'}</span>
                                    </div>
                                 </td>
+                                <td className="px-6 py-6 text-sm font-medium text-slate-700">{order.createdBy || 'Unknown'}</td>
+                                <td className="px-6 py-6 text-sm font-medium text-slate-700">{order.modifiedBy || '-'}</td>
+                                <td className="px-6 py-6 text-sm font-medium text-slate-700">{order.modifiedDate ? new Date(order.modifiedDate).toLocaleDateString() : '-'}</td>
                                 <td className="px-6 py-6 text-right font-black text-slate-800 text-base">{orderValue.toLocaleString()}</td>
                                 <td className="px-6 py-6 overflow-visible"><StatusBadgeWithAction orderId={order.id} itemCode={null} status={order.status} updateStatus={updateSaleOrderItemStatus} /></td>
                                 <td className="px-8 py-6 text-right">
                                    <div className="flex items-center justify-end gap-2">
-                                     <button onClick={() => updateSaleOrderItemStatus(order.id, null, 'Deleted')} title="Delete Order" className="text-red-400 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center">
-                                       <span className="material-symbols-outlined text-[18px]">delete</span>
+                                     <button onClick={() => setPrintOrder(order)} className="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors flex items-center justify-center" title="Print Record">
+                                        <span className="material-symbols-outlined text-[20px]">print</span>
                                      </button>
-                                     <button onClick={() => setPrintOrder(order)} className="text-primary hover:bg-primary/10 px-4 py-2 rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1.5 border border-transparent hover:border-primary/20">
-                                        <span className="material-symbols-outlined text-[16px]">print</span>
-                                        Print Record
+                                     <button onClick={() => handleEditOrder(order)} title="Edit Order" className="text-blue-400 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors flex items-center justify-center">
+                                       <span className="material-symbols-outlined text-[20px]">edit</span>
+                                     </button>
+                                     <button onClick={() => updateSaleOrderItemStatus(order.id, null, 'Deleted')} title="Delete Order" className="text-red-400 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center">
+                                       <span className="material-symbols-outlined text-[20px]">delete</span>
                                      </button>
                                    </div>
                                 </td>
                             </tr>
                          )
                       })}
-                      {filteredHistory.length === 0 && (
+                      {displayedHistory.length === 0 && (
                           <tr><td colSpan="6" className="py-16 text-center text-slate-400 font-bold italic">No history matches the current filters.</td></tr>
                       )}
                     </tbody>
                 </table>
+              </div>
+              
+              {/* Pagination & Toggle Area */}
+              <div className="px-6 py-4 bg-surface-container-low flex flex-col md:flex-row justify-between items-center border-t border-outline-variant/10 gap-4 no-print">
+                <div className="flex items-center gap-4">
+                    <div className="text-xs font-medium text-on-surface-variant">
+                        Showing {displayedHistory.length} of {filteredHistory.length} orders
+                    </div>
+                    
+                    {/* Pagination Toggle Switch */}
+                    <div className="flex items-center gap-2 border-l border-outline-variant/20 pl-4">
+                        <span className={`text-xs font-bold ${!isPaginated ? 'text-primary' : 'text-on-surface-variant'}`}>List View</span>
+                        <button 
+                            onClick={toggleGlobalPagination}
+                            className={`w-10 h-5 rounded-full relative transition-colors ${isPaginated ? 'bg-primary' : 'bg-surface-container-highest'}`}
+                        >
+                            <div className={`w-3.5 h-3.5 rounded-full bg-white absolute top-0.5 transition-transform ${isPaginated ? 'left-[22px]' : 'left-[3px]'}`}></div>
+                        </button>
+                        <span className={`text-xs font-bold ${isPaginated ? 'text-primary' : 'text-on-surface-variant'}`}>Pages</span>
+                    </div>
+                </div>
+                
+                {isPaginated && totalPages > 1 && (
+                    <div className="flex items-center gap-1">
+                      <button 
+                          disabled={currentPage === 1}
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          className="p-1 rounded hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                      ><span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>chevron_left</span></button>
+                      
+                      {/* Simple page numbers mapping */}
+                      {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
+                          let pageNum = currentPage;
+                          if (currentPage <= 3) pageNum = idx + 1;
+                          else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + idx;
+                          else pageNum = currentPage - 2 + idx;
+                          
+                          if (pageNum > totalPages || pageNum < 1) return null;
+                          
+                          return (
+                              <button 
+                                  key={pageNum}
+                                  onClick={() => setCurrentPage(pageNum)}
+                                  className={`w-8 h-8 rounded-full text-xs font-bold transition-colors ${currentPage === pageNum ? 'bg-primary text-white shadow-md' : 'hover:bg-surface-container-high text-on-surface'}`}
+                              >
+                                  {pageNum}
+                              </button>
+                          );
+                      })}
+                      
+                      <button 
+                          disabled={currentPage === totalPages}
+                          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                          className="p-1 rounded hover:bg-surface-container-high transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                      ><span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>chevron_right</span></button>
+                    </div>
+                )}
               </div>
            </div>
         </div>

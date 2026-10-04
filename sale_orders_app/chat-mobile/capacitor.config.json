@@ -1,0 +1,11 @@
+{
+  "appId": "com.flashvision.chat",
+  "appName": "FlashVision Chat",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "Keyboard": {
+      "resize": "body"
+    }
+  }
+}

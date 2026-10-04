@@ -1,269 +1,647 @@
-import React from 'react';
+import React, { useState, Suspense, useRef, useMemo } from 'react';
+import { useApp } from '../../context/AppContext';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Stage, useGLTF } from '@react-three/drei';
+import GlobalPagination from '../ui/GlobalPagination';
+import useDynamicColumns from '../../hooks/useDynamicColumns';
+import DraggableResizableHeader from '../ui/DraggableResizableHeader';
+import CustomMultiSelect from '../ui/CustomMultiSelect';
 
-export default function InvStock() {
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("Failed to load 3D model:", error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+
+function RealModel({ url }) {
+  const { scene } = useGLTF(url);
+  return <primitive object={scene} />;
+}
+
+function DummyModel({ type }) {
+  if (type === 'Cloth' || type === 'Textiles') {
+    return (
+      <mesh>
+        <cylinderGeometry args={[1, 1, 2, 32]} />
+        <meshStandardMaterial color="#3b82f6" />
+      </mesh>
+    );
+  } else if (type === 'Chemical') {
+    return (
+      <mesh>
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshStandardMaterial color="#10b981" />
+      </mesh>
+    );
+  } else if (type === 'Plastic') {
+    return (
+      <mesh>
+        <boxGeometry args={[1.5, 1.5, 1.5]} />
+        <meshStandardMaterial color="#f59e0b" />
+      </mesh>
+    );
+  } else {
+    return (
+      <mesh>
+        <torusGeometry args={[1, 0.4, 16, 100]} />
+        <meshStandardMaterial color="#8b5cf6" />
+      </mesh>
+    );
+  }
+}
+
+function Model({ type, url }) {
+  const [isUrlValid, setIsUrlValid] = useState(null);
+
+  React.useEffect(() => {
+    if (!url) {
+      setIsUrlValid(false);
+      return;
+    }
+    const isValidFormat = typeof url === 'string' && (url.startsWith('blob:') || url.startsWith('data:') || url.startsWith('http://') || url.startsWith('https://'));
+    if (!isValidFormat) {
+      setIsUrlValid(false);
+      return;
+    }
+
+    // Safely check if the URL is fetchable before rendering in ThreeJS
+    fetch(url)
+      .then(res => {
+        if (res.ok) {
+          setIsUrlValid(true);
+        } else {
+          setIsUrlValid(false);
+        }
+      })
+      .catch(() => {
+        setIsUrlValid(false);
+      });
+  }, [url]);
+
+  if (isUrlValid === null) {
+    return null; // Silent loader state
+  }
+
+  if (isUrlValid) {
+    return (
+      <ErrorBoundary fallback={<DummyModel type={type} />}>
+        <Suspense fallback={null}>
+          <RealModel url={url} />
+        </Suspense>
+      </ErrorBoundary>
+    );
+  }
+
+  return <DummyModel type={type} />;
+}
+
+const getSafeItemWithDeptStock = (item) => {
+    const nextItem = { ...item };
+    if (!nextItem.stockByDepartment) {
+        nextItem.stockByDepartment = {};
+    }
+    const depts = (nextItem.department || '').split(',').map(d => d.trim()).filter(Boolean);
+    depts.forEach((dept, idx) => {
+        if (nextItem.stockByDepartment[dept] === undefined) {
+            if (idx === 0) {
+                nextItem.stockByDepartment[dept] = Number(nextItem.stock || 0);
+            } else {
+                nextItem.stockByDepartment[dept] = 0;
+            }
+        }
+    });
+    nextItem.stock = Object.values(nextItem.stockByDepartment).reduce((sum, val) => sum + Number(val || 0), 0);
+    return nextItem;
+};
+
+const DEFAULT_COLUMNS = [
+  { id: 'sku', label: 'Item ID', visible: true, width: 120 },
+  { id: 'name', label: 'Product Details', visible: true, width: 250 },
+  { id: 'stock', label: 'Stock Level', visible: true, width: 120 },
+  { id: 'rolls', label: 'Rolls', visible: true, width: 100 },
+  { id: 'uom', label: 'UOM', visible: true, width: 80 },
+  { id: 'category', label: 'Category', visible: false, width: 120 },
+  { id: 'rawMaterialType', label: 'Item Type', visible: false, width: 120 },
+  { id: 'subCategory', label: 'Subcategory', visible: false, width: 120 },
+  { id: 'price', label: 'Price', visible: false, width: 100 },
+  { id: 'alert', label: 'Reorder Level', visible: false, width: 100 },
+  { id: 'status', label: 'Status', visible: false, width: 100 },
+  { id: 'specifications', label: 'Specifications', visible: false, width: 200 },
+  { id: 'backClothId', label: 'Back Cloth', visible: false, width: 120 },
+  { id: 'packingType', label: 'Packing Type', visible: false, width: 120 },
+  { id: 'packingSize', label: 'Packing Size', visible: false, width: 120 },
+  { id: 'uomNumber', label: 'UOM Base Qty', visible: false, width: 120 },
+  { id: 'rollSize', label: 'Roll Size', visible: false, width: 100 }
+];
+
+export default function InvStock({ selectedDepartments = [], selectable = false, selectedIds = [], onToggleSelect, onSelectAll, flattenTypes = false, excludeSaleOrderStock = false }) {
+  const { state, toggleGlobalPagination } = useApp();
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedOutputTypes, setSelectedOutputTypes] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showColSettings, setShowColSettings] = useState(false);
+
+  const { columns, visibleColumns, toggleColumn, resizeColumn, moveColumn } = useDynamicColumns(DEFAULT_COLUMNS, 'InvStock_columns');
+  const colSettingsRef = useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (colSettingsRef.current && !colSettingsRef.current.contains(event.target)) {
+        setShowColSettings(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggleOutputType = (type) => {
+      setSelectedOutputTypes(prev => 
+          prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+      );
+  };
+
+  const availableTypes = useMemo(() => Array.from(new Set(
+      state.items.flatMap(item => item.stockByType ? Object.keys(item.stockByType) : [])
+  )).filter(Boolean), [state.items]);
+
+  const filteredRows = useMemo(() => {
+      let items = state?.items || [];
+      
+      if (selectedDepartments && selectedDepartments.length > 0) {
+          items = items.filter(item => {
+              const safeItem = getSafeItemWithDeptStock(item);
+              const depts = (safeItem.department || '').split(',').map(d => d.trim()).filter(Boolean);
+              return depts.some(d => selectedDepartments.includes(d)) || 
+                     selectedDepartments.some(dept => safeItem.stockByDepartment && safeItem.stockByDepartment[dept] > 0);
+          });
+      } else {
+          return [];
+      }
+
+      // Apply search filter
+      if (searchTerm) {
+          const lowerTerm = searchTerm.toLowerCase();
+          items = items.filter(r => 
+              (r.sku || r.id)?.toLowerCase().includes(lowerTerm) ||
+              r.name?.toLowerCase().includes(lowerTerm)
+          );
+      }
+
+      const mappedItems = [];
+      
+      items.forEach(item => {
+          const safeItem = getSafeItemWithDeptStock(item);
+          let totalStock = 0;
+          if (selectedDepartments && selectedDepartments.length > 0) {
+              selectedDepartments.forEach(dept => {
+                  totalStock += safeItem.stockByDepartment[dept] || 0;
+              });
+          } else {
+              totalStock = safeItem.stock || 0;
+          }
+
+          let hasTypes = false;
+          const stockTypesData = [];
+          
+          if (safeItem.stockByType && Object.keys(safeItem.stockByType).length > 0) {
+              hasTypes = true;
+              totalStock = 0; // Reset and calculate from types
+              Object.entries(safeItem.stockByType).forEach(([typeName, qty]) => {
+                  if (selectedOutputTypes.length === 0 || selectedOutputTypes.includes(typeName)) {
+                      totalStock += qty;
+                  }
+                  stockTypesData.push({ typeName, qty });
+              });
+          }
+
+          let allocatedLegacy = 0;
+          if (excludeSaleOrderStock) {
+              const orders = state?.saleOrders || [];
+              orders.forEach(o => {
+                  if (o.status !== 'Delivered' && o.status !== 'Cancelled') {
+                      o.items?.forEach(i => {
+                          if (i.itemId === safeItem.id || i.itemCode === safeItem.sku || i.itemCode === safeItem.id) {
+                              const prod = parseFloat(i.producedQty) || 0;
+                              const disp = (parseFloat(i.dispatchedQty) || 0) + (parseFloat(i.deliveredQty) || 0);
+                              if (prod > disp) {
+                                  allocatedLegacy += (prod - disp);
+                              }
+                          }
+                      });
+                  }
+              });
+              
+              if (allocatedLegacy > 0) {
+                  totalStock = Math.max(0, totalStock - allocatedLegacy);
+                  if (hasTypes) {
+                      let remainingAllocated = allocatedLegacy;
+                      stockTypesData.forEach(t => {
+                          if (remainingAllocated <= 0) return;
+                          let deduct = Math.min(t.qty, remainingAllocated);
+                          t.qty -= deduct;
+                          remainingAllocated -= deduct;
+                      });
+                  }
+              }
+          } else {
+              // Fallback for legacy data
+              let legacyStock = 0;
+              const orders = state?.saleOrders || [];
+              orders.forEach(o => {
+                  o.items?.forEach(i => {
+                      if (i.itemId === safeItem.id || i.itemCode === safeItem.sku || i.itemCode === safeItem.id) {
+                          legacyStock += (parseFloat(i.producedQty) || 0) - (parseFloat(i.dispatchedQty) || 0);
+                      }
+                  });
+              });
+              if (legacyStock > 0 && totalStock === 0) {
+                  totalStock = legacyStock;
+              }
+          }
+
+          if (flattenTypes && hasTypes) {
+              stockTypesData.forEach(t => {
+                  if (t.qty > 0 && (selectedOutputTypes.length === 0 || selectedOutputTypes.includes(t.typeName))) {
+                      mappedItems.push({
+                          ...safeItem,
+                          displayStock: t.qty,
+                          displayType: t.typeName,
+                          displayUom: safeItem.uom || 'Unit',
+                          uniqueKey: `${safeItem.id}:::${t.typeName}`,
+                          hasTypes: false,
+                          name: `${safeItem.name} (${t.typeName})`,
+                          stockTypesData: []
+                      });
+                  }
+              });
+          } else {
+              // In flattenTypes mode, only push if stock > 0. Otherwise, normal logic.
+              if (totalStock > 0 || !excludeSaleOrderStock) {
+                  mappedItems.push({
+                      ...safeItem,
+                      displayStock: totalStock,
+                      displayType: hasTypes ? 'Multiple Types' : 'Standard',
+                      displayUom: safeItem.uom || 'Unit',
+                      uniqueKey: safeItem.id,
+                      hasTypes,
+                      stockTypesData
+                  });
+              }
+          }
+      });
+      
+      return mappedItems;
+  }, [state.items, state.saleOrders, selectedDepartments, searchTerm, selectedOutputTypes, flattenTypes, excludeSaleOrderStock]);
+
+  // Pagination Logic
+  const isPaginated = state?.isGlobalPaginated;
+  const displayedRows = isPaginated 
+      ? filteredRows.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+      : filteredRows;
+
+  const activeItem = selectedItem || (filteredRows.length > 0 ? filteredRows[0] : null);
+
+  const renderCell = (colId, item) => {
+    switch(colId) {
+        case 'sku':
+            return <span className="font-mono font-medium text-xs text-primary">{item.sku || item.id}</span>;
+        case 'name':
+            return (
+                <div className="flex items-center gap-3">
+                  {item.image ? (
+                      <img src={item.image} alt={item.name} className="w-10 h-10 rounded-lg object-cover shadow-sm border border-outline-variant/20 shrink-0" />
+                  ) : (
+                      <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-primary shrink-0">
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>inventory_2</span>
+                      </div>
+                  )}
+                  <div>
+                    <div className="font-bold text-sm text-on-surface">{item.name || 'Unknown Item'}</div>
+                    <div className="text-[10px] text-on-surface-variant max-w-[180px] truncate" title={item.description || item.specifications}>{item.description || item.specifications || 'No description'}</div>
+                  </div>
+                </div>
+            );
+        case 'stock':
+            return (
+                <span className="font-bold text-sm text-on-surface">
+                    {item.displayStock.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})}
+                </span>
+            );
+        case 'rolls':
+            return (
+                <span className="text-xs font-medium text-on-surface-variant">
+                    {item.rollSize && item.rollSize > 0 ? (item.displayStock / item.rollSize).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) : '-'}
+                </span>
+            );
+        case 'uom':
+            return <span className="text-xs text-on-surface-variant font-bold text-tertiary">{item.displayUom}</span>;
+        case 'price':
+            return <span className="text-sm">Rs. {item.price || '0.00'}</span>;
+        case 'status':
+            return (
+                <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${item.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    {item.status || "Active"}
+                </span>
+            );
+        case 'category':
+            return <span className="text-sm font-medium text-on-surface-variant">{item.category || item.type || '-'}</span>;
+        case 'rawMaterialType':
+            return <span className="text-sm font-medium text-on-surface-variant">{item.rawMaterialType || '-'}</span>;
+        default:
+            return <span className="text-sm text-on-surface-variant truncate block">{item[colId] || '-'}</span>;
+    }
+  };
+
   return (
-    <div className="animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-24">
-      {/* Header Form */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
-        <div>
-          <nav className="flex text-xs text-on-surface-variant mb-2 gap-2">
-            <span>Inventory</span>
-            <span>/</span>
-            <span className="text-primary font-semibold">Stock List</span>
-          </nav>
-          <h1 className="text-4xl font-extrabold tracking-tight text-on-surface brand-font">Stock Inventory</h1>
-          <p className="text-on-surface-variant mt-2 max-w-xl">Real-time oversight of synthetic assets across global fulfillment nodes. Maintain precision in your logistic flows.</p>
-        </div>
-        <div className="flex gap-3">
-          <button className="px-6 py-2.5 rounded-xl border border-outline-variant bg-surface-container-lowest text-primary font-semibold hover:bg-surface-container transition-colors flex items-center gap-2">
-            <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>tune</span>
-            Stock Adjustment
-          </button>
-          <button className="px-6 py-2.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-white font-semibold hover:shadow-lg active:scale-95 transition-all flex items-center gap-2">
-            <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 0" }}>add_circle</span>
-            Add New Item
-          </button>
-        </div>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="bg-surface-container-low rounded-2xl p-6 mb-8 flex flex-wrap items-center gap-6 border border-outline-variant/10">
-        <div className="flex-1 min-w-[300px] relative">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline" style={{ fontVariationSettings: "'FILL' 0" }}>search</span>
-          <input className="w-full bg-surface-container-lowest border-none outline-none ring-1 ring-outline-variant/20 focus:ring-2 focus:ring-primary rounded-xl py-3 pl-12 pr-4 text-sm font-medium" placeholder="Search by ID, name, or SKU..." type="text"/>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant mb-1 ml-1">Category</span>
-            <select className="bg-surface-container-lowest border-none ring-1 ring-outline-variant/20 rounded-xl py-2 px-4 text-sm font-medium min-w-[160px] focus:ring-2 focus:ring-primary outline-none">
-              <option>All Categories</option>
-              <option>Synthetic Polymers</option>
-              <option>Liquid Resins</option>
-              <option>Aero-composites</option>
-            </select>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant mb-1 ml-1">Warehouse</span>
-            <select className="bg-surface-container-lowest border-none ring-1 ring-outline-variant/20 rounded-xl py-2 px-4 text-sm font-medium min-w-[160px] focus:ring-2 focus:ring-primary outline-none">
-              <option>Global Nodes</option>
-              <option>Berlin-North Hub</option>
-              <option>Singapore-04</option>
-              <option>Austin-Central</option>
-            </select>
-          </div>
-          <button className="mt-5 p-2.5 text-on-surface-variant hover:text-primary hover:bg-white rounded-xl transition-all">
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>filter_list</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Inventory Table (Bento Style Card) */}
-      <div className="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant/10 shadow-[0_20px_40px_rgba(0,28,56,0.06)] mb-12">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1000px]">
-            <thead>
-              <tr className="bg-surface-container text-on-surface-variant text-[11px] font-bold uppercase tracking-widest border-b border-outline-variant/10">
-                <th className="px-8 py-5">Item ID</th>
-                <th className="px-6 py-5">Product Details</th>
-                <th className="px-6 py-5">Category</th>
-                <th className="px-6 py-5">Warehouse</th>
-                <th className="px-6 py-5">Stock Level</th>
-                <th className="px-6 py-5">UOM</th>
-                <th className="px-6 py-5">Last Sync</th>
-                <th className="px-8 py-5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm divide-y divide-outline-variant/10">
-              <tr className="hover:bg-surface-container-low transition-colors group">
-                <td className="px-8 py-6 font-mono font-medium text-primary">#FV-9021-X</td>
-                <td className="px-6 py-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>science</span>
-                    </div>
-                    <div>
-                      <div className="font-bold text-on-surface">Neo-Polymer V2</div>
-                      <div className="text-[11px] text-on-surface-variant">High-density industrial grade</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-6">
-                  <span className="px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold">SYNTHETICS</span>
-                </td>
-                <td className="px-6 py-6 text-on-surface-variant font-medium">Berlin-North</td>
-                <td className="px-6 py-6">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-on-surface">1,240.00</span>
-                    <div className="w-12 h-1.5 rounded-full bg-surface-container-high overflow-hidden">
-                      <div className="bg-primary h-full" style={{width: '85%'}}></div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-6 text-on-surface-variant">KG</td>
-                <td className="px-6 py-6 text-on-surface-variant">2h ago</td>
-                <td className="px-8 py-6 text-right">
-                  <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-all">
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>more_vert</span>
-                  </button>
-                </td>
-              </tr>
-              <tr className="bg-surface-container-low/30 hover:bg-surface-container-low transition-colors group">
-                <td className="px-8 py-6 font-mono font-medium text-primary">#FV-1188-B</td>
-                <td className="px-6 py-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>opacity</span>
-                    </div>
-                    <div>
-                      <div className="font-bold text-on-surface">ClearResin Alpha</div>
-                      <div className="text-[11px] text-on-surface-variant">Optical transparency resin</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-6">
-                  <span className="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold">LIQUIDS</span>
-                </td>
-                <td className="px-6 py-6 text-on-surface-variant font-medium">Singapore-04</td>
-                <td className="px-6 py-6">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-tertiary">42.00</span>
-                    <div className="w-12 h-1.5 rounded-full bg-surface-container-high overflow-hidden">
-                      <div className="bg-tertiary h-full" style={{width: '15%'}}></div>
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-tertiary font-bold">CRITICAL LOW</span>
-                </td>
-                <td className="px-6 py-6 text-on-surface-variant">Ltrs</td>
-                <td className="px-6 py-6 text-on-surface-variant">12m ago</td>
-                <td className="px-8 py-6 text-right">
-                  <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-all">
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>more_vert</span>
-                  </button>
-                </td>
-              </tr>
-              <tr className="hover:bg-surface-container-low transition-colors group">
-                <td className="px-8 py-6 font-mono font-medium text-primary">#FV-5542-C</td>
-                <td className="px-6 py-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>layers</span>
-                    </div>
-                    <div>
-                      <div className="font-bold text-on-surface">Carbon Fiber Roll</div>
-                      <div className="text-[11px] text-on-surface-variant">3K Twill Weave 200gsm</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-6">
-                  <span className="px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant text-[10px] font-bold">COMPOSITES</span>
-                </td>
-                <td className="px-6 py-6 text-on-surface-variant font-medium">Austin-Central</td>
-                <td className="px-6 py-6">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-on-surface">850.00</span>
-                    <div className="w-12 h-1.5 rounded-full bg-surface-container-high overflow-hidden">
-                      <div className="bg-primary h-full" style={{width: '60%'}}></div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-6 text-on-surface-variant">SQM</td>
-                <td className="px-6 py-6 text-on-surface-variant">Yesterday</td>
-                <td className="px-8 py-6 text-right">
-                  <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-all">
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>more_vert</span>
-                  </button>
-                </td>
-              </tr>
-              <tr className="bg-surface-container-low/30 hover:bg-surface-container-low transition-colors group">
-                <td className="px-8 py-6 font-mono font-medium text-primary">#FV-2291-M</td>
-                <td className="px-6 py-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-secondary-container/30 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>precision_manufacturing</span>
-                    </div>
-                    <div>
-                      <div className="font-bold text-on-surface">Micro-Actuator A1</div>
-                      <div className="text-[11px] text-on-surface-variant">High-torque robotic joint</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-6">
-                  <span className="px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed-variant text-[10px] font-bold">ELECTRONICS</span>
-                </td>
-                <td className="px-6 py-6 text-on-surface-variant font-medium">Singapore-04</td>
-                <td className="px-6 py-6">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-on-surface">3,400.00</span>
-                    <div className="w-12 h-1.5 rounded-full bg-surface-container-high overflow-hidden">
-                      <div className="bg-primary h-full" style={{width: '95%'}}></div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-6 text-on-surface-variant">Units</td>
-                <td className="px-6 py-6 text-on-surface-variant">4h ago</td>
-                <td className="px-8 py-6 text-right">
-                  <button className="opacity-0 group-hover:opacity-100 text-outline hover:text-primary transition-all">
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>more_vert</span>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {/* Pagination */}
-        <div className="px-8 py-6 bg-surface-container-low border-t border-outline-variant/10 flex items-center justify-between">
-          <div className="text-xs text-on-surface-variant font-medium">
-            Showing <span className="text-on-surface">1 - 4</span> of 248 items
-          </div>
-          <div className="flex gap-2">
-            <button className="p-2 rounded-lg border border-outline-variant hover:bg-white text-on-surface-variant transition-all">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>chevron_left</span>
-            </button>
-            <button className="px-4 py-2 rounded-lg bg-primary text-white text-xs font-bold">1</button>
-            <button className="px-4 py-2 rounded-lg hover:bg-white text-on-surface-variant text-xs font-bold transition-all">2</button>
-            <button className="px-4 py-2 rounded-lg hover:bg-white text-on-surface-variant text-xs font-bold transition-all">3</button>
-            <button className="p-2 rounded-lg border border-outline-variant hover:bg-white text-on-surface-variant transition-all">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>chevron_right</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* System Stats Asymmetric Footer */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-8 rounded-[2rem] bg-primary text-on-primary flex flex-col justify-between shadow-[0_20px_40px_rgba(0,28,56,0.06)] relative overflow-hidden">
-          <div className="relative z-10">
-            <h3 className="text-sm font-bold opacity-80 mb-6 uppercase tracking-widest">Total Valuation</h3>
-            <div className="text-4xl font-extrabold brand-font">$4.2M</div>
-            <p className="text-xs mt-2 opacity-70">+12% from last quarter</p>
-          </div>
-          {/* Abstract decorative element border-none ring-0 */}
-          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-        </div>
-        <div className="md:col-span-2 p-8 rounded-[2rem] bg-surface-container-high flex items-center gap-10">
-          <div className="flex-1">
-            <h3 className="text-sm font-bold text-on-surface-variant mb-4 uppercase tracking-widest">Operational Health</h3>
-            <div className="flex items-center gap-4 mb-2">
-              <div className="text-2xl font-bold">98.4%</div>
-              <div className="flex-1 h-3 rounded-full bg-surface-container flex overflow-hidden">
-                <div className="bg-primary w-[98%] h-full rounded-full"></div>
-              </div>
-            </div>
-            <p className="text-[11px] text-on-surface-variant">Global warehouse synchronization is optimal. 2 nodes reporting minor latency.</p>
-          </div>
-          <div className="hidden lg:block w-32 h-20 rounded-2xl bg-white p-4 shadow-[0_10px_20px_rgba(0,28,56,0.03)] border border-outline-variant/10">
-            <div className="text-[10px] font-bold text-outline mb-2">SYNC RATE</div>
-            <div className="flex items-end gap-1 h-8">
-              <div className="w-2 bg-primary/20 h-4 rounded-t-sm"></div>
-              <div className="w-2 bg-primary/40 h-6 rounded-t-sm"></div>
-              <div className="w-2 bg-primary/60 h-5 rounded-t-sm"></div>
-              <div className="w-2 bg-primary h-8 rounded-t-sm"></div>
-              <div class="w-2 bg-primary/80 h-7 rounded-t-sm"></div>
+    <div className="flex flex-col lg:flex-row gap-6 h-full animate-in fade-in duration-500 pb-10 max-w-full">
+      {/* Left Main List */}
+      <div className="flex-1 bg-surface-container-lowest rounded-[2rem] shadow-[0_20px_40px_rgba(0,28,56,0.06)] border border-outline-variant/10 flex flex-col overflow-hidden max-h-[85vh]">
+        <div className="p-6 border-b border-outline-variant/10 flex flex-col gap-4 bg-surface/50">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-xl font-bold font-manrope text-on-surface">Stock Inventory</h3>
+              <p className="text-sm text-on-surface-variant mt-1">Real-time oversight of synthetic assets</p>
             </div>
           </div>
+
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+              <input 
+                  type="text" 
+                  placeholder="Search by ID, name, or SKU..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-surface border border-outline-variant/30 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              />
+            </div>
+          </div>
+          
+          {filteredRows.some(i => i.category?.toLowerCase() === 'finished goods' || i.rawMaterialType?.toLowerCase() === 'finished good' || i.category?.toLowerCase() === 'finish good') && availableTypes.length > 0 && (
+             <div className="flex flex-wrap gap-2 items-center">
+                 <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mr-2">Output Types Filter:</span>
+                 {availableTypes.map(type => (
+                     <button
+                         key={type}
+                         onClick={() => toggleOutputType(type)}
+                         className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                             selectedOutputTypes.includes(type)
+                                 ? 'bg-primary text-white border-primary shadow-sm'
+                                 : 'bg-surface border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low'
+                         }`}
+                     >
+                         {type}
+                     </button>
+                 ))}
+                 {selectedOutputTypes.length > 0 && (
+                     <button 
+                         onClick={() => setSelectedOutputTypes([])}
+                         className="text-xs text-error hover:underline ml-2"
+                     >
+                         Clear Filter
+                     </button>
+                 )}
+             </div>
+          )}
         </div>
+        
+        <div className="flex-1 overflow-auto relative">
+            <table className="w-full text-left border-collapse" style={{ tableLayout: 'fixed', minWidth: `${visibleColumns.reduce((acc, col) => acc + (col.width || 120), 0) + 50}px` }}>
+                <thead className="sticky top-0 bg-surface-container-low/90 backdrop-blur-md z-10 border-b border-outline-variant/20 shadow-sm">
+                    <tr className="text-[11px] font-black uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">
+                        {selectable && (
+                            <th className="px-6 py-4 w-12 text-center">
+                                <input 
+                                    type="checkbox"
+                                    checked={displayedRows.length > 0 && displayedRows.every(r => selectedIds.includes(r.uniqueKey))}
+                                    ref={input => { 
+                                        if(input) {
+                                            const some = displayedRows.some(r => selectedIds.includes(r.uniqueKey));
+                                            const all = displayedRows.length > 0 && displayedRows.every(r => selectedIds.includes(r.uniqueKey));
+                                            input.indeterminate = some && !all; 
+                                        }
+                                    }}
+                                    onChange={(e) => {
+                                        if (onSelectAll) {
+                                            const ids = displayedRows.map(r => r.uniqueKey);
+                                            onSelectAll(ids, e.target.checked);
+                                        }
+                                    }}
+                                    className="rounded text-primary focus:ring-primary/20 border-outline-variant/50 w-4 h-4 cursor-pointer" 
+                                />
+                            </th>
+                        )}
+                        {visibleColumns.map((col, index) => (
+                            <DraggableResizableHeader 
+                                key={col.id}
+                                id={col.id}
+                                defaultWidth={col.width}
+                                onResize={resizeColumn}
+                                onMove={moveColumn}
+                                className={`px-6 py-4 ${index === visibleColumns.length - 1 ? 'pr-12' : ''}`}
+                            >
+                                {col.label}
+                            </DraggableResizableHeader>
+                        ))}
+                        <th className="w-full"></th>
+                    </tr>
+                    {/* Settings Dropdown Button in Header */}
+                    <th className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center">
+                        <div className="relative" ref={colSettingsRef}>
+                            <button 
+                                onClick={() => setShowColSettings(!showColSettings)}
+                                className="w-8 h-8 rounded-full hover:bg-on-surface/5 flex items-center justify-center text-on-surface-variant transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-[18px]">more_vert</span>
+                            </button>
+                            {showColSettings && (
+                                <div className="absolute right-0 top-full mt-1 w-56 bg-surface rounded-xl shadow-lg border border-outline-variant/20 p-2 z-50 animate-in fade-in slide-in-from-top-2 text-none lowercase !normal-case">
+                                    <div className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider px-3 py-2 border-b border-outline-variant/10 mb-2 text-left">
+                                        Visible Columns
+                                    </div>
+                                    <div className="max-h-60 overflow-y-auto custom-scrollbar flex flex-col gap-1 text-left">
+                                        {columns.map(col => (
+                                            <label key={col.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-container-low cursor-pointer transition-colors">
+                                                <input 
+                                                    type="checkbox" 
+                                                    checked={col.visible}
+                                                    onChange={() => toggleColumn(col.id)}
+                                                    className="w-4 h-4 rounded text-primary focus:ring-primary border-outline-variant/30"
+                                                />
+                                                <span className="text-sm font-medium text-on-surface normal-case capitalize leading-tight">{col.label}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </th>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                    {displayedRows.length > 0 ? displayedRows.map(row => (
+                        <tr 
+                            key={row.uniqueKey} 
+                            onClick={() => setSelectedItem(row)}
+                            className={`cursor-pointer transition-colors hover:bg-primary/5 ${activeItem?.id === row.id ? 'bg-primary/10 border-l-4 border-primary' : 'border-l-4 border-transparent'}`}
+                        >
+                            {selectable && (
+                                <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
+                                    <input 
+                                        type="checkbox"
+                                        checked={selectedIds.includes(row.uniqueKey)}
+                                        onChange={(e) => {
+                                            if (onToggleSelect) onToggleSelect(row.uniqueKey, e.target.checked);
+                                        }}
+                                        className="rounded text-primary focus:ring-primary border-outline-variant w-4 h-4 cursor-pointer" 
+                                    />
+                                </td>
+                            )}
+                            {visibleColumns.map((col, index) => (
+                                <td key={col.id} className="px-6 py-4 truncate">
+                                    {renderCell(col.id, row)}
+                                </td>
+                            ))}
+                            <td></td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan={visibleColumns.length + 1} className="text-center py-12 text-on-surface-variant">No items found matching criteria.</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
+
+        {/* Pagination & Toggle Area */}
+        <GlobalPagination 
+            totalItems={filteredRows.length}
+            itemsPerPage={itemsPerPage}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+        />
       </div>
 
+      {/* Right Side Panel */}
+      <div className="w-full lg:w-[400px] flex flex-col gap-6 max-h-[85vh]">
+          {/* Top 3D Viewer (Free space) */}
+          <div className="h-64 relative flex items-center justify-center shrink-0 bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden">
+               <ErrorBoundary fallback={
+                   <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant gap-2 p-4">
+                       {activeItem?.image ? (
+                           <img src={activeItem.image} alt={activeItem.name} className="w-24 h-24 rounded-xl object-cover shadow-sm" />
+                       ) : (
+                           <span className="material-symbols-outlined text-5xl opacity-40">category</span>
+                       )}
+                       <span className="text-xs font-semibold">2D Item Preview</span>
+                   </div>
+               }>
+                   <Canvas shadows camera={{ position: [0, 0, 4], fov: 50 }} className="w-full h-full cursor-move">
+                       <ambientLight intensity={0.5} />
+                       <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} castShadow />
+                       <OrbitControls makeDefault autoRotate autoRotateSpeed={1.5} enablePan={false} />
+                       <Suspense fallback={null}>
+                          <Stage environment="city" intensity={0.6}>
+                             <Model type={activeItem?.rawMaterialType || activeItem?.subCategory || activeItem?.category} url={activeItem?.model3d} />
+                          </Stage>
+                       </Suspense>
+                   </Canvas>
+               </ErrorBoundary>
+          </div>
+
+          {/* Bottom Details Panel */}
+          {activeItem ? (
+             <div className="flex-1 bg-surface-container-lowest rounded-[2rem] shadow-[0_20px_40px_rgba(0,28,56,0.06)] border border-outline-variant/10 p-6 flex flex-col overflow-y-auto">
+                 <div className="flex justify-between items-start mb-6">
+                     <div>
+                         <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary mb-2 inline-block">
+                             {activeItem.category || activeItem.type || 'Inventory Item'}
+                         </span>
+                         <h2 className="text-2xl font-black text-on-surface">{activeItem.name}</h2>
+                         <p className="font-mono text-sm text-on-surface-variant">{activeItem.sku || activeItem.id}</p>
+                     </div>
+                 </div>
+
+                 <div className="space-y-6">
+                     {activeItem.hasTypes && activeItem.stockTypesData.length > 0 ? (
+                         <div className="space-y-3">
+                             <h4 className="text-xs uppercase font-bold tracking-widest text-on-surface-variant">Output Types Stock</h4>
+                             <div className="grid grid-cols-2 gap-3">
+                                 {activeItem.stockTypesData.map(t => (
+                                     <div key={t.typeName} className={`p-4 rounded-2xl border ${t.typeName.toLowerCase().includes('wastage') ? 'bg-error/5 border-error/20' : 'bg-surface border-outline-variant/20'}`}>
+                                         <p className={`text-[10px] uppercase tracking-wider mb-1 font-bold ${t.typeName.toLowerCase().includes('wastage') ? 'text-error' : 'text-on-surface-variant'}`}>{t.typeName}</p>
+                                         <p className={`text-xl font-bold ${t.typeName.toLowerCase().includes('wastage') ? 'text-error' : 'text-emerald-600'}`}>{t.qty.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})} <span className="text-xs font-medium text-on-surface-variant ml-1">{t.typeName.toLowerCase().includes('wastage') ? 'Kgs' : activeItem.uom}</span></p>
+                                     </div>
+                                 ))}
+                             </div>
+                             <div className="bg-surface-container-low p-4 rounded-xl flex justify-between items-center mt-2">
+                                 <span className="text-sm font-bold text-on-surface">Total Selected Filtered</span>
+                                 <div className="text-right">
+                                     <span className="text-lg font-black text-on-surface block">{activeItem.displayStock.toLocaleString()} {activeItem.uom}</span>
+                                     <span className="text-xs text-on-surface-variant font-medium">Rolls: {activeItem.rollSize && activeItem.rollSize > 0 ? (activeItem.displayStock / activeItem.rollSize).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) : '-'}</span>
+                                 </div>
+                             </div>
+                         </div>
+                     ) : (
+                         <div className="grid grid-cols-2 gap-4">
+                             <div className="bg-surface p-4 rounded-2xl border border-outline-variant/20">
+                                 <p className="text-xs uppercase tracking-wider text-on-surface-variant mb-1 font-bold">In Stock</p>
+                                 <p className="text-xl font-bold text-emerald-600">{activeItem.displayStock.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2})} <span className="text-sm font-medium text-on-surface-variant ml-1">{activeItem.uom}</span></p>
+                             </div>
+                             <div className="bg-surface p-4 rounded-2xl border border-outline-variant/20">
+                                 <p className="text-xs uppercase tracking-wider text-on-surface-variant mb-1 font-bold">Rolls Quantity</p>
+                                 <p className="text-xl font-bold text-primary">{activeItem.rollSize && activeItem.rollSize > 0 ? (activeItem.displayStock / activeItem.rollSize).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) : '-'} <span className="text-sm font-medium text-on-surface-variant ml-1">Rolls</span></p>
+                             </div>
+                             <div className="bg-surface p-4 rounded-2xl border border-outline-variant/20 col-span-2">
+                                 <p className="text-xs uppercase tracking-wider text-on-surface-variant mb-1 font-bold">Packing Size</p>
+                                 <p className="text-xl font-bold text-primary">{activeItem.packingSizeRaw || activeItem.packingSize || '-'} <span className="text-sm font-medium text-on-surface-variant ml-1">{activeItem.packingType}</span></p>
+                             </div>
+                         </div>
+                     )}
+
+                     <div>
+                         <h4 className="text-sm font-bold text-on-surface mb-3 flex items-center gap-2">
+                             <span className="material-symbols-outlined text-[18px] text-primary">info</span> Detail Specifications
+                         </h4>
+                         <div className="bg-surface-container-low/50 rounded-xl p-4 text-sm text-on-surface-variant leading-relaxed">
+                             {activeItem.specifications || 'No detailed specifications provided for this item.'}
+                         </div>
+                     </div>
+
+                     <div className="pt-4 border-t border-outline-variant/10">
+                         <div className="flex justify-between items-center">
+                             <span className="text-sm text-on-surface-variant">Estimated Cost:</span>
+                             <span className="font-bold text-on-surface text-lg">Rs. {activeItem.price || '0.00'}</span>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+          ) : (
+             <div className="flex-1 bg-surface-container-lowest rounded-[2rem] border border-outline-variant/10 flex items-center justify-center p-6 text-center">
+                 <div>
+                     <div className="w-16 h-16 bg-surface-container mx-auto rounded-full flex items-center justify-center text-outline mb-4">
+                         <span className="material-symbols-outlined text-2xl">touch_app</span>
+                     </div>
+                     <p className="text-on-surface-variant font-medium">Select an item from the list to view its 3D model and complete stock details.</p>
+                 </div>
+             </div>
+          )}
+      </div>
     </div>
   );
 }

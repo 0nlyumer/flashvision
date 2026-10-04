@@ -1,12 +1,274 @@
-import React from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useApp } from '../../context/AppContext';
+import PrintLayout from '../ui/PrintLayout';
+import InventoryAdjustmentHistory from './InventoryAdjustmentHistory';
+import CustomMultiSelect from '../ui/CustomMultiSelect';
+import { useDialog } from '../../context/DialogContext';
+import { supabase } from '../../utils/supabaseClient';
 
-export default function InvAdjustment() {
+export default function InvAdjustment({ selectedDepartments = [], onBack }) {
+  const { state, setCollection, addNotification } = useApp();
+  const { appAlert } = useDialog();
+  
+  const [showHistory, setShowHistory] = useState(false);
+  
+  // State for the multi-item form
+  const [lines, setLines] = useState([
+      { id: Date.now(), itemId: '', type: 'Addition', qty: '', reason: '', customReason: '', remarks: '', outputType: '' }
+  ]);
+
+  // Local department filter for modules that don't pass it down
+  const [localDepartments, setLocalDepartments] = useState(() => {
+      if (selectedDepartments && selectedDepartments.length > 0) {
+          return [selectedDepartments[0]];
+      }
+      const depts = state?.departments || [];
+      return depts.length > 0 ? [depts[0].value || depts[0].name] : [];
+  });
+  
+  // Searchable dropdown state for Items (per line)
+  const [openItemDropdownId, setOpenItemDropdownId] = useState(null);
+  const [itemSearchQuery, setItemSearchQuery] = useState('');
+
+  // Dropdown state for Reasons (per line)
+  const [openReasonDropdownId, setOpenReasonDropdownId] = useState(null);
+
+  // Print state
+  const [printData, setPrintData] = useState(null);
+
+  const effectiveDepartments = selectedDepartments.length > 0 ? selectedDepartments : localDepartments;
+
+  const filteredItems = useMemo(() => {
+    if (!effectiveDepartments || effectiveDepartments.length === 0) return [];
+    return state?.items?.filter(item => {
+        const depts = (item.department || '').split(',').map(d => d.trim()).filter(Boolean);
+        return depts.some(d => effectiveDepartments.includes(d));
+    }) || [];
+  }, [state?.items, effectiveDepartments]);
+
+  const searchedItems = useMemo(() => {
+    if (!itemSearchQuery) return filteredItems;
+    const lowerQ = itemSearchQuery.toLowerCase();
+    return filteredItems.filter(item => 
+        (item.name || '').toLowerCase().includes(lowerQ) || 
+        (item.sku || '').toLowerCase().includes(lowerQ)
+    );
+  }, [filteredItems, itemSearchQuery]);
+
+  const reasons = [
+      "Damage / Spoilage",
+      "Correction / Miscount",
+      "Initial Stock Entry",
+      "Return to Vendor",
+      "Internal Use",
+      "Others"
+  ];
+
+  const handleAddLine = () => {
+      setLines([...lines, { id: Date.now(), itemId: '', type: 'Addition', qty: '', reason: '', customReason: '', remarks: '', outputType: '' }]);
+  };
+
+  const handleRemoveLine = (idToRemove) => {
+      if (lines.length > 1) {
+          setLines(lines.filter(l => l.id !== idToRemove));
+      }
+  };
+
+  const updateLine = (id, field, value) => {
+      setLines(lines.map(l => l.id === id ? { ...l, [field]: value } : l));
+  };
+
+  const handleProcessAdjustment = async () => {
+      // Validate
+      const validLines = lines.filter(l => l.itemId && l.qty && l.reason);
+      if (validLines.length === 0) {
+          addNotification('Error', 'Please complete at least one line (Item, Qty, Reason).', 'error');
+          return;
+      }
+      
+      let hasError = false;
+      let errorMsg = 'Quantity must be > 0 and Custom Reason must be provided if "Others" is selected.';
+      
+      validLines.forEach(l => {
+          if (parseFloat(l.qty) <= 0) hasError = true;
+          if (l.reason === 'Others' && !l.customReason) hasError = true;
+          
+          const item = state.items.find(i => i.id === l.itemId);
+          if (item && item.category === 'Finished Goods' && !l.outputType) {
+              hasError = true;
+              errorMsg = `Output Type is required for Finished Good: ${item.name}`;
+          }
+      });
+
+      if (hasError) {
+          addNotification('Error', errorMsg, 'error');
+          return;
+      }
+
+      // Check internet and Supabase connection
+      if (!navigator.onLine) {
+          appAlert("Network Offline Error\n\nYour internet connection appears to be offline. Please reconnect to the internet and try again.");
+          return;
+      }
+
+      try {
+          const { data, error } = await supabase.from('erp_state').select('id').eq('id', 'main_state').maybeSingle();
+          if (error) throw error;
+      } catch (err) {
+          console.error("Supabase connection check failed:", err);
+          appAlert("Cloud Database Sync Error\n\nCould not establish a connection to the central database. Please make sure the database server is online and try again.");
+          return;
+      }
+
+      // Generate Sequential ID
+      let maxIdNum = 0;
+      if (state.adjustments && state.adjustments.length > 0) {
+          state.adjustments.forEach(adj => {
+              if (adj.parentId && adj.parentId.startsWith('ADJ-')) {
+                  const numStr = adj.parentId.replace('ADJ-', '');
+                  const num = parseInt(numStr, 10);
+                  if (!isNaN(num) && num > maxIdNum) {
+                      maxIdNum = num;
+                  }
+              }
+          });
+      }
+      const nextIdNum = maxIdNum + 1;
+      const parentId = `ADJ-${nextIdNum.toString().padStart(3, '0')}`;
+
+      const updatedItems = [...state.items];
+      const newAdjustments = [];
+
+      validLines.forEach((line, idx) => {
+          const qty = parseFloat(line.qty) || 0;
+          const netChange = line.type === 'Addition' ? qty : -qty;
+          const selectedItem = updatedItems.find(i => i.id === line.itemId);
+          
+          let targetDept = effectiveDepartments[0] || 'Warehouse';
+          if (selectedItem) {
+              if (!selectedItem.stockByDepartment) selectedItem.stockByDepartment = {};
+              
+              // Auto-associate department if not in item mapped list
+              const existingDepts = (selectedItem.department || '').split(',').map(d => d.trim()).filter(Boolean);
+              if (!existingDepts.includes(targetDept)) {
+                  existingDepts.push(targetDept);
+                  selectedItem.department = existingDepts.join(', ');
+              }
+              
+              selectedItem.stockByDepartment[targetDept] = (selectedItem.stockByDepartment[targetDept] || 0) + netChange;
+              selectedItem.stock = Object.values(selectedItem.stockByDepartment).reduce((sum, val) => sum + Number(val || 0), 0);
+              
+              // Handle Output Type stock if it's a finished good
+              if (selectedItem.category === 'Finished Goods' && line.outputType) {
+                  if (!selectedItem.stockByType) selectedItem.stockByType = {};
+                  selectedItem.stockByType[line.outputType] = (selectedItem.stockByType[line.outputType] || 0) + netChange;
+              }
+          }
+
+          newAdjustments.push({
+              id: `${parentId}-${idx + 1}`,
+              parentId: parentId,
+              itemId: line.itemId,
+              itemCode: selectedItem?.sku || '',
+              itemName: selectedItem?.name || '',
+              type: line.type === 'Addition' ? 'add' : 'sub',
+              qty: qty,
+              reason: line.reason === 'Others' ? line.customReason : line.reason,
+              outputType: line.outputType || '',
+              remarks: line.remarks,
+              department: targetDept,
+              addedBy: state?.currentUser?.name || 'Admin',
+              date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              timestamp: new Date().getTime()
+          });
+      });
+
+      const updatedAdjustments = [...newAdjustments, ...(state.adjustments || [])];
+
+      setCollection('items', updatedItems);
+      setCollection('adjustments', updatedAdjustments);
+      
+      setLines([{ id: Date.now(), itemId: '', type: 'Addition', qty: '', reason: '', customReason: '', remarks: '', outputType: '' }]);
+      addNotification('Success', `Processed ${validLines.length} stock adjustment(s).`, 'success');
+  };
+
+  const handleDiscard = () => {
+      setLines([{ id: Date.now(), itemId: '', type: 'Addition', qty: '', reason: '', customReason: '', remarks: '', outputType: '' }]);
+  };
+
+  const handlePrint = (act) => {
+      setPrintData(act);
+      setTimeout(() => {
+          window.print();
+      }, 100);
+  };
+
+  // Activity generator based on the selected items
+  const recentActivities = useMemo(() => {
+      if (!state.adjustments || effectiveDepartments.length === 0) return [];
+      let acts = state.adjustments;
+      // Filter by local department if applicable
+      const deptItemIds = filteredItems.map(i => i.id);
+      acts = acts.filter(a => deptItemIds.includes(a.itemId));
+      return acts.sort((a, b) => b.timestamp - a.timestamp).slice(0, 10);
+  }, [state.adjustments, filteredItems, effectiveDepartments]);
+
+  if (showHistory) {
+      return <InventoryAdjustmentHistory onBack={() => setShowHistory(false)} />;
+  }
+
   return (
-    <div className="animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-24">
+    <>
+    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-24 print:hidden">
       {/* Header section */}
-      <header className="mb-10">
-        <h1 className="text-4xl font-extrabold text-on-surface tracking-tight mb-2 font-headline">Manual Stock Adjustment</h1>
-        <p className="text-on-surface-variant font-body">Correct inventory discrepancies with high-precision tracking.</p>
+      <header className="mb-10 flex justify-between items-end">
+        <div>
+            {/* Added onBack handler */}
+            {onBack && (
+               <button 
+                  onClick={onBack}
+                  className="mb-4 text-primary font-bold text-sm flex items-center gap-1 hover:bg-primary/10 px-3 py-1.5 rounded-lg transition-colors -ml-3"
+               >
+                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>arrow_back</span>
+                  Back to Production
+               </button>
+            )}
+            <h1 className="text-4xl font-extrabold text-on-surface tracking-tight mb-2 font-headline">Manual Stock Adjustment</h1>
+            <p className="text-on-surface-variant font-body">Correct inventory discrepancies with high-precision tracking.</p>
+        </div>
+        <div className="flex items-center gap-4">
+              {selectedDepartments.length === 0 && (
+                  <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Department:</span>
+                      <div className="w-[200px] z-50 relative">
+                          <select
+                              value={localDepartments[0] || ''}
+                              onChange={(e) => {
+                                  const val = e.target.value;
+                                  setLocalDepartments(val ? [val] : []);
+                                  // Clear selections if department changes
+                                  setLines([{ id: Date.now(), itemId: '', type: 'Addition', qty: '', reason: '', customReason: '', remarks: '', outputType: '' }]);
+                              }}
+                              className="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg py-2.5 px-4 text-sm font-body text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:border-outline-variant/40 transition-all cursor-pointer font-bold"
+                          >
+                              <option value="" disabled>Select Department...</option>
+                              {(state?.departments || []).map(dept => (
+                                  <option key={dept.id || dept.value} value={dept.value || dept.name}>
+                                      {dept.label || dept.name}
+                                  </option>
+                              ))}
+                          </select>
+                      </div>
+                  </div>
+              )}
+            <button 
+                onClick={() => setShowHistory(true)}
+                className="bg-surface-container-low text-on-surface-variant border border-outline-variant/20 rounded-lg px-6 py-3 font-body font-medium flex items-center gap-2 hover:bg-surface-container transition-colors shadow-sm"
+            >
+                <span className="material-symbols-outlined text-[1.25rem]">history</span>
+                Adjustment History
+            </button>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
@@ -14,56 +276,224 @@ export default function InvAdjustment() {
         <section className="xl:col-span-8 space-y-8">
           <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/10 shadow-[0_20px_40px_rgba(0,28,56,0.06)] p-8">
             <form className="space-y-6">
-              {/* Select Item */}
-              <div>
-                <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Select Item</label>
-                <div className="relative group">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant" style={{ fontVariationSettings: "'FILL' 0" }}>search</span>
-                  <input className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl pl-12 pr-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all placeholder:text-outline-variant outline-none" placeholder="Search by SKU, Name or Batch ID..." type="text" />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Adjustment Type */}
-                <div>
-                  <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Adjustment Type</label>
-                  <div className="flex gap-3">
-                    <button className="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl bg-primary-container text-white font-semibold transition-all shadow-sm" type="button">
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>add_circle</span> Addition
-                    </button>
-                    <button className="flex-1 flex items-center justify-center gap-2 py-4 rounded-xl bg-surface-container-low border border-outline-variant/10 text-on-surface-variant font-semibold hover:bg-surface-container transition-all" type="button">
-                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>remove_circle</span> Subtraction
-                    </button>
+                
+              {lines.map((line, index) => {
+                  const selectedItem = filteredItems.find(i => i.id === line.itemId);
+                  return (
+                  <div key={line.id} className="p-6 bg-surface border border-outline-variant/10 rounded-xl relative group">
+                      {lines.length > 1 && (
+                          <button 
+                              type="button" 
+                              onClick={() => handleRemoveLine(line.id)}
+                              className="absolute -right-3 -top-3 w-8 h-8 rounded-full bg-error text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md z-10"
+                          >
+                              <span className="material-symbols-outlined text-[18px]">close</span>
+                          </button>
+                      )}
+                      <h4 className="text-xs font-bold text-outline-variant uppercase tracking-widest mb-4 border-b border-outline-variant/10 pb-2">Line {index + 1}</h4>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                          {/* Searchable Item Selection */}
+                          <div className="relative">
+                            <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Select Item</label>
+                            <div 
+                                className="relative cursor-pointer"
+                                onClick={() => setOpenItemDropdownId(openItemDropdownId === line.id ? null : line.id)}
+                            >
+                              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>inventory_2</span>
+                              <input 
+                                  type="text"
+                                  className="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl pl-12 pr-10 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none font-medium text-sm text-on-surface cursor-pointer"
+                                  placeholder="Search or select an item..."
+                                  value={openItemDropdownId === line.id ? itemSearchQuery : (selectedItem ? `${selectedItem.name} (${selectedItem.sku})` : '')}
+                                  onChange={(e) => {
+                                      setItemSearchQuery(e.target.value);
+                                      setOpenItemDropdownId(line.id);
+                                      if (e.target.value === '') updateLine(line.id, 'itemId', '');
+                                  }}
+                                  onFocus={() => {
+                                      setOpenItemDropdownId(line.id);
+                                      setItemSearchQuery('');
+                                  }}
+                              />
+                              <span className={`material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant transition-transform duration-300 pointer-events-none ${openItemDropdownId === line.id ? 'rotate-180' : ''}`}>expand_more</span>
+                            </div>
+                            
+                            {openItemDropdownId === line.id && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setOpenItemDropdownId(null)}></div>
+                                    <div className="absolute z-50 w-full mt-2 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-xl max-h-[300px] overflow-y-auto animate-in fade-in slide-in-from-top-2">
+                                        {searchedItems.length > 0 ? (
+                                            <ul className="py-2">
+                                                {searchedItems.map(item => (
+                                                    <li 
+                                                        key={item.id}
+                                                        className="px-4 py-3 hover:bg-surface-container-low cursor-pointer flex items-center gap-3 transition-colors group"
+                                                        onClick={() => {
+                                                            updateLine(line.id, 'itemId', item.id);
+                                                            setOpenItemDropdownId(null);
+                                                            setItemSearchQuery('');
+                                                        }}
+                                                    >
+                                                        <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                                            <span className="material-symbols-outlined text-[16px]">conveyor_belt</span>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">{item.name}</p>
+                                                            <p className="text-[10px] font-mono text-outline-variant">{item.sku}</p>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <div className="p-6 text-center text-on-surface-variant text-sm">
+                                                No items found
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                          </div>
+                          
+                          {/* Adjustment Type & Quantity */}
+                          <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                  <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Type</label>
+                                  <div className="flex bg-surface-container-low p-1 rounded-xl border border-outline-variant/20 h-[54px]">
+                                      <button 
+                                          onClick={() => updateLine(line.id, 'type', 'Addition')}
+                                          className={`flex-1 flex items-center justify-center rounded-lg font-bold text-xs transition-all ${line.type === 'Addition' ? 'bg-primary-container text-on-primary-container shadow-sm' : 'text-on-surface-variant hover:bg-surface-container'}`} 
+                                          type="button"
+                                      >
+                                          + Add
+                                      </button>
+                                      <button 
+                                          onClick={() => updateLine(line.id, 'type', 'Subtraction')}
+                                          className={`flex-1 flex items-center justify-center rounded-lg font-bold text-xs transition-all ${line.type === 'Subtraction' ? 'bg-error-container text-error shadow-sm' : 'text-on-surface-variant hover:bg-surface-container'}`} 
+                                          type="button"
+                                      >
+                                          - Sub
+                                      </button>
+                                  </div>
+                              </div>
+                              <div>
+                                  <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Quantity</label>
+                                  <div className="relative">
+                                      <input 
+                                          value={line.qty}
+                                          onChange={(e) => updateLine(line.id, 'qty', e.target.value)}
+                                          className="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl px-4 h-[54px] focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none text-on-surface font-mono font-bold" 
+                                          placeholder="0.00" 
+                                          type="number" 
+                                      />
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+
+                      <div className={`grid grid-cols-1 md:grid-cols-${selectedItem && selectedItem.category === 'Finished Goods' ? '3' : '2'} gap-6`}>
+                          {/* Reason */}
+                          <div className="relative">
+                            <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Reason</label>
+                            <div 
+                                className="relative cursor-pointer"
+                                onClick={() => setOpenReasonDropdownId(openReasonDropdownId === line.id ? null : line.id)}
+                            >
+                              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline-variant" style={{ fontVariationSettings: "'FILL' 0" }}>help</span>
+                              <div className={`w-full bg-surface-container-low border rounded-xl pl-12 pr-10 py-4 transition-all outline-none text-sm font-medium ${openReasonDropdownId === line.id ? 'border-primary ring-2 ring-primary/20 bg-surface-container-lowest' : 'border-outline-variant/20 hover:bg-surface-container'} ${line.reason ? 'text-on-surface' : 'text-on-surface-variant'}`}>
+                                  {line.reason || "Select a reason..."}
+                              </div>
+                              <span className={`material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant transition-transform duration-300 pointer-events-none ${openReasonDropdownId === line.id ? 'rotate-180' : ''}`}>expand_more</span>
+                            </div>
+                            
+                            {openReasonDropdownId === line.id && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setOpenReasonDropdownId(null)}></div>
+                                    <div className="absolute z-50 w-full mt-2 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-lg overflow-hidden animate-in fade-in slide-in-from-top-2">
+                                        <ul className="py-1">
+                                            {reasons.map(r => (
+                                                <li 
+                                                    key={r}
+                                                    className={`px-4 py-3 hover:bg-surface-container-low cursor-pointer text-sm font-medium transition-colors ${line.reason === r ? 'bg-primary/5 text-primary' : 'text-on-surface'}`}
+                                                    onClick={() => {
+                                                        updateLine(line.id, 'reason', r);
+                                                        setOpenReasonDropdownId(null);
+                                                    }}
+                                                >
+                                                    {r}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </>
+                            )}
+                          </div>
+
+                          {/* Custom Reason / Remarks */}
+                          <div>
+                            {line.reason === 'Others' ? (
+                                <>
+                                    <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px] text-primary">Custom Reason *</label>
+                                    <input 
+                                        type="text"
+                                        value={line.customReason}
+                                        onChange={(e) => updateLine(line.id, 'customReason', e.target.value)}
+                                        className="w-full bg-surface-container-low border border-primary/40 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none text-sm text-on-surface" 
+                                        placeholder="Specify custom reason..." 
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Remarks (Optional)</label>
+                                    <input 
+                                        type="text"
+                                        value={line.remarks}
+                                        onChange={(e) => updateLine(line.id, 'remarks', e.target.value)}
+                                        className="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none text-sm text-on-surface" 
+                                        placeholder="Add notes..." 
+                                    />
+                                </>
+                            )}
+                          </div>
+                          
+                          {/* Output Type (Only for Finished Goods) */}
+                          {selectedItem && selectedItem.category === 'Finished Goods' && (
+                              <div className="relative">
+                                  <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px] text-primary">Output Type *</label>
+                                  <div className="relative">
+                                      <select
+                                          className={`w-full bg-surface-container-low border rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none text-sm font-medium appearance-none ${line.outputType ? 'border-primary ring-2 ring-primary/20 bg-surface-container-lowest text-on-surface' : 'border-outline-variant/20 hover:bg-surface-container text-on-surface-variant'}`}
+                                          value={line.outputType || ''}
+                                          onChange={(e) => updateLine(line.id, 'outputType', e.target.value)}
+                                      >
+                                          <option value="" disabled>Select Output Type...</option>
+                                          {(state?.batchOutputTypes || []).map(t => (
+                                              <option key={t.id} value={t.name}>{t.name}</option>
+                                          ))}
+                                      </select>
+                                      <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">expand_more</span>
+                                  </div>
+                              </div>
+                          )}
+                      </div>
                   </div>
-                </div>
-                {/* Quantity */}
-                <div>
-                  <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Quantity</label>
-                  <input className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none" placeholder="0.00" type="number" />
-                </div>
+                  );
+              })}
+
+              <div className="flex justify-center">
+                  <button 
+                      type="button"
+                      onClick={handleAddLine}
+                      className="text-primary font-bold text-sm px-6 py-3 rounded-xl hover:bg-primary/5 border border-dashed border-primary/30 hover:border-primary/60 transition-colors flex items-center gap-2"
+                  >
+                      <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                      Add Another Item
+                  </button>
               </div>
-              {/* Reason */}
-              <div>
-                <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Reason for Adjustment</label>
-                <div className="relative">
-                   <select className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all text-on-surface appearance-none outline-none">
-                     <option>Select a reason...</option>
-                     <option>Damage / Spoilage</option>
-                     <option>Correction / Miscount</option>
-                     <option>Initial Stock Entry</option>
-                     <option>Return to Vendor</option>
-                     <option>Internal Use</option>
-                   </select>
-                   <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none" style={{ fontVariationSettings: "'FILL' 0" }}>expand_more</span>
-                </div>
-              </div>
-              {/* Remarks */}
-              <div>
-                <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Remarks</label>
-                <textarea className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none" placeholder="Enter detailed notes regarding this correction..." rows="4"></textarea>
-              </div>
+
               <div className="flex justify-end gap-4 pt-4 border-t border-outline-variant/10">
-                <button className="px-8 py-4 rounded-xl text-primary font-bold hover:bg-primary/5 transition-colors" type="button">Discard</button>
-                <button className="px-10 py-4 rounded-xl bg-gradient-to-br from-primary to-primary-container text-white font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all" type="button">Process Adjustment</button>
+                <button onClick={handleDiscard} className="px-8 py-4 rounded-xl text-on-surface-variant font-bold hover:bg-surface-container transition-colors" type="button">Discard</button>
+                <button onClick={handleProcessAdjustment} className="px-10 py-4 rounded-xl bg-gradient-to-br from-primary to-primary-container text-white font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all" type="button">Process Adjustment</button>
               </div>
             </form>
           </div>
@@ -71,79 +501,87 @@ export default function InvAdjustment() {
 
         {/* Reference / Reference Info Section */}
         <aside className="xl:col-span-4 space-y-6">
-          {/* Current Stock Insight */}
-          <div className="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/15">
-            <h3 className="text-sm font-bold text-on-surface-variant mb-6 tracking-widest uppercase">Live Item Insights</h3>
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-16 h-16 rounded-xl bg-surface-container-highest flex items-center justify-center overflow-hidden border border-outline-variant/20">
-                <img alt="Synthetic Logistics Part" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6_I7nCq-Stx1iWBYzXD8-UOSGcrJ2RexbvHfHdY5b8EHGhI9apXPxGRKIkoJb0CXwQHAyjTtRm6Hvt5b6_gLrl6_av0ao94_0crlr1Rcv3vFcgOv6Ortj-MH3tsc4NOhVrep1i9E97OuTyZyoINic2OR8wqyAhNUj05DfkSyrvrIKhJKrdVBF-ASm84EYRT72kGPDXPLOh6pZplOwA_2iewjHkUBrl2OhxXibIWyzjh5LXUpdZxi5ljLzT5Et1lGrwCIbIPNbNUFC" />
-              </div>
-              <div>
-                <p className="font-bold text-on-surface text-lg leading-tight">Iso-Hexane Grade-B</p>
-                <p className="text-xs text-outline font-medium">SKU: FLV-882-QX</p>
-              </div>
+          {/* Expanded Recent History Bento */}
+          <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/10 shadow-sm flex flex-col h-[500px]">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-sm font-bold text-on-surface tracking-widest uppercase flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px]">history</span>
+                  Recent Activity
+              </h3>
+              <button onClick={() => setShowHistory(true)} className="text-xs font-bold text-primary hover:bg-primary/10 px-3 py-1.5 rounded-lg transition-colors">View All</button>
             </div>
-            <div className="space-y-4">
-              <div className="flex justify-between items-end p-4 bg-surface-container-lowest border border-outline-variant/10 rounded-xl">
-                <div>
-                  <span className="text-xs font-medium text-on-surface-variant">Current Balance</span>
-                  <p className="text-2xl font-black text-primary">1,420 <span className="text-sm font-medium">Units</span></p>
-                </div>
-                <span className="material-symbols-outlined text-primary/40 text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>inventory</span>
-              </div>
-              <div className="flex justify-between items-end p-4 bg-surface-container-lowest border border-outline-variant/10 rounded-xl">
-                <div>
-                  <span className="text-xs font-medium text-on-surface-variant">Last Movement</span>
-                  <p className="text-lg font-bold text-on-surface">3h ago</p>
-                </div>
-                <span className="material-symbols-outlined text-secondary/40" style={{ fontVariationSettings: "'FILL' 0" }}>schedule</span>
-              </div>
-              <div className="flex justify-between items-end p-4 bg-surface-container-lowest border border-outline-variant/10 rounded-xl">
-                <div>
-                  <span className="text-xs font-medium text-on-surface-variant">Location</span>
-                  <p className="text-lg font-bold text-on-surface">WH-A / Row 12</p>
-                </div>
-                <span className="material-symbols-outlined text-secondary/40" style={{ fontVariationSettings: "'FILL' 0" }}>location_on</span>
-              </div>
-            </div>
-            {/* Visual Context Image */}
-            <div className="mt-8 rounded-xl overflow-hidden h-40 relative group border border-outline-variant/20">
-              <img alt="Warehouse Storage" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNWC1_jt0RPPYEzH3rV3JPtJ8PYbRT6LhoFmpi1wo2VvoXC5ZnyEAwLpaoh7hRC_w5kzeG6f4hYheK1s163jyFaj7o11ZQVcpiTS7K__U-dPZCgQkuoUxdsrKcEN-q-yrxXUjzNFkQFfj4rd9N9gaf4kNC2FJbnuB8OuOerG8Jnhjx9FBZ9IfwR1mxSego8yLR8QkMDwEjvxEe8WL21m1ru56unkMaDBdLyqfXMCE43qs1yPel6e-sEney9b4aFXlo8CIfy9Akara-" />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent flex items-end p-4">
-                <p className="text-white text-xs font-medium">Verified Location: Zone 4 Warehouse</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Recent History Bento */}
-          <div className="bg-surface-container-highest rounded-2xl p-6 border border-outline-variant/10">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-bold text-on-surface">Recent Activity</h3>
-              <button className="text-xs font-bold text-primary hover:underline">View All</button>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                <div className="w-8 h-8 rounded-full bg-error-container text-error flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>remove</span>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-on-surface">-45 Units</p>
-                  <p className="text-[10px] text-on-surface-variant">Damage • Dec 14, 2023</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-white/50 rounded-lg">
-                <div className="w-8 h-8 rounded-full bg-secondary-container text-primary flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>add</span>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-on-surface">+120 Units</p>
-                  <p className="text-[10px] text-on-surface-variant">Restock • Dec 12, 2023</p>
-                </div>
-              </div>
+            
+            <div className="space-y-3 overflow-y-auto flex-1 pr-2 custom-scrollbar">
+              {recentActivities.length > 0 ? recentActivities.map(act => (
+                  <div key={act.id} className="flex flex-col gap-2 p-4 bg-surface rounded-xl border border-outline-variant/5 hover:border-outline-variant/20 hover:shadow-sm transition-all group">
+                    <div className="flex justify-between items-start">
+                        <p className="font-bold text-sm text-on-surface line-clamp-1">{act.itemName}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-[10px] font-bold text-outline-variant">{act.date}</p>
+                            <button onClick={() => handlePrint(act)} className="text-outline-variant hover:text-primary transition-colors">
+                                <span className="material-symbols-outlined text-[14px]">print</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex justify-between items-center mt-1">
+                        <p className={`text-lg font-black ${act.type === 'sub' ? 'text-error' : 'text-primary'}`}>
+                            {act.type === 'sub' ? '-' : '+'}{act.qty} <span className="text-xs font-bold opacity-70">Units</span>
+                        </p>
+                        <span className="text-[10px] bg-surface-container-low px-2 py-1 rounded-md text-on-surface-variant font-medium max-w-[120px] truncate" title={act.reason}>
+                            {act.reason}
+                        </span>
+                    </div>
+                  </div>
+              )) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center">
+                      <span className="material-symbols-outlined text-4xl text-outline-variant/30 mb-2">history</span>
+                      <p className="text-sm font-bold text-on-surface-variant">No recent activity</p>
+                  </div>
+              )}
             </div>
           </div>
         </aside>
       </div>
     </div>
+
+    {/* PRINT ONLY UI */}
+    {printData && (() => {
+        const adjSettings = state?.adminSetup?.printSettings?.moduleSettings?.inv_adjustment || {};
+        const rowSize = adjSettings.rowSize || 'normal';
+        const paddingClass = rowSize === 'compact' ? 'p-2' : rowSize === 'spacious' ? 'p-6' : 'p-4';
+        
+        return (
+            <div className="hidden print:block w-full">
+                <PrintLayout 
+                    documentTitle="Stock Adjustment Slip"
+                    documentId={printData.id}
+                    date={printData.date}
+                    disclaimerKey="inventory"
+                    extraMeta={[
+                        { label: 'Item Code', value: printData.itemCode },
+                        { label: 'Item Name', value: printData.itemName },
+                        { label: 'Reason', value: printData.reason }
+                    ]}
+                >
+                    <div className="mt-8">
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/30 pb-2 mb-4">Adjustment Details</h3>
+                        <div className={`flex justify-between items-center ${paddingClass} bg-surface-container-low rounded-lg`}>
+                            <span className="text-sm font-bold">Adjusted Quantity:</span>
+                            <span className={`text-lg font-black ${printData.type === 'sub' ? 'text-error' : 'text-primary'}`}>
+                                {printData.type === 'sub' ? '-' : '+'}{printData.qty} Units
+                            </span>
+                        </div>
+                        {printData.remarks && (
+                            <div className={`mt-6 ${paddingClass} border border-outline-variant/30 rounded-lg`}>
+                                <span className="text-xs font-bold uppercase text-on-surface-variant block mb-1">Remarks</span>
+                                <p className="text-sm font-medium">{printData.remarks}</p>
+                            </div>
+                        )}
+                    </div>
+                </PrintLayout>
+            </div>
+        );
+    })()}
+    </>
   );
 }

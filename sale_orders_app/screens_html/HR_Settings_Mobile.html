@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HR Settings - Flashvision</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#d3e4ff",
+                    "on-secondary-container": "#445f7f",
+                    "secondary-fixed": "#d1e4ff",
+                    "on-primary-fixed": "#001c38",
+                    "primary-fixed-dim": "#a2c9ff",
+                    "surface-bright": "#f8f9ff",
+                    "surface-variant": "#e1e2e8",
+                    "background": "#f8f9ff",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#eff0f7",
+                    "tertiary": "#6b3000",
+                    "inverse-primary": "#a2c9ff",
+                    "secondary-container": "#bed9ff",
+                    "secondary": "#456080",
+                    "on-primary-container": "#b1d1ff",
+                    "tertiary-container": "#8e4302",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#2e3035",
+                    "outline": "#727782",
+                    "on-tertiary-fixed": "#321300",
+                    "surface": "#f8f9ff",
+                    "tertiary-fixed": "#ffdbc8",
+                    "surface-container": "#ecedf4",
+                    "on-surface": "#191c20",
+                    "surface-tint": "#1260a5",
+                    "surface-dim": "#d8dae0",
+                    "on-error-container": "#93000a",
+                    "on-tertiary-fixed-variant": "#743500",
+                    "secondary-fixed-dim": "#adc9ed",
+                    "on-surface-variant": "#414750",
+                    "on-secondary-fixed": "#001d36",
+                    "surface-container-highest": "#e1e2e8",
+                    "surface-container-high": "#e7e8ee",
+                    "surface-container-low": "#f2f3fa",
+                    "on-background": "#191c20",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed-variant": "#2d4867",
+                    "tertiary-fixed-dim": "#ffb68a",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-container": "#ffc29d",
+                    "error-container": "#ffdad6",
+                    "primary": "#004277",
+                    "surface-container-lowest": "#ffffff",
+                    "outline-variant": "#c1c7d2",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed-variant": "#004881",
+                    "primary-container": "#005a9e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {},
+            "fontFamily": {
+                    "headline": [
+                            "Manrope"
+                    ],
+                    "display": [
+                            "Manrope"
+                    ],
+                    "body": [
+                            "Inter"
+                    ],
+                    "label": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {}
+    },
+        },
+      }
+    </script>
+<style>
+        /* Hide scrollbar for a cleaner mobile feel */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        body {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #004277;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #004277;
+        }
+        .toggle-checkbox:checked + .toggle-label::after {
+            transform: translateX(100%);
+            border-color: white;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen pb-24">
+<!-- TopAppBar (From JSON, adapted for Mobile Web) -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl flex justify-between items-center px-6 h-16 shadow-[0_4px_20px_rgba(0,28,56,0.02)]">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">widgets</span>
+</div>
+<span class="font-headline font-bold text-lg tracking-tight text-primary">Logistics Precision</span>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="cursor-pointer active:scale-95 duration-200 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="cursor-pointer active:scale-95 duration-200 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border-2 border-surface-container-highest cursor-pointer ml-1">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a female HR administrator in her mid-30s. She is wearing a modern, tailored navy blazer and has a confident, warm smile. The background is a softly blurred, high-key modern office setting with ample natural light, reinforcing a clean, bright, and professional aesthetic aligned with corporate trust." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-nu7GMN3KxBHeswgT-qyL9oWHYZfxDcKt8194jJIJVZGgZrVav-scrYyT8dT6mIS3KDhMQgfMOExRJWpVpgjmtN3Ktvi6rV4qVzITrTH6FmR3N_QpADBl5xLlFm1EOJwS9G4I9CZ9iJVCSSaIe7aDC1BsYTz6ioqjnywU0hMP9I_kGl4ppGkRSlcgQJctKhyCA0n9MEVbPDvBygjI1o7NHGYFB4bmG--5BfF5HKkqau8ICDGEPGrJBXPg5c1pTgwhlHZIrTdTjAfl"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 px-6 max-w-md mx-auto">
+<!-- Header Section (Data mapped from SideNavBar JSON) -->
+<section class="mb-8">
+<h1 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight mb-1">HR Control Center</h1>
+<p class="font-body text-sm text-on-surface-variant font-medium">System Administrator</p>
+</section>
+<!-- Bento Grid Settings Categories -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Departments Card (Expanded focus as requested) -->
+<button class="col-span-2 text-left group cursor-pointer active:scale-[0.98] transition-transform duration-200">
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-[0_10px_30px_rgba(0,28,56,0.04)] relative overflow-hidden h-full flex flex-col justify-between border border-outline-variant/10">
+<!-- Subtle background gradient -->
+<div class="absolute inset-0 bg-gradient-to-br from-primary-container/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+<div class="flex justify-between items-start mb-6 relative z-10">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">domain</span>
+<h2 class="font-headline text-lg font-bold">Departments</h2>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+<!-- Simulating the 'dedicated view' list inside the card -->
+<div class="space-y-3 relative z-10">
+<div class="flex justify-between items-center bg-surface p-3 rounded-lg">
+<span class="font-body text-sm font-medium text-on-surface">Engineering</span>
+<div class="flex gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] hover:text-primary">edit</span>
+<span class="material-symbols-outlined text-[18px] hover:text-error">delete</span>
+</div>
+</div>
+<div class="flex justify-between items-center bg-surface p-3 rounded-lg">
+<span class="font-body text-sm font-medium text-on-surface">Operations</span>
+<div class="flex gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] hover:text-primary">edit</span>
+<span class="material-symbols-outlined text-[18px] hover:text-error">delete</span>
+</div>
+</div>
+</div>
+<!-- Embedded FAB-style CTA -->
+<div class="mt-5 flex justify-end relative z-10">
+<div class="bg-primary hover:bg-primary-container text-on-primary font-body text-sm font-medium py-2 px-4 rounded-full flex items-center gap-2 transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                            Add New Department
+                        </div>
+</div>
+</div>
+</button>
+<!-- HR Permissions Card -->
+<button class="col-span-2 text-left group cursor-pointer active:scale-[0.98] transition-transform duration-200">
+<div class="bg-surface-container-low rounded-xl p-5 border border-outline-variant/10">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3 text-on-primary-fixed-variant">
+<span class="material-symbols-outlined text-[24px]">verified_user</span>
+<h2 class="font-headline text-base font-bold">HR Permissions</h2>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">arrow_forward</span>
+</div>
+<!-- Toggles Simulation -->
+<div class="flex flex-col gap-3 mt-2">
+<div class="flex justify-between items-center">
+<span class="font-body text-xs text-on-surface-variant">Manage Payroll Data</span>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-primary appearance-none cursor-pointer z-10 top-0 transition-all duration-300" id="toggle1" name="toggle1" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-primary cursor-pointer transition-colors duration-300" for="toggle1"></label>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-body text-xs text-on-surface-variant">Approve Leaves</span>
+<div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-outline-variant appearance-none cursor-pointer z-10 top-0 transition-all duration-300" id="toggle2" name="toggle2" style="right: 1.25rem; border-color: #c1c7d2;" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-5 rounded-full bg-surface-variant cursor-pointer transition-colors duration-300" for="toggle2"></label>
+</div>
+</div>
+</div>
+</div>
+</button>
+<!-- Sections Card -->
+<button class="col-span-1 text-left group cursor-pointer active:scale-[0.95] transition-transform duration-200">
+<div class="bg-surface-container-low hover:bg-surface-container rounded-xl p-5 h-full border border-outline-variant/10 flex flex-col items-center justify-center gap-3 transition-colors">
+<span class="material-symbols-outlined text-[32px] text-secondary">account_tree</span>
+<h2 class="font-headline text-sm font-bold text-center text-on-surface">Sub-sections</h2>
+</div>
+</button>
+<!-- Role Management Card -->
+<button class="col-span-1 text-left group cursor-pointer active:scale-[0.95] transition-transform duration-200">
+<div class="bg-surface-container-low hover:bg-surface-container rounded-xl p-5 h-full border border-outline-variant/10 flex flex-col items-center justify-center gap-3 transition-colors">
+<span class="material-symbols-outlined text-[32px] text-secondary">admin_panel_settings</span>
+<h2 class="font-headline text-sm font-bold text-center text-on-surface">Role Management</h2>
+</div>
+</button>
+<!-- Audit Settings Card -->
+<button class="col-span-2 text-left group cursor-pointer active:scale-[0.98] transition-transform duration-200">
+<div class="bg-surface-container-low hover:bg-surface-container rounded-xl p-5 border border-outline-variant/10 flex justify-between items-center transition-colors">
+<div class="flex items-center gap-3 text-tertiary">
+<span class="material-symbols-outlined text-[24px]">history_edu</span>
+<h2 class="font-headline text-base font-bold">Audit Settings</h2>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-tertiary transition-colors">arrow_forward</span>
+</div>
+</button>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Shell Nav) -->
+<nav class="fixed bottom-0 w-full bg-surface-container-lowest/90 backdrop-blur-lg pb-safe pt-2 px-6 shadow-[0_-10px_40px_rgba(0,28,56,0.03)] border-t-0 z-50">
+<ul class="flex justify-between items-center max-w-md mx-auto">
+<!-- Inactive -->
+<li class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="font-body text-[10px] font-medium">Home</span>
+</li>
+<!-- Inactive -->
+<li class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[24px]">event_available</span>
+<span class="font-body text-[10px] font-medium">Attendance</span>
+</li>
+<!-- Inactive -->
+<li class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-[24px]">groups</span>
+<span class="font-body text-[10px] font-medium">Staff</span>
+</li>
+<!-- Active (Settings usually falls under More/Profile) -->
+<li class="flex-1 flex flex-col items-center justify-center gap-1 py-2 text-primary font-semibold relative cursor-pointer">
+<div class="absolute -top-3 w-12 h-1 bg-primary rounded-b-full"></div>
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">menu</span>
+<span class="font-body text-[10px] font-bold">More</span>
+</li>
+</ul>
+</nav>
+<script>
+        // Simple JS to handle generic toggle visual state for the unchecked one in the demo
+        const toggle2 = document.getElementById('toggle2');
+        toggle2.addEventListener('change', function() {
+            if(this.checked) {
+                this.style.right = '0';
+                this.style.borderColor = '#004277';
+                this.nextElementSibling.style.backgroundColor = '#004277';
+            } else {
+                this.style.right = '1.25rem';
+                this.style.borderColor = '#c1c7d2';
+                this.nextElementSibling.style.backgroundColor = '#e1e2e8';
+            }
+        });
+    </script>
+</body></html>

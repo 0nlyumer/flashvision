@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashvision - Print &amp; Layout Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#004277",
+                      "surface-container": "#ecedf4",
+                      "primary-container": "#005a9e",
+                      "outline-variant": "#c1c7d2",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#8e4302",
+                      "surface-variant": "#e1e2e8",
+                      "primary-fixed-dim": "#a2c9ff",
+                      "on-error": "#ffffff",
+                      "secondary-container": "#bed9ff",
+                      "surface-container-highest": "#e1e2e8",
+                      "inverse-primary": "#a2c9ff",
+                      "on-secondary-fixed-variant": "#2d4867",
+                      "on-background": "#191c20",
+                      "secondary-fixed": "#d1e4ff",
+                      "on-tertiary-fixed-variant": "#743500",
+                      "surface-dim": "#d8dae0",
+                      "on-secondary": "#ffffff",
+                      "surface": "#f8f9ff",
+                      "surface-bright": "#f8f9ff",
+                      "on-tertiary-container": "#ffc29d",
+                      "on-secondary-fixed": "#001d36",
+                      "tertiary-fixed-dim": "#ffb68a",
+                      "surface-container-low": "#f2f3fa",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#1260a5",
+                      "outline": "#727782",
+                      "on-tertiary-fixed": "#321300",
+                      "on-primary-container": "#b1d1ff",
+                      "on-surface": "#191c20",
+                      "error-container": "#ffdad6",
+                      "secondary": "#456080",
+                      "tertiary-fixed": "#ffdbc8",
+                      "on-surface-variant": "#414750",
+                      "inverse-surface": "#2e3035",
+                      "secondary-fixed-dim": "#adc9ed",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-container": "#445f7f",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed": "#001c38",
+                      "on-error-container": "#93000a",
+                      "surface-container-high": "#e7e8ee",
+                      "primary-fixed": "#d3e4ff",
+                      "background": "#f8f9ff",
+                      "on-primary-fixed-variant": "#004881",
+                      "inverse-on-surface": "#eff0f7",
+                      "tertiary": "#6b3000"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "fontFamily": {
+                      "headline": ["Manrope"],
+                      "display": ["Manrope"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+        .glass-nav {
+            background: rgba(248, 249, 255, 0.8);
+            backdrop-filter: blur(20px);
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c7d2; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-surface flex min-h-screen overflow-hidden">
+<!-- SideNavBar Component -->
+<aside class="hidden md:flex flex-col fixed left-0 top-0 h-screen w-72 bg-[#f2f3fa] dark:bg-[#111318] pt-8 pb-4 pr-4 z-50 shadow-[20px_0_40px_rgba(0,28,56,0.04)]">
+<div class="px-8 mb-8">
+<h1 class="text-xl font-black text-[#004277] dark:text-[#005a9e] mb-2">Flashvision</h1>
+<p class="font-['Manrope'] text-sm font-semibold tracking-wide text-[#414750]">Digital Concierge</p>
+</div>
+<nav class="flex-grow flex flex-col gap-2">
+<a class="text-[#414750] dark:text-[#909094] py-3 px-6 hover:bg-[#ecedf4] dark:hover:bg-[#1c1b1f] rounded-r-full transition-all flex items-center gap-4 font-['Manrope'] text-sm font-semibold tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span> Sales Orders
+            </a>
+<a class="text-[#414750] dark:text-[#909094] py-3 px-6 hover:bg-[#ecedf4] dark:hover:bg-[#1c1b1f] rounded-r-full transition-all flex items-center gap-4 font-['Manrope'] text-sm font-semibold tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard_customize">dashboard_customize</span> OMS
+            </a>
+<a class="text-[#414750] dark:text-[#909094] py-3 px-6 hover:bg-[#ecedf4] dark:hover:bg-[#1c1b1f] rounded-r-full transition-all flex items-center gap-4 font-['Manrope'] text-sm font-semibold tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="precision_manufacturing">precision_manufacturing</span> Production
+            </a>
+<a class="text-[#414750] dark:text-[#909094] py-3 px-6 hover:bg-[#ecedf4] dark:hover:bg-[#1c1b1f] rounded-r-full transition-all flex items-center gap-4 font-['Manrope'] text-sm font-semibold tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span> Inventory
+            </a>
+<a class="text-[#414750] dark:text-[#909094] py-3 px-6 hover:bg-[#ecedf4] dark:hover:bg-[#1c1b1f] rounded-r-full transition-all flex items-center gap-4 font-['Manrope'] text-sm font-semibold tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span> Delivery
+            </a>
+<div class="mt-auto px-6 pb-4">
+<button class="w-full bg-gradient-to-r from-[#004277] to-[#005a9e] text-white py-3 px-6 rounded-xl font-bold text-sm shadow-lg active:scale-95 transition-all">
+                    Create Shipment
+                </button>
+</div>
+</nav>
+<div class="border-t border-outline-variant/20 pt-4 mt-2">
+<a class="text-[#414750] dark:text-[#909094] py-3 px-6 hover:bg-[#ecedf4] rounded-r-full transition-all flex items-center gap-4 font-['Manrope'] text-sm font-semibold tracking-wide" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span> Support
+            </a>
+<a class="bg-gradient-to-r from-[#004277] to-[#005a9e] text-white rounded-r-full py-3 px-6 shadow-lg flex items-center gap-4 font-['Manrope'] text-sm font-semibold tracking-wide translate-x-1 duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="settings" style="font-variation-settings: 'FILL' 1;">settings</span> Settings
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-grow md:ml-72 flex flex-col h-screen overflow-hidden">
+<!-- TopNavBar Component -->
+<header class="flex justify-between items-center w-full px-8 sticky top-0 z-40 h-16 bg-[#f8f9ff]/80 dark:bg-[#191c20]/80 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<span class="font-['Manrope'] font-extrabold tracking-widest text-lg text-[#004277] dark:text-[#005a9e] uppercase">Flashvision</span>
+<nav class="hidden lg:flex items-center ml-8 gap-6 font-['Manrope'] font-medium text-sm tracking-tight text-[#414750]">
+<a class="text-[#414750] dark:text-[#c4c6cf] hover:text-[#004277]" href="#">Dashboard</a>
+<a class="text-[#414750] dark:text-[#c4c6cf] hover:text-[#004277]" href="#">Reports</a>
+<a class="text-[#004277] dark:text-[#005a9e] font-bold border-b-2 border-[#004277]" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<button class="material-symbols-outlined text-[#414750] p-2 hover:bg-[#ecedf4] rounded-full transition-colors" data-icon="notifications">notifications</button>
+<button class="material-symbols-outlined text-[#414750] p-2 hover:bg-[#ecedf4] rounded-full transition-colors" data-icon="help">help</button>
+</div>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User profile" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNrrLfOVCVJa5ndkQxtubc4jj7mnEf59UFlh8v7I_hXABfp7KE61pXCE23wuHYrC28GvJYHperLzagpng3Ri-pE9Hp29sRWImsNHoCL_44QlqnFEW95qFKTS29Wnuye6dVler6En9Fkoshq0iq9CdBBak-1bebeS6eMnGRv4FjBw-i5qBy5pC6FhH6sSUycmsiZq5P3eGNnKwqC9yq-O1ZZqc9x99Gr4pnNnpYXhLmajbRK50pASqDEYCWYE5J_Bo_n1zCKECXohlJ"/>
+</div>
+</div>
+</header>
+<!-- Configuration Body -->
+<div class="flex-grow flex flex-col lg:flex-row overflow-hidden bg-surface">
+<!-- Left Panel: Configuration -->
+<section class="w-full lg:w-[450px] bg-surface-container-low p-8 overflow-y-auto custom-scrollbar flex flex-col gap-10">
+<header>
+<h2 class="text-2xl font-extrabold text-on-surface tracking-tight">Print &amp; Layout</h2>
+<p class="text-on-surface-variant text-sm mt-1">Customize the visual identity of your outbound documents.</p>
+</header>
+<!-- Document Selection -->
+<div class="space-y-4">
+<label class="text-xs font-bold uppercase tracking-widest text-primary">Document Type</label>
+<div class="relative">
+<select class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-3 text-sm font-medium shadow-sm focus:ring-2 focus:ring-primary appearance-none">
+<option>Sales Order</option>
+<option>Delivery Challan</option>
+<option>Production Slip</option>
+<option>Inventory Audit</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-3 text-outline pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Header & Footer Settings -->
+<div class="space-y-4">
+<h3 class="text-xs font-bold uppercase tracking-widest text-primary">Header &amp; Footer</h3>
+<div class="bg-surface-container-lowest rounded-xl p-4 space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Show Company Logo</span>
+<div class="w-12 h-6 bg-primary rounded-full relative p-1 cursor-pointer">
+<div class="w-4 h-4 bg-white rounded-full absolute right-1"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Include Company Address</span>
+<div class="w-12 h-6 bg-primary rounded-full relative p-1 cursor-pointer">
+<div class="w-4 h-4 bg-white rounded-full absolute right-1"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium">Footer Notes &amp; Terms</span>
+<div class="w-12 h-6 bg-outline-variant rounded-full relative p-1 cursor-pointer">
+<div class="w-4 h-4 bg-white rounded-full absolute left-1"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column Management -->
+<div class="space-y-4">
+<h3 class="text-xs font-bold uppercase tracking-widest text-primary">Column Management</h3>
+<div class="grid grid-cols-2 gap-3">
+<div class="flex items-center gap-3 p-3 bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-primary" data-icon="check_box" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span class="text-sm font-medium">Rate</span>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-primary" data-icon="check_box" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span class="text-sm font-medium">Total</span>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-outline" data-icon="check_box_outline_blank">check_box_outline_blank</span>
+<span class="text-sm font-medium">Packing</span>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-lowest rounded-xl border border-transparent hover:border-primary/20 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-primary" data-icon="check_box" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span class="text-sm font-medium">HSN Code</span>
+</div>
+</div>
+</div>
+<!-- Page Settings -->
+<div class="space-y-4 mb-8">
+<h3 class="text-xs font-bold uppercase tracking-widest text-primary">Page Settings</h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Orientation</span>
+<div class="flex bg-surface-container-high rounded-lg p-1">
+<button class="flex-1 text-xs py-1.5 bg-white rounded-md shadow-sm font-bold text-primary">Portrait</button>
+<button class="flex-1 text-xs py-1.5 text-on-surface-variant font-medium">Landscape</button>
+</div>
+</div>
+<div class="space-y-1">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Paper Size</span>
+<select class="w-full bg-surface-container-lowest border-none rounded-lg py-1.5 text-xs font-medium focus:ring-primary shadow-sm">
+<option>A4 (Standard)</option>
+<option>Letter</option>
+<option>A5</option>
+</select>
+</div>
+</div>
+<div class="space-y-1">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase ml-1">Margins (mm)</span>
+<div class="grid grid-cols-4 gap-2">
+<input class="w-full text-center bg-surface-container-lowest border-none rounded-lg text-xs py-1.5 shadow-sm" type="number" value="10"/>
+<input class="w-full text-center bg-surface-container-lowest border-none rounded-lg text-xs py-1.5 shadow-sm" type="number" value="10"/>
+<input class="w-full text-center bg-surface-container-lowest border-none rounded-lg text-xs py-1.5 shadow-sm" type="number" value="10"/>
+<input class="w-full text-center bg-surface-container-lowest border-none rounded-lg text-xs py-1.5 shadow-sm" type="number" value="10"/>
+</div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="mt-auto pt-8 border-t border-outline-variant/30 flex gap-4">
+<button class="flex-1 py-3 px-4 rounded-xl border border-primary text-primary font-bold text-sm hover:bg-primary/5 transition-all">Print Test</button>
+<button class="flex-[1.5] py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-bold text-sm shadow-md hover:shadow-lg transition-all active:scale-95">Save Settings</button>
+</div>
+</section>
+<!-- Right Panel: Live Preview -->
+<section class="flex-grow bg-surface p-12 flex flex-col items-center justify-center overflow-hidden">
+<div class="w-full max-w-4xl h-full flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-primary-container/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary" data-icon="visibility">visibility</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Live Preview</h4>
+<p class="text-xs text-on-surface-variant">Real-time rendering of Sales Order #SO-2024-081</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-surface-container-low rounded-full px-4 py-1.5">
+<button class="material-symbols-outlined text-sm text-on-surface-variant hover:text-primary" data-icon="zoom_out">zoom_out</button>
+<span class="text-xs font-bold w-12 text-center">85%</span>
+<button class="material-symbols-outlined text-sm text-on-surface-variant hover:text-primary" data-icon="zoom_in">zoom_in</button>
+</div>
+</div>
+<!-- Paper Mockup -->
+<div class="flex-grow bg-white shadow-[0_30px_60px_-15px_rgba(0,40,80,0.12)] rounded-sm overflow-hidden flex flex-col mx-auto aspect-[1/1.414] border border-outline-variant/10">
+<!-- Simulated Document Header -->
+<div class="p-12 pb-6 space-y-6">
+<div class="flex justify-between items-start">
+<div class="space-y-4">
+<div class="h-10 w-40 overflow-hidden">
+<img class="h-full object-contain object-left" data-alt="A clean, minimalist logo for a high-end logistics company named Flashvision, featuring abstract geometric forms in deep covalent blue and navy. The design is modern, professional, and sophisticated, reflecting a digital concierge service that is authoritative and reliable. Set against a white background to emphasize precision and trust." src="https://lh3.googleusercontent.com/aida/ADBb0ugcnQHk5nCRuAo3QzOzFIewhq2rSk76wk1gMTEwER9PeTxCk4jcoPgWfan6GBHKVTA4BKFmidqpdf7uNmxx5M8EX0thTpExlT5C1Upg7oOBE7ByY1E08D0YK0VQAMpJL-dZxNlxHmSSiVr9EauynibS-wNF8nIKUuYhcxPtLATZZscAKewdt7ESi0B18AJRJlrsnUUUsgz8Y-ZU_Yjl_jyjpCRBz6Mm3MQB5XJEA5itKxs2FmZ2od9A8IzrX4QnMqAi3YEjFwy9vEs"/>
+</div>
+<div class="space-y-1">
+<div class="w-48 h-2 bg-surface-container rounded-full"></div>
+<div class="w-32 h-2 bg-surface-container rounded-full"></div>
+<div class="w-40 h-2 bg-surface-container rounded-full"></div>
+</div>
+</div>
+<div class="text-right space-y-2">
+<h5 class="text-xl font-black text-primary tracking-tighter uppercase">Sales Order</h5>
+<div class="space-y-1">
+<div class="w-32 h-2 bg-surface-container rounded-full ml-auto"></div>
+<div class="w-24 h-2 bg-surface-container rounded-full ml-auto"></div>
+</div>
+</div>
+</div>
+<!-- Document Table Mockup -->
+<div class="mt-8">
+<div class="grid grid-cols-6 bg-primary py-2 px-4 rounded-t-sm">
+<div class="col-span-3 text-[8px] font-bold text-white uppercase tracking-widest">Description</div>
+<div class="text-[8px] font-bold text-white uppercase tracking-widest text-center">Qty</div>
+<div class="text-[8px] font-bold text-white uppercase tracking-widest text-center">Rate</div>
+<div class="text-[8px] font-bold text-white uppercase tracking-widest text-right">Total</div>
+</div>
+<div class="divide-y divide-outline-variant/10 border-x border-b border-outline-variant/10">
+<div class="grid grid-cols-6 py-3 px-4">
+<div class="col-span-3 space-y-1.5">
+<div class="w-4/5 h-2.5 bg-surface-container-high rounded-sm"></div>
+<div class="w-2/3 h-2 bg-surface-container rounded-sm"></div>
+</div>
+<div class="flex justify-center items-center"><div class="w-4 h-2 bg-surface-container rounded-sm"></div></div>
+<div class="flex justify-center items-center"><div class="w-8 h-2 bg-surface-container rounded-sm"></div></div>
+<div class="flex justify-end items-center"><div class="w-10 h-2 bg-primary/20 rounded-sm"></div></div>
+</div>
+<div class="grid grid-cols-6 py-3 px-4 bg-surface-container-low/30">
+<div class="col-span-3 space-y-1.5">
+<div class="w-3/4 h-2.5 bg-surface-container-high rounded-sm"></div>
+<div class="w-1/2 h-2 bg-surface-container rounded-sm"></div>
+</div>
+<div class="flex justify-center items-center"><div class="w-4 h-2 bg-surface-container rounded-sm"></div></div>
+<div class="flex justify-center items-center"><div class="w-8 h-2 bg-surface-container rounded-sm"></div></div>
+<div class="flex justify-end items-center"><div class="w-10 h-2 bg-primary/20 rounded-sm"></div></div>
+</div>
+<div class="grid grid-cols-6 py-3 px-4">
+<div class="col-span-3 space-y-1.5">
+<div class="w-1/2 h-2.5 bg-surface-container-high rounded-sm"></div>
+<div class="w-1/3 h-2 bg-surface-container rounded-sm"></div>
+</div>
+<div class="flex justify-center items-center"><div class="w-4 h-2 bg-surface-container rounded-sm"></div></div>
+<div class="flex justify-center items-center"><div class="w-8 h-2 bg-surface-container rounded-sm"></div></div>
+<div class="flex justify-end items-center"><div class="w-10 h-2 bg-primary/20 rounded-sm"></div></div>
+</div>
+</div>
+</div>
+<!-- Signature & Total Area -->
+<div class="flex justify-between mt-8 pt-8 border-t border-outline-variant/10">
+<div class="space-y-8">
+<div class="w-32 h-10 border-b border-primary/20"></div>
+<p class="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest">Authorized Signatory</p>
+</div>
+<div class="w-48 space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-[8px] font-bold text-on-surface-variant uppercase">Subtotal</span>
+<div class="w-16 h-2 bg-surface-container rounded-full"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-[8px] font-bold text-on-surface-variant uppercase">GST (18%)</span>
+<div class="w-12 h-2 bg-surface-container rounded-full"></div>
+</div>
+<div class="flex justify-between items-center pt-2 border-t border-outline-variant/20">
+<span class="text-[10px] font-black text-primary uppercase">Grand Total</span>
+<div class="w-20 h-3 bg-primary/10 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Vertical Pulse Tracker Visual (Decorative/Progress indicator in preview) -->
+<div class="mt-auto p-12 bg-surface-container-low/30">
+<div class="flex items-start gap-4">
+<div class="flex flex-col items-center">
+<div class="w-2 h-2 bg-primary rounded-full"></div>
+<div class="w-[2px] h-8 bg-primary"></div>
+<div class="w-2 h-2 bg-outline-variant rounded-full"></div>
+</div>
+<div class="space-y-4 flex-grow">
+<div class="w-full h-2 bg-surface-container rounded-full"></div>
+<div class="w-3/4 h-2 bg-surface-container rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Options -->
+<div class="flex justify-center gap-6 pb-6">
+<button class="flex items-center gap-2 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="file_download">file_download</span> Download PDF
+                        </button>
+<button class="flex items-center gap-2 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="send">send</span> Email Draft
+                        </button>
+<button class="flex items-center gap-2 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="share">share</span> Copy Link
+                        </button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Contextual FAB (Suppressed on settings/details pages as per instructions, but adding one here if needed for primary task - although instructions say suppress on settings) -->
+<!-- Suppressing FAB per rules: "You MUST suppress the FAB on Settings, Profile, Details, and Transactional screens." -->
+</body></html>

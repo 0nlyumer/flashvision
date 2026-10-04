@@ -1,0 +1,19 @@
+﻿# SDKs & JDKs
+android-sdk/
+jdk17/
+jdk21/
+
+# Large binaries & installers (>100MB blocked by GitHub)
+*.exe
+*.apk
+*.zip
+*.log
+firebase-debug.log
+hs_err_pid*.log
+replay_pid*.log
+
+# Node dependencies & builds
+**/node_modules/
+**/dist/
+**/dist-desktop/
+**/.firebase/

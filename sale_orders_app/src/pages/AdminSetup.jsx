@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { useApp } from '../context/AppContext';
+import { useDialog } from '../context/DialogContext';
 
 export default function AdminSetup() {
   const { state, setCollection } = useApp();
+  const { appConfirm, appAlert } = useDialog();
   const [activeTab, setActiveTab] = useState('modules');
+  const [selectedPrintModule, setSelectedPrintModule] = useState('global');
   
   // New Item State
   const [newItemName, setNewItemName] = useState('');
@@ -16,7 +19,44 @@ export default function AdminSetup() {
 
   // New User State
   const [newUserName, setNewUserName] = useState('');
+  const [newUserUsername, setNewUserUsername] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserRole, setNewUserRole] = useState('Operator');
+
+  // Print Settings State
+  const defaultPrint = state.adminSetup?.printSettings || { disclaimers: {} };
+  const [printConfig, setPrintConfig] = useState({
+     logoUrl: defaultPrint.logoUrl || '',
+     address: defaultPrint.address || '',
+     phone: defaultPrint.phone || '',
+     email: defaultPrint.email || '',
+     showCreatedBy: defaultPrint.showCreatedBy !== false,
+     disclaimers: { ...defaultPrint.disclaimers },
+     moduleSettings: { ...defaultPrint.moduleSettings }
+  });
+
+  const printModules = [
+      { id: 'global', name: 'Global Headers & Disclaimers', icon: 'business' },
+      { id: 'sale_order', name: 'Sale Order Invoice', icon: 'receipt_long' },
+      { id: 'delivery_challan', name: 'Delivery Challan', icon: 'local_shipping' },
+      { id: 'inv_adjustment', name: 'Inventory Adjustment', icon: 'tune' },
+      { id: 'inv_return', name: 'Inventory Return', icon: 'assignment_return' },
+      { id: 'production_slip', name: 'Production Job Slip', icon: 'precision_manufacturing' },
+  ];
+
+  const handleModuleSettingChange = (field, value) => {
+      setPrintConfig(prev => ({
+          ...prev,
+          moduleSettings: {
+              ...(prev.moduleSettings || {}),
+              [selectedPrintModule]: {
+                  ...(prev.moduleSettings?.[selectedPrintModule] || {}),
+                  [field]: value
+              }
+          }
+      }));
+  };
 
   const rawMaterials = state.items.filter(i => i.type === 'Raw Material');
 
@@ -43,20 +83,39 @@ export default function AdminSetup() {
     // Reset form
     setNewItemName('');
     setNewItemStock(0);
-    alert('Item Added Successfully!');
+    appAlert('Item Added Successfully!');
   };
 
   const handleAddUser = (e) => {
     e.preventDefault();
+    const usernameClean = newUserUsername.trim().toLowerCase();
+    if (!usernameClean) {
+      appAlert('Username is required.');
+      return;
+    }
+    const exists = state.users?.some(u => u.username?.toLowerCase() === usernameClean);
+    if (exists) {
+      appAlert('Username already exists. Please choose a unique username.');
+      return;
+    }
+
     const newUser = {
-      id: state.users.length + 1,
+      id: Date.now(),
       name: newUserName,
+      username: usernameClean,
+      password: newUserPassword,
+      email: newUserEmail.trim(),
       role: newUserRole,
-      permissions: ['sale_order'] // default basic permission
+      permissions: ['salesOrders'], // default basic permission
+      granularPermissions: {},
+      requirePasswordChange: false
     };
-    setCollection('users', [...state.users, newUser]);
+    setCollection('users', [...(state.users || []), newUser]);
     setNewUserName('');
-    alert('User Added Successfully!');
+    setNewUserUsername('');
+    setNewUserPassword('');
+    setNewUserEmail('');
+    appAlert('User Added Successfully!');
   };
 
   const togglePermission = (userId, perm) => {
@@ -79,14 +138,19 @@ export default function AdminSetup() {
   const setupModules = [
     { title: 'User Access Control', icon: 'manage_accounts', desc: 'Roles, permissions, and security policies.', status: 'Active', action: () => setActiveTab('users') },
     { title: 'Product Master', icon: 'category', desc: 'SKUs, AJ Synthetic Fabric Logic, and inventory master.', status: 'Active', action: () => setActiveTab('items') },
+    { title: 'Global Print Settings', icon: 'print', desc: 'Manage company logo, headers, and document disclaimers.', status: 'Active', action: () => setActiveTab('print') },
   ];
 
   const availableModules = [
-    { id: 'sale_order', name: 'Sale Order' },
-    { id: 'oms', name: 'OMS & Production' },
+    { id: 'salesOrders', name: 'Sales Orders' },
+    { id: 'oms', name: 'OMS (Production Flow)' },
+    { id: 'productionPlanning', name: 'Production Planning' },
     { id: 'inventory', name: 'Inventory' },
     { id: 'delivery', name: 'Delivery' },
-    { id: 'user_control', name: 'User Control' }
+    { id: 'finance', name: 'Finance' },
+    { id: 'hr', name: 'HR Management' },
+    { id: 'userManagement', name: 'User Control' },
+    { id: 'settings', name: 'Settings' }
   ];
 
   return (
@@ -230,6 +294,18 @@ export default function AdminSetup() {
                 <input required type="text" value={newUserName} onChange={e => setNewUserName(e.target.value)} className="w-full mt-1 p-2 bg-surface border border-slate-200 rounded-lg text-sm" placeholder="e.g. John Doe" />
               </div>
               <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Username (For Login)</label>
+                <input required type="text" value={newUserUsername} onChange={e => setNewUserUsername(e.target.value)} className="w-full mt-1 p-2 bg-surface border border-slate-200 rounded-lg text-sm" placeholder="e.g. john" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Password</label>
+                <input required type="password" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} className="w-full mt-1 p-2 bg-surface border border-slate-200 rounded-lg text-sm" placeholder="e.g. pass123" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-500 uppercase">Email (Optional)</label>
+                <input type="email" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} className="w-full mt-1 p-2 bg-surface border border-slate-200 rounded-lg text-sm" placeholder="e.g. john@example.com" />
+              </div>
+              <div>
                 <label className="text-xs font-bold text-slate-500 uppercase">Role</label>
                 <select value={newUserRole} onChange={(e) => setNewUserRole(e.target.value)} className="w-full mt-1 p-2 bg-surface border border-slate-200 rounded-lg text-sm font-semibold">
                   <option value="Operator">Operator</option>
@@ -263,7 +339,8 @@ export default function AdminSetup() {
                     <tr key={u.id} className="hover:bg-surface-container-low transition-colors">
                       <td className="px-4 py-4">
                         <p className="font-bold text-on-surface">{u.name}</p>
-                        <p className="text-[10px] uppercase font-bold text-primary tracking-widest">{u.role}</p>
+                        <p className="text-xs text-on-surface-variant">@{u.username || 'admin'} • {u.password || 'admin1'}</p>
+                        <p className="text-[10px] uppercase font-bold text-primary tracking-widest mt-1">{u.role}</p>
                       </td>
                       {availableModules.map(mod => {
                         const hasAccess = u.permissions.includes('all') || u.permissions.includes(mod.id);

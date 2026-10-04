@@ -2,18 +2,31 @@ import React, { useState, useEffect } from 'react';
 import BulkUploadModal from './BulkUploadModal';
 import ProfileCardModal from './ProfileCardModal';
 import { useApp } from '../../context/AppContext';
+import { useDialog } from '../../context/DialogContext';
+import CustomSelect from '../ui/CustomSelect';
+import GlobalPagination from '../ui/GlobalPagination';
 
 export default function AddRawMaterial() {
   const { state, setCollection } = useApp();
+  const { appConfirm, appAlert } = useDialog();
   const [showHistory, setShowHistory] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [viewProfileData, setViewProfileData] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const rawMaterials = state.items.filter(item => item.category === 'Raw Material');
 
   const generateTrackingCode = () => {
-    const rmCount = rawMaterials.length;
-    return `RM-${String(rmCount + 1).padStart(3, '0')}`;
+    const rawMaterialsList = state.items.filter(item => item.category === 'Raw Material');
+    const ids = rawMaterialsList.map(item => {
+      const match = item.sku?.match(/\d+/);
+      return match ? parseInt(match[0], 10) : 0;
+    });
+    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
+    return `RM-${String(maxId + 1).padStart(3, '0')}`;
   };
 
   // Form State
@@ -27,32 +40,195 @@ export default function AddRawMaterial() {
     }
   }, [state.items, showHistory]);
 
-  const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const displayedMaterials = state?.isGlobalPaginated
+    ? rawMaterials.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : rawMaterials;
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if(formErrors[e.target.name]) setFormErrors(prev => ({ ...prev, [e.target.name]: null }));
+  };
 
   const handleSave = () => {
-    if (!formData.name || !formData.sku) return alert("Name and SKU are required");
+    let errors = {};
+    if (!formData.name) errors.name = "Material Name";
+    if (!formData.sku) errors.sku = "Material Code (SKU)";
+    if (!formData.rawMaterialType) errors.rawMaterialType = "Raw Material Type";
+    if (!formData.uom) errors.uom = "Unit of Measure (UOM)";
+    if (!formData.price) errors.price = "Estimated Cost / Unit";
+
+    if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        appAlert(`Please fill the following mandatory fields:\n${Object.values(errors).join(', ')}`);
+        return;
+    }
+
     let updatedItems = [...state.items];
     
     if (formData.id) {
       updatedItems = updatedItems.map(item => item.id === formData.id ? formData : item);
     } else {
-      updatedItems.push({ ...formData, id: 'I' + Date.now() });
+      updatedItems.push({ ...formData, id: 'RM' + Date.now() });
     }
     
     setCollection('items', updatedItems);
     setFormData({ id: '', name: '', sku: generateTrackingCode(), uom: '', rawMaterialType: '', specifications: '', price: '', alert: '', category: 'Raw Material', type: 'Raw Material', status: 'Active' });
+    setFormErrors({});
     setShowHistory(true);
   };
 
-  const handleEdit = (item) => {
+  const handleEdit = async (item) => {
+    if (!(await appConfirm('Are you sure you want to edit this raw material?'))) return;
     setFormData(item);
     setShowHistory(false);
   };
 
-  const handleDelete = (id) => {
-    if(window.confirm('Are you sure you want to delete this material?')) {
+  const handleDelete = async (id) => {
+    if(await appConfirm('Are you sure you want to delete this material?')) {
       const updatedItems = state.items.filter(item => item.id !== id);
       setCollection('items', updatedItems);
+    }
+  };
+
+  const handleBulkUpload = (csvText) => {
+    const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
+    if (lines.length < 2) {
+      appAlert("No valid data found in CSV file.");
+      return;
+    }
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+    
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      const firstCell = line.split(',')[0]?.trim().replace(/^["']|["']$/g, '').toLowerCase();
+      if (firstCell === 'end' || line.trim().toLowerCase() === 'end') {
+        break;
+      }
+
+      const values = [];
+      let currentVal = '';
+      let inQuotes = false;
+      for (let char of line) {
+        if (char === '"' || char === "'") {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          values.push(currentVal.trim());
+          currentVal = '';
+        } else {
+          currentVal += char;
+        }
+      }
+      values.push(currentVal.trim());
+      
+      const rowData = {};
+      headers.forEach((header, index) => {
+        rowData[header] = values[index]?.replace(/^["']|["']$/g, '') || '';
+      });
+      
+      const name = (rowData['Item Name'] || rowData['Item name'] || '').trim();
+      if (/[a-zA-Z0-9]/.test(name)) {
+        rows.push(rowData);
+      }
+    }
+
+    const errors = [];
+    const requiredHeaders = ['Item Name', 'Department', 'Raw Material Type', 'Unit of Measure', 'Packing Type', 'Packing Size', 'Estimated Cost'];
+    const missingHeaders = requiredHeaders.filter(rh => !headers.some(h => h.toLowerCase() === rh.toLowerCase()));
+    if (missingHeaders.length > 0) {
+      appAlert(`CSV file template mismatch!\nMissing required columns: ${missingHeaders.join(', ')}`);
+      return;
+    }
+
+    rows.forEach((row, index) => {
+      const rowNum = index + 2;
+      const getKey = (names) => {
+        const match = headers.find(h => names.some(n => n.toLowerCase() === h.toLowerCase()));
+        return match ? row[match] : '';
+      };
+
+      const name = getKey(['Item Name', 'Item name']);
+      const rmType = getKey(['Raw Material Type', 'Raw material type']);
+      const uom = getKey(['Unit of Measure', 'Unit of measure', 'UOM', 'uom']);
+      const packSizeStr = getKey(['Packing Size', 'Packing size']);
+      const estCostStr = getKey(['Estimated Cost', 'Estimated cost']);
+
+      if (!name) {
+        errors.push(`Row ${rowNum}: 'Item Name' is empty.`);
+      }
+      if (!rmType) {
+        errors.push(`Row ${rowNum}: 'Raw Material Type' is empty.`);
+      }
+      if (!uom) {
+        errors.push(`Row ${rowNum}: 'Unit of Measure' is empty.`);
+      }
+      
+      const packSize = Number(packSizeStr);
+      if (isNaN(packSize) || packSize <= 0) {
+        errors.push(`Row ${rowNum}: 'Packing Size' ("${packSizeStr}") must be a valid positive number.`);
+      }
+
+      const cleanCost = (estCostStr || '').replace(/[^\d.]/g, '');
+      const estCost = parseFloat(cleanCost);
+      if (isNaN(estCost) || estCost < 0) {
+        errors.push(`Row ${rowNum}: 'Estimated Cost' ("${estCostStr}") must be a valid non-negative number.`);
+      }
+    });
+
+    if (errors.length > 0) {
+      const errorMsg = `File validation failed! Please correct the following errors:\n\n` + errors.slice(0, 15).join('\n') + (errors.length > 15 ? `\n...and ${errors.length - 15} more errors.` : '');
+      appAlert(errorMsg);
+      return;
+    }
+
+    let updatedItems = [...state.items];
+    const existingRM = updatedItems.filter(i => i.category === 'Raw Material');
+    let rmCount = existingRM.length;
+    let addedCount = 0;
+
+    rows.forEach(row => {
+      const name = row['Item Name'] || row['Item name'];
+      if (!name) return;
+
+      const dept = row['Department'] || row['department'] || 'Procurement';
+      const rmType = row['Raw Material Type'] || row['Raw material type'] || 'Other';
+      const uom = row['Unit of Measure'] || row['Unit of measure'] || row['UOM'] || 'Units (ea)';
+      const packingType = row['Packing Type'] || row['Packing type'] || 'Box';
+      const packingSize = row['Packing Size'] || row['Packing size'] || '1';
+      const estCost = row['Estimated Cost'] || row['Estimated cost'] || '0.00';
+      const formattedPrice = estCost.startsWith('$') ? estCost : '$' + parseFloat(estCost).toFixed(2);
+      const model3d = row['3D Model'] || row['3d model'] || '';
+
+      rmCount++;
+      const sku = `RM-${String(rmCount).padStart(3, '0')}`;
+
+      updatedItems.push({
+        id: 'RM' + (Date.now() + addedCount),
+        name: name,
+        sku: sku,
+        uom: uom,
+        rawMaterialType: rmType,
+        packingType: packingType,
+        packingSize: packingSize,
+        price: formattedPrice,
+        category: 'Raw Material',
+        type: 'Raw Material',
+        status: 'Active',
+        specifications: '',
+        alert: '',
+        image: null,
+        model3d: model3d ? `/models/${model3d}` : null,
+        model3dName: model3d || null,
+        department: dept
+      });
+      addedCount++;
+    });
+
+    if (addedCount > 0) {
+      setCollection('items', updatedItems);
+      appAlert(`Successfully uploaded and created ${addedCount} raw materials!`);
+    } else {
+      appAlert("No valid raw material entries were found in the file.");
     }
   };
 
@@ -100,38 +276,48 @@ export default function AddRawMaterial() {
           <div className="p-6 lg:p-8 animate-in fade-in zoom-in-95 duration-300">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="relative group col-span-1 md:col-span-2">
-                <input name="name" value={formData.name} onChange={handleInputChange} type="text" placeholder="e.g. Aluminum Sheets 2mm" className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all" />
-                <label className="absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold text-primary uppercase tracking-wider">Material Name</label>
+                <input name="name" value={formData.name} onChange={handleInputChange} type="text" placeholder="e.g. Aluminum Sheets 2mm" className={`w-full bg-surface border rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all ${formErrors.name ? 'border-error/80 ring-1 ring-error/30' : 'border-outline-variant/30'}`} />
+                <label className={`absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold uppercase tracking-wider ${formErrors.name ? 'text-error' : 'text-primary'}`}>Material Name</label>
               </div>
               
               <div className="relative group">
-                <input name="sku" value={formData.sku} onChange={handleInputChange} type="text" placeholder="e.g. RM-AL-002" className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all font-mono" />
-                <label className="absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold text-primary uppercase tracking-wider">Material Code (SKU)</label>
+                <input name="sku" value={formData.sku} onChange={handleInputChange} type="text" placeholder="e.g. RM-AL-002" className={`w-full bg-surface border rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all font-mono ${formErrors.sku ? 'border-error/80 ring-1 ring-error/30' : 'border-outline-variant/30'}`} />
+                <label className={`absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold uppercase tracking-wider ${formErrors.sku ? 'text-error' : 'text-primary'}`}>Material Code (SKU)</label>
               </div>
 
               <div className="relative group">
-                 <select name="rawMaterialType" value={formData.rawMaterialType} onChange={handleInputChange} className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all appearance-none">
-                  <option value="">Select Type...</option>
-                  <option value="Cloth">Cloth</option>
-                  <option value="Chemical">Chemical</option>
-                  <option value="Metal">Metal</option>
-                  <option value="Plastic">Plastic</option>
-                  <option value="Other">Other</option>
-                </select>
-                <label className="absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold text-primary uppercase tracking-wider">Raw Material Type</label>
-                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                <CustomSelect
+                  name="rawMaterialType"
+                  value={formData.rawMaterialType}
+                  onChange={handleInputChange}
+                  options={[
+                    { label: 'Select Type...', value: '' },
+                    { label: 'Cloth', value: 'Cloth' },
+                    { label: 'Chemical', value: 'Chemical' },
+                    { label: 'Metal', value: 'Metal' },
+                    { label: 'Plastic', value: 'Plastic' },
+                    { label: 'Other', value: 'Other' }
+                  ]}
+                  label="Raw Material Type"
+                  error={formErrors.rawMaterialType}
+                />
               </div>
 
               <div className="relative group">
-                 <select name="uom" value={formData.uom} onChange={handleInputChange} className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all appearance-none">
-                  <option value="">Select UOM...</option>
-                  <option value="Kilograms (kg)">Kilograms (kg)</option>
-                  <option value="Liters (L)">Liters (L)</option>
-                  <option value="Units (ea)">Units (ea)</option>
-                  <option value="Meters (m)">Meters (m)</option>
-                </select>
-                <label className="absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold text-primary uppercase tracking-wider">Unit of Measure (UOM)</label>
-                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                <CustomSelect
+                  name="uom"
+                  value={formData.uom}
+                  onChange={handleInputChange}
+                  options={[
+                    { label: 'Select UOM...', value: '' },
+                    { label: 'Kilograms (kg)', value: 'Kilograms (kg)' },
+                    { label: 'Liters (L)', value: 'Liters (L)' },
+                    { label: 'Units (ea)', value: 'Units (ea)' },
+                    { label: 'Meters (m)', value: 'Meters (m)' }
+                  ]}
+                  label="Unit of Measure (UOM)"
+                  error={formErrors.uom}
+                />
               </div>
 
               <div className="relative group col-span-1 md:col-span-2">
@@ -143,8 +329,8 @@ export default function AddRawMaterial() {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <span className="text-slate-400 text-sm">$</span>
                 </div>
-                <input name="price" value={formData.price} onChange={handleInputChange} type="text" placeholder="0.00" className="w-full bg-surface border border-outline-variant/30 rounded-xl pl-8 pr-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all" />
-                <label className="absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold text-primary uppercase tracking-wider">Estimated Cost / Unit</label>
+                <input name="price" value={formData.price} onChange={handleInputChange} type="text" placeholder="0.00" className={`w-full bg-surface border rounded-xl pl-8 pr-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all ${formErrors.price ? 'border-error/80 ring-1 ring-error/30' : 'border-outline-variant/30'}`} />
+                <label className={`absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold uppercase tracking-wider ${formErrors.price ? 'text-error' : 'text-primary'}`}>Estimated Cost / Unit</label>
               </div>
 
               <div className="relative group">
@@ -155,7 +341,10 @@ export default function AddRawMaterial() {
 
             <div className="mt-8 pt-6 border-t border-outline-variant/20 flex justify-end gap-4">
               <button 
-                onClick={() => setFormData({ id: '', name: '', sku: generateTrackingCode(), uom: '', rawMaterialType: '', specifications: '', price: '', alert: '', category: 'Raw Material', type: 'Raw Material', status: 'Active' })} 
+                onClick={() => {
+                  setFormData({ id: '', name: '', sku: generateTrackingCode(), uom: '', rawMaterialType: '', specifications: '', price: '', alert: '', category: 'Raw Material', type: 'Raw Material', status: 'Active' });
+                  setFormErrors({});
+                }} 
                 className="px-6 py-2.5 rounded-xl font-bold text-sm text-primary hover:bg-surface transition-colors"
               >
                 Reset
@@ -185,7 +374,7 @@ export default function AddRawMaterial() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/20 uppercase font-medium text-xs font-body text-on-surface">
-                  {rawMaterials.map((mat) => (
+                  {displayedMaterials.map((mat) => (
                     <tr key={mat.id} className="hover:bg-surface/50 transition-colors">
                       <td className="py-4 px-6 font-bold">{mat.name}</td>
                       <td className="py-4 px-6 font-mono text-primary">{mat.sku}</td>
@@ -212,6 +401,13 @@ export default function AddRawMaterial() {
                 </tbody>
               </table>
             </div>
+            
+            <GlobalPagination 
+              totalItems={rawMaterials.length}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
           </div>
         )}
       </div>
@@ -220,6 +416,7 @@ export default function AddRawMaterial() {
         isOpen={isBulkUploadOpen} 
         onClose={() => setIsBulkUploadOpen(false)} 
         entityName="Raw Materials" 
+        onUpload={handleBulkUpload}
       />
       <ProfileCardModal 
         isOpen={!!viewProfileData} 

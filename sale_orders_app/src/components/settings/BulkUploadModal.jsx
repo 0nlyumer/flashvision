@@ -1,7 +1,11 @@
 import React, { useState, useRef } from 'react';
+import { useDialog } from '../../context/DialogContext';
+import { useApp } from '../../context/AppContext';
 
-export default function BulkUploadModal({ isOpen, onClose, entityName }) {
+export default function BulkUploadModal({ isOpen, onClose, entityName, onUpload }) {
   const fileInputRef = useRef(null);
+  const { appAlert } = useDialog();
+  const { state } = useApp();
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleDownload = () => {
@@ -10,10 +14,10 @@ export default function BulkUploadModal({ isOpen, onClose, entityName }) {
 
     switch(entityName) {
       case 'Customers':
-        headers = ['Company Name', 'Email', 'Phone', 'Address', 'VAT', 'Terms'];
+        headers = ['Company Name', 'Contact Person', 'Email', 'Phone', 'Address', 'VAT', 'Terms'];
         rows = [
-          ['Acme Corp', 'billing@acmecorp.com', '+1-555-0100', '123 Acme Way', 'VAT123', 'Net 30'],
-          ['Beta LLC', 'finance@betallc.com', '+1-555-0200', '456 Beta Blvd', 'VAT456', 'Due on Receipt']
+          ['Acme Corp', 'John Doe', 'billing@acmecorp.com', '+1-555-0100', '123 Acme Way', 'VAT123', 'Net 30'],
+          ['Beta LLC', 'Jane Smith', 'finance@betallc.com', '+1-555-0200', '456 Beta Blvd', 'VAT456', 'Due on Receipt']
         ];
         break;
       case 'Suppliers':
@@ -24,22 +28,56 @@ export default function BulkUploadModal({ isOpen, onClose, entityName }) {
         ];
         break;
       case 'Finished Goods':
-        headers = ['Item Name', 'SKU', 'SubCategory', 'Price', 'Status'];
+        headers = ['Item Name', 'Department', 'UOM', 'Back Cloth Name', 'UOM Base Quantity', 'Packing Size', 'Unit Price'];
         rows = [
-          ['Premium Widget', 'WID-001', 'Widgets', '25.00', 'Active'],
-          ['Standard Gadget', 'GAD-101', 'Gadgets', '15.50', 'Active']
+          ['Premium Widget', 'Production', 'Units (ea)', 'Cotton Base 1', '100', '50', '25.00'],
+          ['Standard Gadget', 'Assembly', 'Kilograms (kg)', 'Silk Base 2', '200', '10', '15.50']
         ];
         break;
-      case 'Raw Material':
-        headers = ['Material Name', 'SKU', 'Type', 'UOM', 'Estimated Cost', 'Status'];
+      case 'BOMs':
+        const allItems = state.items || [];
+        const rawItems = allItems.filter(i => i.type === 'Raw Material' || i.category === 'Raw Material');
+        const packingItems = rawItems.filter(rm => {
+           const type = rm.rawMaterialType?.toLowerCase() || '';
+           return type.includes('packing') || type.includes('packaging') || rm.name.toLowerCase().includes('pack');
+        });
+        const genericItems = rawItems.filter(rm => {
+           const type = rm.rawMaterialType?.toLowerCase() || '';
+           return !type.includes('cloth') && !type.includes('packing') && !type.includes('packaging');
+        });
+
+        headers = ['Finished Good Name', 'Synthetic Winter Coat', 'Batch Size', '1000', 'Cloth Name', 'Basic Back Cloth', 'Cloth Quantity', '50g'];
         rows = [
-          ['Steel Tubing', 'TUB-002', 'Metal', 'Meters (m)', '12.00', 'Active'],
-          ['Cotton Blend', 'CTN-301', 'Cloth', 'Kilograms (kg)', '5.50', 'Active']
+          ['TOP', 'Quantity', 'FOAM', 'Quantity', 'ADHESIVE', 'Quantity', 'PACKING', 'Quantity']
         ];
+        
+        const loopMax = Math.max(genericItems.length, packingItems.length);
+        const limitCount = loopMax > 0 ? loopMax : 1; 
+
+        for (let i = 0; i < limitCount; i++) {
+           const gItem = genericItems[i];
+           const pItem = packingItems[i];
+           rows.push([
+              gItem ? gItem.name : '', '',
+              gItem ? gItem.name : '', '',
+              gItem ? gItem.name : '', '',
+              pItem ? pItem.name : '', ''
+           ]);
+        }
+        rows.push(['END!', '', '', '', '', '', '', '']);
         break;
       default:
-        headers = ['Col1', 'Col2', 'Col3'];
-        rows = [['Data1', 'Data2', 'Data3']];
+        if (state?.itemCategories?.some(c => (typeof c === 'object' ? c.value : c) === entityName) || entityName === 'Raw Material' || entityName === 'Raw Materials') {
+          headers = ['Item Name', 'Department', `${entityName === 'Raw Materials' ? 'Raw Material' : entityName} Type`, 'Unit of Measure', 'Packing Type', 'Packing Size', 'Estimated Cost', '3D Model'];
+          rows = [
+            ['Steel Tubing', 'Procurement', 'Metal', 'Meters (m)', 'Roll', '50', '12.00', 'tubing.obj'],
+            ['Cotton Blend', 'Warehouse', 'Cloth', 'Kilograms (kg)', 'Box', '100', '5.50', '']
+          ];
+        } else {
+          headers = ['Col1', 'Col2', 'Col3'];
+          rows = [['Data1', 'Data2', 'Data3']];
+        }
+        break;
     }
 
     const csvContent = "data:text/csv;charset=utf-8," 
@@ -68,8 +106,18 @@ export default function BulkUploadModal({ isOpen, onClose, entityName }) {
 
   const handleUpload = () => {
     if (selectedFile) {
-      alert(`File "${selectedFile.name}" would be uploaded here.`);
-      handleClose();
+      if (onUpload) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+              const text = e.target.result;
+              onUpload(text);
+              handleClose();
+          };
+          reader.readAsText(selectedFile);
+      } else {
+          appAlert(`File "${selectedFile.name}" would be uploaded here.`);
+          handleClose();
+      }
     }
   };
 

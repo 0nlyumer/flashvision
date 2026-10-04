@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashvision - Confirmation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#ffdbc8",
+                        "secondary-fixed": "#d1e4ff",
+                        "on-primary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "inverse-surface": "#2e3035",
+                        "primary-fixed": "#d3e4ff",
+                        "on-tertiary-container": "#ffc29d",
+                        "tertiary": "#6b3000",
+                        "surface-bright": "#f8f9ff",
+                        "surface-dim": "#d8dae0",
+                        "inverse-on-surface": "#eff0f7",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "primary": "#004277",
+                        "surface-container-low": "#f2f3fa",
+                        "outline": "#727782",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed": "#001c38",
+                        "tertiary-container": "#8e4302",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "on-surface-variant": "#414750",
+                        "on-surface": "#191c20",
+                        "primary-container": "#005a9e",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "on-secondary-container": "#445f7f",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "on-primary-container": "#b1d1ff",
+                        "inverse-primary": "#a2c9ff",
+                        "outline-variant": "#c1c7d2",
+                        "surface-variant": "#e1e2e8",
+                        "secondary-container": "#bed9ff",
+                        "on-tertiary-fixed": "#321300",
+                        "on-secondary-fixed": "#001d36",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#ecedf4",
+                        "on-primary-fixed-variant": "#004881",
+                        "on-background": "#191c20",
+                        "surface-tint": "#1260a5",
+                        "surface-container-high": "#e7e8ee",
+                        "secondary": "#456080",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#2d4867"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope", "sans-serif"],
+                        "display": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen relative overflow-hidden flex items-center justify-center">
+<!-- Simulated Background Context (Dashboard) -->
+<div class="absolute inset-0 z-0 opacity-40 blur-sm pointer-events-none" data-alt="abstract blurred background resembling a data-heavy dashboard with charts and graphs in cool blue tones" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBpHMKsAQV33LXo32YxClf7EX3OyPPrJ3H2W3Ouxds4SDMFva5DVkgkltA1H0y9XQVv3gkFavaOQluVMMm_HvwHtGmfEkrTW3P3r4SePZzw-cgdBKAEf2SW2C2zAmnHKYjhkSuM4JuDOf1IyDYqZiYIoLPVAfUpoXepma1PQ-DXTF8gvsGAcUeFAlDzMuR5BrF2XqlVbnzGYagl4dnenM-yAAiUSdJ-PuBAVtO02em84mXN7UayzioDLNAuvQLSRET1QoxEUQ1CMGGa'); background-size: cover; background-position: center;">
+</div>
+<!-- Modal Backdrop Overlay -->
+<div class="absolute inset-0 z-10 bg-on-background/20 backdrop-blur-[2px]"></div>
+<!-- Confirmation Modal -->
+<div aria-labelledby="modal-title" aria-modal="true" class="relative z-20 w-full max-w-md bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)] ring-1 ring-outline-variant/15 flex flex-col items-center p-8 text-center" role="dialog">
+<!-- Icon Container -->
+<div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-6 ring-1 ring-outline-variant/20">
+<span class="material-symbols-outlined text-4xl text-primary" data-icon="error_outline">error_outline</span>
+</div>
+<!-- Typography: Header & Body -->
+<h2 class="font-headline font-bold text-2xl text-on-surface mb-2 tracking-wide" id="modal-title">Confirm Action</h2>
+<p class="font-body text-sm text-on-surface-variant mb-8 leading-relaxed max-w-[280px]">Are you sure you want to apply these changes?</p>
+<!-- Actions -->
+<div class="flex flex-col w-full gap-3 sm:flex-row sm:justify-center">
+<button class="font-body text-sm font-semibold text-on-surface-variant bg-surface-container-low hover:bg-surface-container transition-colors duration-200 px-6 py-3 rounded-lg ring-1 ring-outline-variant/15 w-full sm:w-auto" type="button">
+                Cancel
+            </button>
+<button class="font-body text-sm font-semibold text-on-primary bg-gradient-to-br from-primary to-primary-container hover:opacity-90 transition-opacity duration-200 px-6 py-3 rounded-lg shadow-sm w-full sm:w-auto" type="button">
+                Confirm
+            </button>
+</div>
+</div>
+</body></html>

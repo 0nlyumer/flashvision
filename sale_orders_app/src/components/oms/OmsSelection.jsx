@@ -9,11 +9,13 @@ export default function OmsSelection({ pendingItems = [], customers = [], handle
     const itemsWithData = useMemo(() => {
         return pendingItems.map(item => {
             const customerName = customers.find(c => c.id === item.customerId)?.name || item.customer || 'Unknown';
+            const originalQty = parseInt(item.originalQuantity) || parseInt(item.quantity) || 0;
             const outputQty = parseInt(item.producedQty) || 0;
-            const remaining = (parseInt(item.quantity) || 0) - outputQty;
+            const remaining = parseInt(item.remainingToPlan) || parseInt(item.quantity) || 0;
             return {
                 ...item,
                 customerName,
+                originalQty,
                 outputQty,
                 remaining
             };
@@ -71,7 +73,7 @@ export default function OmsSelection({ pendingItems = [], customers = [], handle
                 };
             }
             groups[item.orderId].items.push(item);
-            groups[item.orderId].totalQty += parseInt(item.quantity) || 0;
+            groups[item.orderId].totalQty += item.originalQty;
             groups[item.orderId].totalOutput += item.outputQty;
             groups[item.orderId].totalRemaining += item.remaining;
         });
@@ -130,7 +132,7 @@ export default function OmsSelection({ pendingItems = [], customers = [], handle
 
             {/* Selection Data Table */}
             <div className="bg-surface-container-lowest rounded-[2rem] shadow-[0_20px_40px_rgba(0,28,56,0.06)] overflow-hidden border border-outline-variant/10">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto custom-scrollbar">
                     {/* Render ITEM-WISE TABLE */}
                     {viewMode === 'item' ? (
                         <table className="w-full text-left border-collapse min-w-[1200px]">
@@ -142,7 +144,6 @@ export default function OmsSelection({ pendingItems = [], customers = [], handle
                                     <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">Sale Order / Date</th>
                                     <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">Customer Name</th>
                                     <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">Product / Item Code</th>
-                                    <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">Required Material</th>
                                     <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10 text-right">Order Metres</th>
                                     <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10 text-right">Output Metres</th>
                                     <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-tertiary border-b border-outline-variant/10 text-right">Remaining</th>
@@ -174,14 +175,8 @@ export default function OmsSelection({ pendingItems = [], customers = [], handle
                                                 <span className="font-mono text-[10px] bg-slate-100 text-slate-600 px-1 py-0.5 rounded w-fit">{item.itemCode}</span>
                                             </div>
                                         </td>
-                                        <td className="py-6 px-6 align-middle">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-xs font-semibold text-on-surface">{item.requiredFabricName}</span>
-                                                {item.hasShortage && <span className="text-[10px] text-error font-bold flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">warning</span>Shortage</span>}
-                                            </div>
-                                        </td>
                                         <td className="py-6 px-6 align-middle text-right">
-                                            <span className="font-manrope font-black text-base text-on-surface">{item.quantity}<span className="text-xs font-medium ml-1">m</span></span>
+                                            <span className="font-manrope font-black text-base text-on-surface">{item.originalQty}<span className="text-xs font-medium ml-1">m</span></span>
                                         </td>
                                         <td className="py-6 px-6 align-middle text-right">
                                             <span className="font-manrope font-bold text-base text-on-surface-variant">{item.outputQty}<span className="text-xs font-medium ml-1">m</span></span>
@@ -266,7 +261,7 @@ export default function OmsSelection({ pendingItems = [], customers = [], handle
 
             {/* Sticky Action Footer */}
             <div className="fixed bottom-[49px] left-[0px] md:left-[240px] right-0 z-40 px-10 py-0 flex justify-center translate-y-[-24px] pointer-events-none">
-                <div className="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] rounded-2xl p-4 flex items-center justify-between w-full max-w-5xl pointer-events-auto overflow-x-auto">
+                <div className="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] rounded-2xl p-4 flex items-center justify-between w-full max-w-5xl pointer-events-auto overflow-x-auto custom-scrollbar">
                     <div className="flex items-center gap-8 pl-4">
                         <div>
                             <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-0.5">Selected Items</p>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-background antialiased" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashvision ERP - HR Settings</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed": "#d3e4ff",
+                        "on-secondary-container": "#445f7f",
+                        "secondary-fixed": "#d1e4ff",
+                        "on-primary-fixed": "#001c38",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "surface-bright": "#f8f9ff",
+                        "surface-variant": "#e1e2e8",
+                        "background": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#eff0f7",
+                        "tertiary": "#6b3000",
+                        "inverse-primary": "#a2c9ff",
+                        "secondary-container": "#bed9ff",
+                        "secondary": "#456080",
+                        "on-primary-container": "#b1d1ff",
+                        "tertiary-container": "#8e4302",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#2e3035",
+                        "outline": "#727782",
+                        "on-tertiary-fixed": "#321300",
+                        "surface": "#f8f9ff",
+                        "tertiary-fixed": "#ffdbc8",
+                        "surface-container": "#ecedf4",
+                        "on-surface": "#191c20",
+                        "surface-tint": "#1260a5",
+                        "surface-dim": "#d8dae0",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "on-surface-variant": "#414750",
+                        "on-secondary-fixed": "#001d36",
+                        "surface-container-highest": "#e1e2e8",
+                        "surface-container-high": "#e7e8ee",
+                        "surface-container-low": "#f2f3fa",
+                        "on-background": "#191c20",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#ffc29d",
+                        "error-container": "#ffdad6",
+                        "primary": "#004277",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#c1c7d2",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed-variant": "#004881",
+                        "primary-container": "#005a9e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope", "sans-serif"],
+                        "display": ["Manrope", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "label": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom Scrollbar for sleek desktop feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d8dae0; /* surface-dim */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c1c7d2; /* outline-variant */
+        }
+    </style>
+</head>
+<body class="h-full flex overflow-hidden font-body text-on-surface">
+<!-- Global Side Navigation (from TopAppBar context but adapted for side navigation as requested) -->
+<nav class="w-20 bg-surface-container-lowest shadow-[20px_0_40px_rgba(0,28,56,0.06)] flex flex-col items-center py-6 z-50 flex-shrink-0 border-r border-outline-variant/10">
+<!-- Brand Logo -->
+<div class="mb-10 w-10 h-10 bg-gradient-to-br from-primary to-primary-container rounded-lg flex items-center justify-center text-on-primary font-headline font-bold text-xl shadow-sm">
+            F
+        </div>
+<!-- Main Nav Links -->
+<div class="flex flex-col gap-6 flex-1 w-full items-center">
+<button class="w-12 h-12 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors group relative">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">dashboard</span>
+<span class="absolute left-14 bg-inverse-surface text-inverse-on-surface text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">Dashboard</span>
+</button>
+<button class="w-12 h-12 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors group relative">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">inventory_2</span>
+<span class="absolute left-14 bg-inverse-surface text-inverse-on-surface text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">Inventory</span>
+</button>
+<button class="w-12 h-12 rounded-xl flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors group relative">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">factory</span>
+<span class="absolute left-14 bg-inverse-surface text-inverse-on-surface text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">Operations</span>
+</button>
+<!-- Active State -->
+<button class="w-12 h-12 rounded-xl flex items-center justify-center bg-primary-container/20 text-primary group relative">
+<span class="material-symbols-outlined icon-fill">settings</span>
+<span class="absolute left-14 bg-inverse-surface text-inverse-on-surface text-xs font-medium px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">Logistics</span>
+<!-- Active Indicator -->
+<div class="absolute left-0 w-1 h-6 bg-primary rounded-r-full"></div>
+</button>
+</div>
+<!-- Trailing Actions -->
+<div class="flex flex-col gap-4 w-full items-center">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low transition-colors overflow-hidden border border-outline-variant/20 mt-2">
+<img alt="Admin Profile" class="w-full h-full object-cover" data-alt="Close up portrait of a professional corporate administrator in a bright office environment, high resolution, subtle warm lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLExEBO62xXUhcz0EFuWUTtzDyyWa0Us-FD3aDgVx-ekZNJCezx3CuDhq5ks-SZEFZiIGM5gmToT5ojyHhGgc1TLzC7nTiiLe_WRRkc0kMiPQm8p9EKPIcZREWW9ygNzKlKejlichmVwa2euA2Eed9jS6tJKB6shec5JKhUgrpMyrXx6K_Za0_smj_06OB_JWdJ47AoOJKN2_jrbJ772k3Tf2uK6z27staTk6lwvlYn_mmu3UaEDShLkMpwOv5dmt6J02xNKPrhVw9"/>
+</button>
+</div>
+</nav>
+<!-- Settings Inner Shell -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Settings SideNavBar (From JSON) -->
+<aside class="w-72 bg-surface-container-low dark:bg-surface-dim h-full flex flex-col flex-shrink-0 z-40 border-r border-outline-variant/10 shadow-[20px_0_40px_rgba(0,28,56,0.04)] pt-8">
+<!-- Header -->
+<div class="px-8 mb-8">
+<h1 class="font-headline text-2xl font-extrabold text-on-surface tracking-tight mb-1">HR Control Center</h1>
+<p class="font-body text-sm text-on-surface-variant">System Administrator</p>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 overflow-y-auto px-4 space-y-1">
+<!-- Active: Departments -->
+<button class="w-full flex items-center gap-4 px-6 py-4 bg-surface-container-lowest text-primary rounded-r-full shadow-sm group cursor-pointer select-none relative font-body text-sm font-semibold transition-all">
+<span class="material-symbols-outlined icon-fill">domain</span>
+<span>Departments</span>
+<div class="absolute left-0 w-1 h-8 bg-primary rounded-r-full top-1/2 -translate-y-1/2"></div>
+</button>
+<!-- Inactive -->
+<button class="w-full flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-300 rounded-r-full group cursor-pointer select-none font-body text-sm font-medium">
+<span class="material-symbols-outlined">account_tree</span>
+<span>Sub-sections</span>
+</button>
+<button class="w-full flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-300 rounded-r-full group cursor-pointer select-none font-body text-sm font-medium">
+<span class="material-symbols-outlined">verified_user</span>
+<span>HR Permissions</span>
+</button>
+<button class="w-full flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-300 rounded-r-full group cursor-pointer select-none font-body text-sm font-medium">
+<span class="material-symbols-outlined">admin_panel_settings</span>
+<span>Role Management</span>
+</button>
+<button class="w-full flex items-center gap-4 px-6 py-4 text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-300 rounded-r-full group cursor-pointer select-none font-body text-sm font-medium">
+<span class="material-symbols-outlined">history_edu</span>
+<span>Audit Settings</span>
+</button>
+</nav>
+<!-- Footer Actions -->
+<div class="p-6 mt-auto border-t border-outline-variant/10">
+<button class="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-container text-on-primary py-3 px-4 rounded-xl font-body text-sm font-semibold hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 duration-200">
+<span class="material-symbols-outlined text-sm">add</span>
+                    Add New Department
+                </button>
+<div class="flex items-center justify-between mt-6 px-2">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 text-sm font-medium">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                        Settings
+                    </button>
+<button class="text-on-surface-variant hover:text-error transition-colors flex items-center gap-2 text-sm font-medium">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+                        Log Out
+                    </button>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col h-full bg-surface overflow-hidden relative">
+<!-- Glassmorphism Header Bar for Content Area -->
+<header class="h-20 flex items-center justify-between px-10 border-b border-outline-variant/10 bg-surface/80 backdrop-blur-xl z-20 flex-shrink-0">
+<div class="flex items-center gap-4">
+<h2 class="font-headline text-display-sm text-on-surface font-extrabold tracking-tight">Departments Overview</h2>
+<span class="px-3 py-1 bg-surface-container text-on-surface-variant text-xs font-semibold rounded-full border border-outline-variant/20">4 Active</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-sm">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl pl-9 pr-4 py-2 text-sm text-on-surface focus:bg-surface-container-lowest focus:border-primary/50 focus:ring-0 transition-all placeholder:text-outline" placeholder="Search departments..." type="text"/>
+</div>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-10 pb-24">
+<!-- High-End Bento Grid Layout for Departments -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+<!-- Department Card: Production -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,28,56,0.02)] border border-outline-variant/10 hover:shadow-[0_8px_30px_rgba(0,28,56,0.06)] transition-all group relative overflow-hidden flex flex-col">
+<!-- Decorative Top Border Shift -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-primary/20 group-hover:bg-primary transition-colors"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]">precision_manufacturing</span>
+</div>
+<div>
+<h3 class="font-headline text-lg font-bold text-on-surface">Production</h3>
+<p class="font-body text-xs text-on-surface-variant mt-0.5">Core Manufacturing Unit</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Stats Row -->
+<div class="flex gap-6 mb-6 px-2 py-3 bg-surface-container-low rounded-lg border border-outline-variant/5">
+<div class="flex flex-col">
+<span class="font-body text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Headcount</span>
+<span class="font-headline text-lg font-bold text-on-surface">142</span>
+</div>
+<div class="w-px bg-outline-variant/20"></div>
+<div class="flex flex-col">
+<span class="font-body text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Sub-sections</span>
+<span class="font-headline text-lg font-bold text-on-surface">3</span>
+</div>
+<div class="w-px bg-outline-variant/20"></div>
+<div class="flex flex-col">
+<span class="font-body text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Manager</span>
+<span class="font-headline text-sm font-semibold text-on-surface mt-1">S. Miller</span>
+</div>
+</div>
+<!-- Quick Sub-sections -->
+<div class="mt-auto">
+<h4 class="font-body text-xs font-semibold text-on-surface-variant mb-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">account_tree</span>
+                                Active Sub-sections
+                            </h4>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface border border-outline-variant/10 text-on-surface text-xs font-medium rounded-md">Foam Mixing</span>
+<span class="px-3 py-1 bg-surface border border-outline-variant/10 text-on-surface text-xs font-medium rounded-md">Adhesive</span>
+<span class="px-3 py-1 bg-surface border border-outline-variant/10 text-on-surface text-xs font-medium rounded-md">Packing</span>
+</div>
+</div>
+</div>
+<!-- Department Card: Logistics -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,28,56,0.02)] border border-outline-variant/10 hover:shadow-[0_8px_30px_rgba(0,28,56,0.06)] transition-all group relative overflow-hidden flex flex-col">
+<div class="absolute top-0 left-0 right-0 h-1 bg-secondary/20 group-hover:bg-secondary transition-colors"></div>
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-secondary-container/30 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[28px]">local_shipping</span>
+</div>
+<div>
+<h3 class="font-headline text-lg font-bold text-on-surface">Logistics</h3>
+<p class="font-body text-xs text-on-surface-variant mt-0.5">Supply Chain &amp; Delivery</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-error transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Stats Row -->
+<div class="flex gap-6 mb-6 px-2 py-3 bg-surface-container-low rounded-lg border border-outline-variant/5">
+<div class="flex flex-col">
+<span class="font-body text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Headcount</span>
+<span class="font-headline text-lg font-bold text-on-surface">45</span>
+</div>
+<div class="w-px bg-outline-variant/20"></div>
+<div class="flex flex-col">
+<span class="font-body text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Sub-sections</span>
+<span class="font-headline text-lg font-bold text-on-surface">2</span>
+</div>
+<div class="w-px bg-outline-variant/20"></div>
+<div class="flex flex-col">
+<span class="font-body text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">Manager</span>
+<span class="font-headline text-sm font-semibold text-on-surface mt-1">D. Chen</span>
+</div>
+</div>
+<!-- Quick Sub-sections -->
+<div class="mt-auto">
+<h4 class="font-body text-xs font-semibold text-on-surface-variant mb-3 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">account_tree</span>
+                                Active Sub-sections
+                            </h4>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface border border-outline-variant/10 text-on-surface text-xs font-medium rounded-md">Fleet Mgmt</span>
+<span class="px-3 py-1 bg-surface border border-outline-variant/10 text-on-surface text-xs font-medium rounded-md">Warehouse</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,287 +1,498 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useApp } from '../../context/AppContext';
+import ResizableHeader from '../ui/ResizableHeader';
+import PrintLayout from '../ui/PrintLayout';
+import GlobalPagination from '../ui/GlobalPagination';
 
-export default function InvReturn() {
+export default function InvReturn({ selectedDepartments = [] }) {
+  const { state, addReturn, deleteReturn, toggleGlobalPagination } = useApp();
+  
+  const [activeTab, setActiveTab] = useState('process'); // 'process' | 'history'
+  
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loadedOrder, setLoadedOrder] = useState(null);
+  const [returnItems, setReturnItems] = useState({}); // { itemId: { qty: X, reason: Y, checked: true/false } }
+  const [globalReason, setGlobalReason] = useState('Damaged');
+  const [remarks, setRemarks] = useState('');
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
+  const [printData, setPrintData] = useState(null);
+
+  const handleSearch = () => {
+      if (!searchQuery.trim()) return;
+      const order = state?.saleOrders?.find(o => 
+          o.id.toLowerCase() === searchQuery.toLowerCase() ||
+          o.customerName?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      if (order) {
+          setLoadedOrder(order);
+          // Initialize return items
+          let initialReturns = {};
+          order.items?.forEach(i => {
+              initialReturns[i.id] = { qty: 0, reason: globalReason, checked: false, orderedQty: i.quantity, itemCode: i.itemCode, name: i.productName };
+          });
+          setReturnItems(initialReturns);
+      } else {
+          alert('No order found matching: ' + searchQuery);
+      }
+  };
+
+  const handleItemToggle = (itemId) => {
+      setReturnItems(prev => ({
+          ...prev,
+          [itemId]: { ...prev[itemId], checked: !prev[itemId].checked }
+      }));
+  };
+
+  const handleQtyChange = (itemId, qty) => {
+      setReturnItems(prev => ({
+          ...prev,
+          [itemId]: { ...prev[itemId], qty: qty }
+      }));
+  };
+
+  const handleReasonChange = (itemId, reason) => {
+      setReturnItems(prev => ({
+          ...prev,
+          [itemId]: { ...prev[itemId], reason: reason }
+      }));
+  };
+
+  const applyGlobalReason = (e) => {
+      const reason = e.target.value;
+      setGlobalReason(reason);
+      setReturnItems(prev => {
+          let next = { ...prev };
+          Object.keys(next).forEach(k => {
+              next[k].reason = reason;
+          });
+          return next;
+      });
+  };
+
+  const handleProcessReturn = () => {
+      if (!loadedOrder) return;
+      const itemsToReturn = Object.keys(returnItems)
+          .filter(k => returnItems[k].checked && parseFloat(returnItems[k].qty) > 0)
+          .map(k => ({
+              itemId: k,
+              itemCode: returnItems[k].itemCode,
+              name: returnItems[k].name,
+              qty: parseFloat(returnItems[k].qty),
+              reason: returnItems[k].reason
+          }));
+
+      if (itemsToReturn.length === 0) {
+          alert('Please select items and enter valid return quantities.');
+          return;
+      }
+
+      const returnData = {
+          id: `RET-${Date.now()}`,
+          orderId: loadedOrder.id,
+          customerName: loadedOrder.customerName,
+          date: new Date().toLocaleDateString(),
+          timestamp: Date.now(),
+          remarks: remarks,
+          items: itemsToReturn
+      };
+
+      addReturn(returnData);
+      
+      // Reset
+      setLoadedOrder(null);
+      setReturnItems({});
+      setRemarks('');
+      setSearchQuery('');
+      setActiveTab('history');
+  };
+
+  const filteredReturns = useMemo(() => {
+      let returns = state?.returns || [];
+      return [...returns].sort((a,b) => b.timestamp - a.timestamp);
+  }, [state?.returns]);
+
+  // Pagination for history
+  const isPaginated = state?.isGlobalPaginated;
+  const totalPages = Math.ceil(filteredReturns.length / itemsPerPage) || 1;
+  const displayedReturns = isPaginated 
+      ? filteredReturns.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+      : filteredReturns;
+
+  const handleDeleteReturn = (id) => {
+      if(window.confirm('Are you sure you want to delete this return? Stock will be reversed (subtracted).')) {
+          deleteReturn(id);
+      }
+  };
+
+  const handlePrintReturn = (ret) => {
+      setPrintData(ret);
+      setTimeout(() => {
+          window.print();
+      }, 100);
+  };
+
   return (
-    <div className="animate-in fade-in duration-500 max-w-[1400px] mx-auto pb-24">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 mb-4 text-xs font-medium text-on-surface-variant">
-        <span>Inventory</span>
-        <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 0" }}>chevron_right</span>
-        <span>Returns Management</span>
-        <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 0" }}>chevron_right</span>
-        <span className="text-primary font-bold">Process Stock Return</span>
-      </nav>
-
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+    <>
+    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-24 print:hidden">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight text-on-surface mb-2 font-headline">Process Stock Return</h1>
-          <p className="text-on-surface-variant text-lg max-w-2xl leading-relaxed font-body">Search for a sale order to load items for return processing and inventory reconciliation.</p>
+          <p className="text-on-surface-variant text-lg max-w-2xl leading-relaxed font-body">Search for an order or DC to process returns and immediately reconcile inventory levels.</p>
         </div>
-        <div className="flex gap-4">
-          <button className="px-6 py-2.5 rounded-xl border border-outline text-primary font-semibold hover:bg-surface-container-low transition-all">Cancel</button>
-          <button className="px-8 py-2.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-[1.02] transition-all">
-            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-            Process Return
-          </button>
-        </div>
-      </div>
-
-      {/* Search Section */}
-      <div className="mb-8 bg-surface-container-lowest p-8 rounded-[2rem] shadow-[0_10px_30px_rgba(0,28,56,0.03)] border border-primary/10">
-        <div className="max-w-2xl">
-          <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-3 block">Primary Search: Sale Order Number</label>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>receipt_long</span>
-              <input className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl pl-12 pr-4 py-4 focus:ring-2 focus:ring-primary transition-all text-lg font-semibold outline-none" placeholder="Enter SO Number (e.g. SO-2024-8902)..." type="text" defaultValue="SO-2024-8902" />
-            </div>
-            <button className="bg-primary text-on-primary px-8 py-4 rounded-xl font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>search</span>
-              Load Items
+        {activeTab === 'process' && (
+            <button 
+                onClick={() => setActiveTab('history')}
+                className="px-6 py-3 rounded-xl bg-surface-container-high border border-outline-variant/20 hover:bg-surface-container-highest transition-colors font-bold text-sm flex items-center gap-2"
+            >
+                <span className="material-symbols-outlined text-[18px]">history</span>
+                View Return History
             </button>
-          </div>
-        </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
-        {/* Form Area */}
-        <div className="xl:col-span-8 space-y-8">
-          <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-[0_20px_40px_rgba(0,28,56,0.04)] border border-outline-variant/10 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-1 h-full bg-primary"></div>
-            <div className="flex justify-between items-center mb-6 pl-2">
-              <h3 className="text-xl font-bold flex items-center gap-2 font-headline">
-                <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>inventory</span>
-                Items from Order SO-2024-8902
-              </h3>
-              <span className="text-xs font-bold bg-secondary-container text-on-secondary-fixed-variant px-3 py-1 rounded-full">3 Items Found</span>
-            </div>
-
-            {/* Loaded Items List */}
-            <div className="space-y-4 mb-8">
-              {/* Item 1 */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 items-center p-4 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 transition-all gap-4">
-                <div className="sm:col-span-1 border-b sm:border-0 pb-2 sm:pb-0 flex justify-start sm:justify-center">
-                  <input defaultChecked className="w-5 h-5 rounded border-outline text-primary focus:ring-primary cursor-pointer" type="checkbox" />
-                </div>
-                <div className="sm:col-span-6">
-                  <p className="font-bold text-on-surface">Solaris Glass Unit B4</p>
-                  <p className="text-xs text-on-surface-variant font-medium">SKU: FV-WIN-402-B • Batch: #2024-A</p>
-                </div>
-                <div className="sm:col-span-2 text-start sm:text-center">
-                  <p className="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Ordered</p>
-                  <p className="font-bold text-on-surface">50 Units</p>
-                </div>
-                <div className="sm:col-span-3">
-                  <p className="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Return Qty</p>
-                  <input className="w-full bg-surface-container-lowest border-outline-variant/50 border rounded-lg px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-primary outline-none text-on-surface" type="number" defaultValue="12" />
+      {activeTab === 'process' && (
+          <div className="space-y-8">
+              {/* Search Section */}
+              <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-[0_10px_30px_rgba(0,28,56,0.03)] border border-primary/10">
+                <div className="max-w-2xl">
+                  <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-3 block">Primary Search: Sale Order / DC Challan</label>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>receipt_long</span>
+                      <input 
+                          value={searchQuery}
+                          onChange={e => setSearchQuery(e.target.value)}
+                          className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl pl-12 pr-4 py-4 focus:ring-2 focus:ring-primary transition-all text-lg font-semibold outline-none" 
+                          placeholder="Enter SO Number (e.g. SO-001)..." 
+                          type="text" 
+                          onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                      />
+                    </div>
+                    <button onClick={handleSearch} className="bg-primary text-on-primary px-8 py-4 rounded-xl font-bold hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
+                      <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>search</span>
+                      Load Items
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Item 2 */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 items-center p-4 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 transition-all gap-4">
-                <div className="sm:col-span-1 border-b sm:border-0 pb-2 sm:pb-0 flex justify-start sm:justify-center">
-                  <input className="w-5 h-5 rounded border-outline text-primary focus:ring-primary cursor-pointer" type="checkbox" />
-                </div>
-                <div className="sm:col-span-6">
-                  <p className="font-bold text-on-surface">Alpha Seal Connector v2</p>
-                  <p className="text-xs text-on-surface-variant font-medium">SKU: FV-CON-88-V2 • Batch: #2024-A</p>
-                </div>
-                <div className="sm:col-span-2 text-start sm:text-center">
-                  <p className="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Ordered</p>
-                  <p className="font-bold text-on-surface">200 Units</p>
-                </div>
-                <div className="sm:col-span-3">
-                  <p className="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Return Qty</p>
-                  <input className="w-full bg-surface-container-lowest border-outline-variant/50 border rounded-lg px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-primary outline-none text-on-surface" type="number" defaultValue="0" />
-                </div>
-              </div>
+              {/* Form Area */}
+              {loadedOrder && (
+                  <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-[0_20px_40px_rgba(0,28,56,0.04)] border border-outline-variant/10 relative overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+                    <div className="flex justify-between items-center mb-6 pl-2">
+                      <h3 className="text-xl font-bold flex items-center gap-2 font-headline">
+                        <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>inventory</span>
+                        Items from {loadedOrder.id} ({loadedOrder.customerName})
+                      </h3>
+                      <span className="text-xs font-bold bg-secondary-container text-on-secondary-fixed-variant px-3 py-1 rounded-full">{loadedOrder.items?.length || 0} Items</span>
+                    </div>
 
-              {/* Item 3 */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 items-center p-4 bg-surface-container-low rounded-xl border border-transparent hover:border-primary/20 transition-all gap-4">
-                <div className="sm:col-span-1 border-b sm:border-0 pb-2 sm:pb-0 flex justify-start sm:justify-center">
-                  <input className="w-5 h-5 rounded border-outline text-primary focus:ring-primary cursor-pointer" type="checkbox" />
-                </div>
-                <div className="sm:col-span-6">
-                  <p className="font-bold text-on-surface">Luminescent Panel X</p>
-                  <p className="text-xs text-on-surface-variant font-medium">SKU: FV-PNL-X100 • Batch: #2023-F</p>
-                </div>
-                <div className="sm:col-span-2 text-start sm:text-center">
-                  <p className="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Ordered</p>
-                  <p className="font-bold text-on-surface">15 Units</p>
-                </div>
-                <div className="sm:col-span-3">
-                  <p className="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Return Qty</p>
-                  <input className="w-full bg-surface-container-lowest border-outline-variant/50 border rounded-lg px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-primary outline-none text-on-surface" type="number" defaultValue="0" />
-                </div>
-              </div>
-            </div>
+                    {/* Loaded Items List */}
+                    <div className="space-y-4 mb-8">
+                      {loadedOrder.items?.map(item => {
+                          const stateItem = returnItems[item.id];
+                          if (!stateItem) return null;
+                          return (
+                          <div key={item.id} className={`grid grid-cols-1 sm:grid-cols-12 items-center p-4 rounded-xl border transition-all gap-4 ${stateItem.checked ? 'bg-primary/5 border-primary/20' : 'bg-surface-container-low border-transparent hover:border-outline-variant/20'}`}>
+                            <div className="sm:col-span-1 border-b sm:border-0 pb-2 sm:pb-0 flex justify-start sm:justify-center">
+                              <input 
+                                  checked={stateItem.checked}
+                                  onChange={() => handleItemToggle(item.id)}
+                                  className="w-5 h-5 rounded border-outline text-primary focus:ring-primary cursor-pointer" 
+                                  type="checkbox" 
+                              />
+                            </div>
+                            <div className="sm:col-span-4">
+                              <p className="font-bold text-on-surface">{item.productName}</p>
+                              <p className="text-xs text-on-surface-variant font-medium">SKU: {item.itemCode}</p>
+                            </div>
+                            <div className="sm:col-span-2 text-start sm:text-center">
+                              <p className="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Ordered</p>
+                              <p className="font-bold text-on-surface">{item.quantity} Units</p>
+                            </div>
+                            <div className="sm:col-span-2 text-start sm:text-center">
+                              <p className="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Produced</p>
+                              <p className="font-bold text-on-surface">{item.producedQty || 0} Units</p>
+                            </div>
+                            <div className="sm:col-span-3 space-y-2">
+                              <div>
+                                  <p className="text-[10px] uppercase font-bold text-on-surface-variant mb-1">Return Qty</p>
+                                  <input 
+                                      value={stateItem.qty}
+                                      onChange={e => handleQtyChange(item.id, e.target.value)}
+                                      className="w-full bg-surface-container-lowest border-outline-variant/50 border rounded-lg px-3 py-2 text-sm font-bold focus:ring-2 focus:ring-primary outline-none text-on-surface" 
+                                      type="number" 
+                                      min="0"
+                                      disabled={!stateItem.checked}
+                                  />
+                              </div>
+                            </div>
+                          </div>
+                      )})}
+                    </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-surface-container">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Return Reason (Apply to Selected)</label>
-                <div className="relative">
-                  <select className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary transition-all appearance-none outline-none">
-                    <option>Select Reason</option>
-                    <option defaultValue>Damaged</option>
-                    <option>Wrong Item</option>
-                    <option>Surplus</option>
-                    <option>Quality Failure</option>
-                  </select>
-                  <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none" style={{ fontVariationSettings: "'FILL' 0" }}>expand_more</span>
-                </div>
-              </div>
-              <div className="md:col-span-2 space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Return Action</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <button className="p-4 border-2 border-primary bg-primary/5 rounded-xl text-primary font-bold text-sm flex flex-col items-center gap-2 hover:bg-primary/10 transition-colors">
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>inventory</span>
-                    Return to Stock
-                  </button>
-                  <button className="p-4 border border-outline-variant/30 bg-surface-container-lowest hover:border-primary rounded-xl text-on-surface-variant hover:text-primary font-medium text-sm flex flex-col items-center gap-2 transition-all">
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>security</span>
-                    Quarantine
-                  </button>
-                  <button className="p-4 border border-outline-variant/30 bg-surface-container-lowest hover:border-error rounded-xl text-on-surface-variant hover:text-error font-medium text-sm flex flex-col items-center gap-2 transition-all">
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>delete_forever</span>
-                    Scrap
-                  </button>
-                  <button className="p-4 border border-outline-variant/30 bg-surface-container-lowest hover:border-primary rounded-xl text-on-surface-variant hover:text-primary font-medium text-sm flex flex-col items-center gap-2 transition-all">
-                    <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>build</span>
-                    Refurbish
-                  </button>
-                </div>
-              </div>
-              <div className="md:col-span-2 space-y-2 mt-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Remarks/Notes</label>
-                <textarea className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary transition-all outline-none" placeholder="Additional details about the items' condition or customer feedback..." rows="4"></textarea>
-              </div>
-            </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-surface-container">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Return Reason (Apply to All)</label>
+                        <div className="relative">
+                          <select 
+                              value={globalReason}
+                              onChange={applyGlobalReason}
+                              className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary transition-all appearance-none outline-none font-semibold text-sm">
+                            <option>Damaged</option>
+                            <option>Wrong Item</option>
+                            <option>Surplus</option>
+                            <option>Quality Failure</option>
+                          </select>
+                          <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none" style={{ fontVariationSettings: "'FILL' 0" }}>expand_more</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Remarks/Notes</label>
+                        <textarea 
+                            value={remarks}
+                            onChange={e => setRemarks(e.target.value)}
+                            className="w-full bg-surface-container-low border border-outline-variant/10 rounded-xl px-4 py-4 focus:ring-2 focus:ring-primary transition-all outline-none text-sm" 
+                            placeholder="Additional details about the items' condition or customer feedback..." 
+                            rows="1"
+                        ></textarea>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end mt-8 gap-4">
+                        <button onClick={() => setLoadedOrder(null)} className="px-6 py-2.5 rounded-xl border border-outline text-on-surface font-semibold hover:bg-surface-container-low transition-all">Cancel</button>
+                        <button onClick={handleProcessReturn} className="px-8 py-2.5 rounded-xl bg-gradient-to-br from-primary to-primary-container text-on-primary font-bold shadow-lg shadow-primary/20 flex items-center gap-2 hover:scale-[1.02] transition-all">
+                            <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                            Process Return
+                        </button>
+                    </div>
+                  </div>
+              )}
           </div>
+      )}
 
-          {/* Workflow Tracker */}
-          <div className="bg-surface-container-lowest p-8 rounded-[2rem] border border-outline-variant/10 shadow-[0_10px_30px_rgba(0,28,56,0.03)] hidden sm:block">
-            <h3 className="text-sm font-bold mb-6 text-on-surface-variant uppercase tracking-widest">Processing Workflow</h3>
-            
-            <div className="flex items-center">
-              <div className="flex flex-col items-center">
-                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] text-on-primary font-bold">1</div>
-                <div className="w-1 h-12 bg-primary"></div>
-              </div>
-              <div className="ml-4 mb-12">
-                <p className="text-sm font-bold text-on-surface">Initiate Return</p>
-                <p className="text-xs text-on-surface-variant">Identify and validate SO items</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center -mt-8">
-              <div className="flex flex-col items-center">
-                <div className="w-6 h-6 rounded-full border-2 border-primary bg-surface flex items-center justify-center text-[10px] text-primary font-bold z-10 relative">2</div>
-                <div className="w-1 h-12 bg-surface-variant relative -top-1"></div>
-              </div>
-              <div className="ml-4 mb-12">
-                <p className="text-sm font-bold text-on-surface">Physical QC</p>
-                <p className="text-xs text-on-surface-variant">Verify against checklist</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center -mt-8">
-              <div className="flex flex-col items-center z-10 relative">
-                <div className="w-6 h-6 rounded-full bg-surface-variant flex items-center justify-center text-[10px] text-on-surface-variant font-bold">3</div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-bold text-on-surface-variant">Inventory Reconciliation</p>
-                <p className="text-xs text-on-surface-variant">Final update to system records</p>
-              </div>
-            </div>
-          </div>
-        </div>
+      {activeTab === 'history' && (
+          <div className="animate-in fade-in space-y-6">
+              {/* Back Button */}
+              <button 
+                  onClick={() => setActiveTab('process')}
+                  className="px-4 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors text-sm font-bold flex items-center gap-2 text-on-surface-variant w-fit"
+              >
+                  <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+                  Back to Process Return
+              </button>
 
-        {/* Sidebar/Side Panel (Right side) */}
-        <div className="xl:col-span-4 space-y-8">
-          {/* Live Item Insights */}
-          <div className="bg-surface-container-lowest rounded-2xl shadow-[0_20px_40px_rgba(0,28,56,0.04)] border border-outline-variant/10 overflow-hidden">
-            <div className="h-40 relative">
-              <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZ4iawOkhNKyj2wbCVhvhUrgd3gqG2Krj5wJnq4A_iboDpyIrmu5zMJp2wBvxzhKOB5icRoYjSKYcy924Kfvo0SOSin_6xYCgV23IxdFk1HSkHZX6ntYy6x5CvCEagdIUPXHWxS99FuRUg9M5vrRXWVawcSlv2ferKPhasVAI9LBepq8URr3fVPrFL6KUj_wXnvkZLxzMN_03hZxQ5Z4aauFW-_L9q3D_xULeqboZ9O2x5alrUKbtpKdpUTvp3HIQrkn0cU5kUYYI4" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-              <div className="absolute bottom-4 left-4 text-white">
-                <span className="bg-primary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider mb-2 inline-block text-white shadow-sm border border-white/10">Live Item Insights</span>
-                <h4 className="font-bold text-lg leading-tight">Solaris Glass Unit B4</h4>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="flex justify-between items-center py-3 border-b border-surface-container">
-                <span className="text-xs text-on-surface-variant font-medium">Current Stock</span>
-                <span className="font-bold text-on-surface">1,240 Units</span>
-              </div>
-              <div className="flex justify-between items-center py-3 border-b border-surface-container">
-                <span className="text-xs text-on-surface-variant font-medium">Warehouse Loc</span>
-                <span className="font-bold text-on-surface">WH-A / Sector 4</span>
-              </div>
-              <div className="flex justify-between items-center pt-3 pb-1">
-                <span className="text-xs text-on-surface-variant font-medium">Last Return</span>
-                <span className="font-bold text-tertiary">14 Days ago</span>
-              </div>
-            </div>
-          </div>
-
-          {/* QC Checklist */}
-          <div className="bg-surface-container border border-outline-variant/10 p-6 rounded-2xl shadow-sm">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">QC Checklist</h4>
-            <div className="space-y-4">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="w-5 h-5 rounded border-2 border-primary bg-primary/10 transition-colors flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[14px] text-primary font-bold" style={{ fontVariationSettings: "'FILL' 0" }}>check</span>
+              {/* Metric Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col justify-between">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>assignment_return</span>
+                    </div>
+                    <span className="text-[10px] font-bold tracking-widest text-primary bg-primary/5 px-2 py-1 rounded">MONTHLY</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-on-surface-variant mb-1">Total Returns</p>
+                    <h2 className="text-4xl font-black text-on-surface">{filteredReturns.length.toLocaleString()}</h2>
+                    <p className="text-xs font-medium text-primary mt-2 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">trending_down</span>
+                        12% less than last month
+                    </p>
+                  </div>
                 </div>
-                <span className="text-sm font-medium text-on-surface">Package Integrity Verified</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="w-5 h-5 rounded border-2 border-outline-variant/50 bg-surface-container-lowest group-hover:border-primary transition-colors flex items-center justify-center"></div>
-                <span className="text-sm font-medium text-on-surface">Serial Number Match</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="w-5 h-5 rounded border-2 border-outline-variant/50 bg-surface-container-lowest group-hover:border-primary transition-colors flex items-center justify-center"></div>
-                <span className="text-sm font-medium text-on-surface">Surface Damage Inspection</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="w-5 h-5 rounded border-2 border-outline-variant/50 bg-surface-container-lowest group-hover:border-primary transition-colors flex items-center justify-center"></div>
-                <span className="text-sm font-medium text-on-surface">Hazardous Leak Check</span>
-              </label>
-            </div>
-          </div>
 
-          {/* Recent Returns */}
-          <div className="space-y-4 bg-surface-container-lowest border border-outline-variant/10 p-6 rounded-2xl shadow-sm">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant flex justify-between items-center pb-2 border-b border-outline-variant/10">
-              Recent Returns
-              <button className="text-primary normal-case font-bold hover:underline">View All</button>
-            </h4>
-            
-            {/* List Item 1 */}
-            <div className="p-4 bg-surface-container-low rounded-xl flex items-center gap-4 group hover:bg-surface-container transition-colors cursor-pointer border border-transparent hover:border-outline-variant/20">
-              <div className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary shrink-0">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>assignment_return</span>
+                <div className="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col justify-between">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center text-error">
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>warning</span>
+                    </div>
+                    <span className="text-[10px] font-bold tracking-widest text-error bg-error/5 px-2 py-1 rounded">ALERT</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-on-surface-variant mb-1">Quarantined</p>
+                    <h2 className="text-4xl font-black text-on-surface">42</h2>
+                    <p className="text-xs font-medium text-error mt-2 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">priority_high</span>
+                        Action required on 8 items
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/10 flex flex-col justify-between">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="w-10 h-10 rounded-xl bg-tertiary/10 flex items-center justify-center text-tertiary">
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    </div>
+                    <span className="text-[10px] font-bold tracking-widest text-tertiary bg-tertiary/5 px-2 py-1 rounded">SUCCESS</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-on-surface-variant mb-1">Processed</p>
+                    <h2 className="text-4xl font-black text-on-surface">{filteredReturns.length.toLocaleString()}</h2>
+                    <p className="text-xs font-medium text-tertiary mt-2 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">done_all</span>
+                        96% clearance rate
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-on-surface truncate">#RET-90422</p>
-                <p className="text-xs text-on-surface-variant truncate">2 Units • Damaged</p>
+
+              {/* Detailed History */}
+              <div className="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
+                <div className="p-6 border-b border-outline-variant/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <h3 className="text-lg font-bold text-on-surface font-headline">Detailed History</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>search</span>
+                      <input 
+                          className="bg-surface-container-low border border-outline-variant/20 rounded-lg pl-9 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary outline-none min-w-[250px]" 
+                          placeholder="Return ID or Customer..." 
+                          type="text" 
+                      />
+                    </div>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-outline-variant/20 rounded-lg text-sm font-bold hover:bg-surface-container-high transition-colors text-on-surface">
+                      <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 0" }}>filter_list</span>
+                      Filter
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto min-h-[400px]">
+                <table className="w-full text-left border-collapse min-w-[800px]">
+                  <thead className="bg-surface-container-low text-on-surface-variant border-b border-outline-variant/10">
+                    <tr>
+                      <ResizableHeader className="px-6 py-4 text-[11px] font-black uppercase tracking-widest">Return ID / Date</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[11px] font-black uppercase tracking-widest">Order Ref</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[11px] font-black uppercase tracking-widest">Customer</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[11px] font-black uppercase tracking-widest">Items Returned</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[11px] font-black uppercase tracking-widest">Remarks</ResizableHeader>
+                      <ResizableHeader className="px-6 py-4 text-[11px] font-black uppercase tracking-widest text-right">Actions</ResizableHeader>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/10">
+                    {displayedReturns.length > 0 ? displayedReturns.map(ret => (
+                        <tr key={ret.id} className="hover:bg-surface-container-low/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="text-sm font-bold text-on-surface">{ret.id}</div>
+                            <div className="text-[10px] text-on-surface-variant font-mono mt-0.5">{ret.date}</div>
+                          </td>
+                          <td className="px-6 py-4 text-sm font-mono text-primary font-semibold">{ret.orderId}</td>
+                          <td className="px-6 py-4 text-sm font-bold text-on-surface">{ret.customerName}</td>
+                          <td className="px-6 py-4">
+                              <span className="bg-secondary-container text-on-secondary-fixed-variant px-3 py-1 rounded-full text-xs font-bold">
+                                  {ret.items.length} Items
+                              </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-on-surface-variant max-w-[200px] truncate" title={ret.remarks}>{ret.remarks || '—'}</td>
+                          <td className="px-6 py-4 text-right">
+                              <div className="flex justify-end gap-2 items-center text-primary">
+                                  <button className="p-2 hover:bg-primary/10 rounded-full transition-colors" title="View">
+                                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>visibility</span>
+                                  </button>
+                                  <button onClick={() => handlePrintReturn(ret)} className="p-2 hover:bg-primary/10 rounded-full transition-colors" title="Print">
+                                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>print</span>
+                                  </button>
+                                  <button className="p-2 hover:bg-primary/10 rounded-full transition-colors" title="Edit">
+                                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>edit</span>
+                                  </button>
+                                  <button onClick={() => handleDeleteReturn(ret.id)} className="p-2 text-error hover:bg-error/10 rounded-full transition-colors" title="Delete">
+                                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 0" }}>delete</span>
+                                  </button>
+                              </div>
+                          </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="6" className="px-6 py-16 text-center text-on-surface-variant">
+                                <div className="flex flex-col items-center justify-center">
+                                    <span className="material-symbols-outlined text-5xl opacity-20 mb-4" style={{ fontVariationSettings: "'FILL' 0" }}>assignment_return</span>
+                                    <p className="font-bold">No returns processed yet</p>
+                                    <p className="text-xs mt-1 max-w-md">Search and process a return to see it listed here.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <span className="text-[10px] font-bold text-on-surface-variant shrink-0">2H AGO</span>
-            </div>
-            
-            {/* List Item 2 */}
-            <div className="p-4 bg-surface-container-low rounded-xl flex items-center gap-4 group hover:bg-surface-container transition-colors cursor-pointer border border-transparent hover:border-outline-variant/20">
-              <div className="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-primary shrink-0">
-                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>assignment_return</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-on-surface truncate">#RET-90419</p>
-                <p className="text-xs text-on-surface-variant truncate">15 Units • Surplus</p>
-              </div>
-              <span className="text-[10px] font-bold text-on-surface-variant shrink-0">5H AGO</span>
-            </div>
+
+              {/* Pagination */}
+              <GlobalPagination 
+                  totalItems={filteredReturns.length}
+                  itemsPerPage={itemsPerPage}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+              />
           </div>
-        </div>
-      </div>
+          </div>
+      )}
     </div>
+
+    {/* PRINT ONLY UI */}
+    {printData && (() => {
+        const returnSettings = state?.adminSetup?.printSettings?.moduleSettings?.inv_return || {};
+        const rowSize = returnSettings.rowSize || 'normal';
+        const cellPadding = rowSize === 'compact' ? 'py-1 px-2' : rowSize === 'spacious' ? 'py-4 px-4' : 'py-2 px-3';
+        const maxRows = parseInt(returnSettings.maxRows) || 25;
+        
+        let colWidths = [];
+        if (returnSettings.columnWidths) {
+            colWidths = returnSettings.columnWidths.split(',').map(s => s.trim());
+        }
+
+        const printChunks = [];
+        for (let i = 0; i < printData.items.length; i += maxRows) {
+            printChunks.push(printData.items.slice(i, i + maxRows));
+        }
+
+        return (
+            <div className="hidden print:block w-full">
+                {printChunks.map((chunk, pageIndex) => (
+                    <div key={pageIndex} className="print:break-after-page">
+                        <PrintLayout 
+                            documentTitle="Return Receipt"
+                            documentId={printData.id}
+                            date={printData.date}
+                            disclaimerKey="returns"
+                            extraMeta={[
+                                { label: 'Order Ref', value: printData.orderId },
+                                { label: 'Customer', value: printData.customerName },
+                                { label: 'Remarks', value: printData.remarks || 'None' },
+                                ...(printChunks.length > 1 ? [{ label: 'Page', value: `${pageIndex + 1} of ${printChunks.length}` }] : [])
+                            ]}
+                        >
+                            <div className="border border-outline-variant/30 mt-4 rounded overflow-hidden">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-surface-container-low">
+                                            <th style={{ width: colWidths[0] || 'auto' }} className={`${cellPadding} text-[10px] font-bold text-on-surface-variant uppercase border-b border-outline-variant/30`}>Item Code</th>
+                                            <th style={{ width: colWidths[1] || 'auto' }} className={`${cellPadding} text-[10px] font-bold text-on-surface-variant uppercase border-b border-outline-variant/30`}>Item Name</th>
+                                            <th style={{ width: colWidths[2] || 'auto' }} className={`${cellPadding} text-[10px] font-bold text-on-surface-variant uppercase border-b border-outline-variant/30 text-right`}>Qty Returned</th>
+                                            <th style={{ width: colWidths[3] || 'auto' }} className={`${cellPadding} text-[10px] font-bold text-on-surface-variant uppercase border-b border-outline-variant/30`}>Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {chunk.map((i, idx) => (
+                                            <tr key={`pr-${idx}`} className="border-b border-outline-variant/10 last:border-0">
+                                                <td className={`${cellPadding} text-[11px] text-on-surface`}>{i.itemCode}</td>
+                                                <td className={`${cellPadding} text-[11px] text-on-surface`}>{i.name || '-'}</td>
+                                                <td className={`${cellPadding} text-[11px] text-on-surface text-right font-bold`}>{i.qty}</td>
+                                                <td className={`${cellPadding} text-[11px] text-on-surface`}>{i.reason}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </PrintLayout>
+                    </div>
+                ))}
+            </div>
+        );
+    })()}
+    </>
   );
 }

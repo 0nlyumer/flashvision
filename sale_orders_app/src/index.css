@@ -6,8 +6,14 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
   body {
-    @apply bg-background font-body text-on-surface min-h-screen selection:bg-secondary-container selection:text-on-secondary-fixed;
+    @apply bg-background font-body text-on-surface selection:bg-secondary-container selection:text-on-secondary-fixed;
   }
 }
 
@@ -24,22 +30,1007 @@
   .ambient-shadow {
     box-shadow: 0 20px 40px rgba(0, 28, 56, 0.06);
   }
+
+  /* Android Simulator & Mobile App Shell CSS */
+  .android-frame {
+    position: relative;
+    width: 385px;
+    height: 790px;
+    border-radius: 46px;
+    border: 14px solid #1f2025;
+    background: #1f2025;
+    box-shadow: 
+      0px 25px 60px -10px rgba(0, 0, 0, 0.65), 
+      inset 0px 2px 8px rgba(255, 255, 255, 0.15), 
+      inset 0px -2px 8px rgba(0, 0, 0, 0.35);
+    overflow: visible;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+  }
+
+  /* Android Landscape Mode Custom Adjustments */
+  .android-frame.landscape {
+    width: 840px;
+    height: 460px;
+  }
+
+  .android-frame.landscape iframe {
+    width: 1280px !important;
+    height: 560px !important;
+    transform: scale(0.635) !important;
+    transform-origin: top left !important;
+    border: none !important;
+  }
+
+  .android-frame.landscape .android-camera-punch {
+    top: 50% !important;
+    left: 7px !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .android-frame.landscape .android-speaker-grill {
+    top: 50% !important;
+    left: -8px !important;
+    transform: translateY(-50%) rotate(90deg) !important;
+  }
+
+  .android-frame.landscape .android-volume-rocker {
+    right: auto !important;
+    left: 150px !important;
+    top: -17.5px !important;
+    width: 55px !important;
+    height: 3.5px !important;
+    border-radius: 3px 3px 0 0 !important;
+  }
+
+  .android-frame.landscape .android-power-btn {
+    right: auto !important;
+    left: 230px !important;
+    top: -17.5px !important;
+    width: 30px !important;
+    height: 3.5px !important;
+    border-radius: 3px 3px 0 0 !important;
+  }
+  
+  .android-screen-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    border-radius: 32px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .android-status-bar {
+    height: 28px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    user-select: none;
+    z-index: 100;
+  }
+  
+  .android-nav-bar {
+    height: 48px;
+    background: #111216;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 32px;
+    z-index: 100;
+    user-select: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .android-nav-btn {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.65;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+  }
+  
+  .android-nav-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .android-nav-btn:active {
+    transform: scale(0.85);
+  }
+  
+  .android-camera-punch {
+    width: 13px;
+    height: 13px;
+    background: #090a0c;
+    border-radius: 50%;
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 110;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .android-speaker-grill {
+    width: 44px;
+    height: 3px;
+    background: #2b2c35;
+    border-radius: 1.5px;
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 110;
+  }
+
+  .android-volume-rocker {
+    width: 3.5px;
+    height: 55px;
+    background: #1f2025;
+    position: absolute;
+    right: -17.5px;
+    top: 150px;
+    border-radius: 0 3px 3px 0;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.25);
+  }
+
+  .android-power-btn {
+    width: 3.5px;
+    height: 30px;
+    background: #1f2025;
+    position: absolute;
+    right: -17.5px;
+    top: 230px;
+    border-radius: 0 3px 3px 0;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.25);
+  }
+
+  /* Scrollbar override for clean mobile emulation */
+  .mobile-screen-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+  
+  .mobile-screen-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbars completely while keeping scroll active */
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari, Opera */
+  }
+
+  /* Pulsing shadow effect for toggle button */
+  @keyframes pulseGlow {
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.75), 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+  }
+  
+  .mobile-toggle-pulse {
+    animation: pulseGlow 2.5s infinite ease-in-out;
+  }
+
+  .drawer-blur {
+    backdrop-filter: blur(20px);
+  }
+
+  .widget-glass {
+    background-color: color-mix(in srgb, var(--color-surface, #ffffff) 45%, transparent) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-color: color-mix(in srgb, var(--color-outline-variant, #c1c7d2) 35%, transparent) !important;
+  }
+}
+
+/* --- BULLETPROOF PROFESSIONAL MOBILE APP RESPONSIVE OVERRIDES --- */
+
+/* Grid optimization */
+.mobile-viewport .grid {
+  grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+/* Keep small metadata rows side-by-side if they make sense */
+.mobile-viewport .grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+/* Standardize form inputs */
+.mobile-viewport input[type="text"],
+.mobile-viewport input[type="date"],
+.mobile-viewport input[type="tel"],
+.mobile-viewport input[type="number"],
+.mobile-viewport select,
+.mobile-viewport textarea {
+  width: 100% !important;
+  height: 44px !important;
+  font-size: 14px !important;
+  padding: 0 16px !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--color-outline-variant, #c1c7d2) !important;
+  background-color: var(--color-surface, #ffffff) !important;
+  color: var(--color-on-surface, #191c20) !important;
+  box-shadow: 0 1px 2px rgba(0, 28, 56, 0.02) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.mobile-viewport textarea {
+  height: auto !important;
+  min-height: 80px !important;
+  padding: 12px 16px !important;
+}
+
+.mobile-viewport input:focus, 
+.mobile-viewport select:focus, 
+.mobile-viewport textarea:focus {
+  border-color: var(--color-primary, #004277) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 66, 119, 0.12) !important;
+}
+
+/* Spacing and borders */
+.mobile-viewport section,
+.mobile-viewport .bg-surface-container-low,
+.mobile-viewport .bg-surface-container-lowest,
+.mobile-viewport .bg-surface-container-high {
+  padding: 16px !important;
+  border-radius: 16px !important;
+  margin-bottom: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 28, 56, 0.02) !important;
+}
+
+.mobile-viewport .space-y-8 > :not([hidden]) ~ :not([hidden]),
+.mobile-viewport .space-y-6 > :not([hidden]) ~ :not([hidden]),
+.mobile-viewport .space-y-5 > :not([hidden]) ~ :not([hidden]) {
+  margin-top: 12px !important;
+}
+
+/* Headings optimization */
+.mobile-viewport h1 {
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  margin-bottom: 2px !important;
+}
+
+.mobile-viewport p.text-on-surface-variant {
+  font-size: 11px !important;
+  line-height: 1.4 !important;
+}
+
+/* Responsive scrollable tables */
+.mobile-viewport div:has(> table),
+.mobile-viewport .table-container {
+  width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(0, 66, 119, 0.05) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.8) !important;
+}
+
+.mobile-viewport table {
+  min-width: 780px !important;
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.mobile-viewport th {
+  padding: 10px 12px !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  background: var(--color-surface-container, #ecedf4) !important;
+  color: var(--color-on-surface-variant, #414750) !important;
+}
+
+.mobile-viewport td {
+  padding: 12px 12px !important;
+  font-size: 12px !important;
+  vertical-align: middle !important;
+}
+
+/* Webkit scrollbars for tables */
+.mobile-viewport div:has(> table)::-webkit-scrollbar {
+  height: 4px !important;
+}
+.mobile-viewport div:has(> table)::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border-radius: 10px !important;
+}
+.mobile-viewport div:has(> table)::-webkit-scrollbar-thumb {
+  background: rgba(0, 66, 119, 0.15) !important;
+  border-radius: 10px !important;
+}
+.mobile-viewport div:has(> table)::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 66, 119, 0.3) !important;
+}
+
+/* Module action footer lock (sticky bottom above bottom nav) */
+.mobile-viewport form > footer,
+.mobile-viewport .module-footer,
+.mobile-viewport footer:not(.main-app-footer):not(.chat-input-footer) {
+  position: fixed !important;
+  bottom: 64px !important; /* height of bottom nav bar */
+  left: 0 !important;
+  right: 0 !important;
+  height: auto !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-top: 1px solid rgba(0, 66, 119, 0.08) !important;
+  padding: 12px 16px 14px 16px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 10px !important;
+  z-index: 100 !important;
+  box-shadow: 0 -6px 20px rgba(0, 28, 56, 0.06) !important;
+}
+
+/* Footer buttons styling */
+.mobile-viewport form > footer button,
+.mobile-viewport .module-footer button,
+.mobile-viewport footer:not(.main-app-footer) button {
+  flex: 1 !important;
+  width: auto !important;
+  margin: 0 !important;
+  height: 42px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.mobile-viewport form > footer button[type="submit"] {
+  background: var(--color-primary, #004277) !important;
+  color: white !important;
+}
+
+.mobile-viewport form > footer button:not([type="submit"]) {
+  background: var(--color-surface-container, #ecedf4) !important;
+  color: var(--color-on-surface-variant, #414750) !important;
+  border: 1px solid var(--color-outline-variant, #c1c7d2) !important;
+}
+
+/* Scroll area padding adjustment */
+.mobile-viewport main {
+  padding-bottom: 150px !important;
+}
+
+/* Modal and search lists */
+.mobile-viewport ul.absolute {
+  width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Header layout rules */
+.mobile-viewport header:not(.chat-header) {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  margin-bottom: 16px !important;
+}
+
+.mobile-viewport header:not(.chat-header) > div {
+  width: 100% !important;
+}
+
+.mobile-viewport header:not(.chat-header) button,
+.mobile-viewport header:not(.chat-header) .flex {
+  width: 100% !important;
+  justify-content: center !important;
+}
+
+/* Bento dashboard widget grids */
+.mobile-viewport .grid-cols-4,
+.mobile-viewport .grid-cols-3 {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+/* Search bar header filters */
+.mobile-viewport .flex-col.md\:flex-row {
+  flex-direction: column !important;
+  gap: 10px !important;
+  padding: 12px !important;
+}
+
+/* Dashboard dynamic tabs side-by-side */
+.mobile-viewport .flex.p-1 {
+  width: 100% !important;
+  display: flex !important;
+}
+
+.mobile-viewport .flex.p-1 button {
+  flex: 1 !important;
+  padding: 8px 4px !important;
+  font-size: 11px !important;
 }
 
 @media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Auto-hide standard UI and utility classes system-wide to prevent page pollution */
+  button, 
+  input, 
+  select, 
+  textarea, 
+  nav, 
+  header:not(.chat-header),
+  footer:not(.print-layout-wrapper footer),
+  .print\:hidden,
+  .btn,
+  .button,
+  [role="button"],
+  .modal,
+  .dialog,
+  .fixed-action-btn,
+  .actions,
+  .no-print,
+  #floating-mobile-toggle,
+  .android-nav-bar,
+  .android-status-bar {
+    display: none !important;
+  }
+  
+  /* Classic visibility swap for print templates to isolate from ERP layout */
   body * {
     visibility: hidden;
   }
-  .print-wrapper, .print-wrapper * {
-    visibility: visible;
+  .print-layout-wrapper,
+  .print-layout-wrapper *,
+  #antigravity-print-preview-modal,
+  #antigravity-print-preview-modal * {
+    visibility: visible !important;
   }
-  .print-wrapper {
+  .print-layout-wrapper {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
+    width: 100% !important;
   }
-  .no-print {
+
+  /* Keep the inner data tables' headers repeating on each page */
+  thead {
+    display: table-header-group !important;
+  }
+
+  /* Avoid splitting individual table rows in half, excluding the wrapper table */
+  .print-layout-wrapper table:not(.print-wrapper-table) tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Override parent height and overflow constraints during printing to prevent viewport snaps */
+  html, body, #root, #root > div, main, .custom-scrollbar {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  /* When printing from the preview modal, hide the main application container completely */
+  body.has-print-modal #root {
     display: none !important;
   }
+  
+  /* Make the print preview modal behave as the main scrollable print container */
+  body.has-print-modal #antigravity-print-preview-modal {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body.has-print-modal .print-preview-control-header {
+    display: none !important;
+  }
+
+  body.has-print-modal .print-preview-page {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
 }
+
+/* Specific search input padding override to prevent icon overlapping placeholder text */
+.mobile-viewport input.chat-search-input {
+  padding-left: 38px !important;
+}
+
+/* ==========================================================================
+   APP-WIDE HEADERS & NAVIGATION BRAND COLOR PALETTE OVERRIDES
+   ========================================================================== */
+
+/* Main Headings */
+h1, h2, h3, 
+.font-headline,
+h1.tracking-tight,
+h2.tracking-tight,
+h3.tracking-tight {
+  color: #004277 !important;
+  font-family: 'Manrope', 'Inter', sans-serif !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.025em;
+  text-shadow: 0 1px 2px rgba(0, 66, 119, 0.02);
+}
+
+/* Secondary Headings and Labels */
+h4, h5, h6 {
+  color: #456080 !important;
+  font-family: 'Manrope', 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em;
+}
+
+/* Navigation Breadcrumbs Legibility Improvement */
+nav.text-xs, 
+nav.text-xs span {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+}
+
+nav.text-xs span:not(.text-primary):not(.material-symbols-outlined) {
+  color: #456080 !important;
+}
+
+nav.text-xs span.text-primary {
+  color: #004277 !important;
+  border-bottom: 1.5px solid rgba(0, 66, 119, 0.2);
+  padding-bottom: 1px;
+}
+
+nav.text-xs span.material-symbols-outlined {
+  color: #8fa0b5 !important;
+}
+
+/* Let's make headers in cards or layout sections pop out beautifully */
+.bg-surface-container-lowest h3,
+.bg-surface-container-lowest h2,
+.bg-surface-container-low h3 {
+  color: #004277 !important;
+}
+
+/* Form headers and standard description labels */
+label.text-on-surface-variant {
+  color: #456080 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em;
+}
+
+/* WhatsApp-style thin custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px !important;
+  height: 4px !important;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(84, 101, 111, 0.25) !important;
+  border-radius: 10px !important;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(84, 101, 111, 0.5) !important;
+}
+
+/* Chat and Activities floating input bar */
+.chat-input-footer {
+  position: relative !important;
+  background: #f0f2f5 !important;
+  padding: 10px 16px !important;
+  z-index: 10 !important;
+  border-top: 1px solid #e9edef !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.camera-caption-input {
+  width: 100% !important;
+  height: 100% !important;
+  font-size: 13px !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: #1e293b !important; /* text-slate-800 */
+}
+.camera-caption-input:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Apply sleek scrollbar globally to all scrollable elements */
+::-webkit-scrollbar {
+  width: 5px !important;
+  height: 5px !important;
+}
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(84, 101, 111, 0.25) !important;
+  border-radius: 10px !important;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(84, 101, 111, 0.5) !important;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(84, 101, 111, 0.25) transparent;
+}
+
+/* WhatsApp Dark Theme Style Overrides */
+.whatsapp-dark {
+  background-color: #0b141a !important;
+  color: #e9edef !important;
+}
+
+/* Sidebar and vertical nav aside */
+.whatsapp-dark aside {
+  background-color: #111b21 !important;
+  border-color: #222e35 !important;
+}
+
+.whatsapp-dark aside button {
+  color: #8696a0 !important;
+}
+
+.whatsapp-dark aside button:hover {
+  background-color: #202c33 !important;
+}
+
+.whatsapp-dark aside button.bg-\[\#e9edef\] {
+  background-color: #2a3942 !important;
+  color: #00a884 !important;
+}
+
+.whatsapp-dark .chat-header {
+  background-color: #111b21 !important;
+  border-color: #222e35 !important;
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .chat-header h1,
+.whatsapp-dark .chat-header h3 {
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .chat-header button {
+  color: #8696a0 !important;
+}
+
+.whatsapp-dark .chat-header button:hover {
+  background-color: #202c33 !important;
+}
+
+/* Search input container and input */
+.whatsapp-dark .search-container {
+  background-color: #111b21 !important;
+  border-color: #222e35 !important;
+}
+
+.whatsapp-dark input.chat-search-input {
+  background-color: #202c33 !important;
+  color: #e9edef !important;
+}
+
+.whatsapp-dark input.chat-search-input::placeholder {
+  color: #8696a0 !important;
+}
+
+/* Thread card lists */
+.whatsapp-dark .thread-list-container {
+  background-color: #111b21 !important;
+}
+
+.whatsapp-dark .thread-card {
+  background-color: #111b21 !important;
+  border-color: #222e35 !important;
+}
+
+.whatsapp-dark .thread-card:hover {
+  background-color: #202c33 !important;
+}
+
+.whatsapp-dark .thread-card.active {
+  background-color: #2a3942 !important;
+}
+
+.whatsapp-dark .thread-card .thread-name {
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .thread-card .thread-snippet {
+  color: #8696a0 !important;
+}
+
+.whatsapp-dark .thread-card .text-slate-400 {
+  color: #8696a0 !important;
+}
+
+/* Status tab */
+.whatsapp-dark .status-card {
+  border-color: #222e35 !important;
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .status-card:hover {
+  background-color: #202c33 !important;
+}
+
+.whatsapp-dark .status-title {
+  color: #e9edef !important;
+}
+
+/* Calls tab */
+.whatsapp-dark .call-card {
+  border-color: #222e35 !important;
+}
+
+.whatsapp-dark .call-card:hover {
+  background-color: #202c33 !important;
+}
+
+.whatsapp-dark .call-title {
+  color: #e9edef !important;
+}
+
+/* Messages & Conversation Window */
+.whatsapp-dark .conversation-window {
+  background-color: #0b141a !important;
+}
+
+/* Fallback panel */
+.whatsapp-dark .conversation-fallback {
+  background-color: #222e35 !important;
+  border-bottom-color: #00a884 !important;
+}
+.whatsapp-dark .conversation-fallback h3 {
+  color: #e9edef !important;
+}
+.whatsapp-dark .conversation-fallback p {
+  color: #8696a0 !important;
+}
+.whatsapp-dark .conversation-fallback .bg-slate-100 {
+  background-color: #2a3942 !important;
+  color: #8696a0 !important;
+}
+
+/* Message bubbles */
+.whatsapp-dark .msg-bubble-self {
+  background-color: #005c4b !important;
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .msg-bubble-other {
+  background-color: #202c33 !important;
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .msg-bubble-self p,
+.whatsapp-dark .msg-bubble-other p {
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .msg-bubble-self span,
+.whatsapp-dark .msg-bubble-other span,
+.whatsapp-dark .msg-bubble-self span.text-slate-400,
+.whatsapp-dark .msg-bubble-other span.text-slate-400 {
+  color: #8696a0 !important;
+}
+
+/* Conversation Footer / Input Bar */
+.whatsapp-dark .chat-input-footer {
+  background-color: #111b21 !important;
+  border-color: #222e35 !important;
+}
+
+.whatsapp-dark .chat-input-footer .input-capsule {
+  background-color: #2a3942 !important;
+  border-color: transparent !important;
+}
+
+.whatsapp-dark .chat-input-footer .chat-msg-input {
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .chat-input-footer .chat-msg-input::placeholder {
+  color: #8696a0 !important;
+}
+
+.whatsapp-dark .chat-input-footer button {
+  color: #8696a0 !important;
+}
+
+.whatsapp-dark .chat-input-footer button:hover {
+  background-color: #202c33 !important;
+}
+
+/* Mobile Bottom Nav */
+.whatsapp-dark nav.h-14 {
+  background-color: #111b21 !important;
+  border-color: #222e35 !important;
+}
+
+.whatsapp-dark nav.h-14 button {
+  color: #8696a0 !important;
+}
+
+/* 3-dot dropdown settings menu */
+.whatsapp-dark .scale-dropdown-menu {
+  background-color: #233138 !important;
+  border-color: #2f3b43 !important;
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .scale-dropdown-menu button {
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .scale-dropdown-menu button:hover {
+  background-color: #182229 !important;
+}
+
+.whatsapp-dark .scale-dropdown-menu hr {
+  border-color: #2f3b43 !important;
+}
+
+/* Modals */
+.whatsapp-dark .modal-content-wrapper {
+  background-color: #222e35 !important;
+  color: #e9edef !important;
+  border-color: #2f3b43 !important;
+}
+
+.whatsapp-dark .modal-content-wrapper h3,
+.whatsapp-dark .modal-content-wrapper h4 {
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .modal-content-wrapper .chat-search-input {
+  background-color: #2a3942 !important;
+  color: #e9edef !important;
+}
+
+.whatsapp-dark .modal-content-wrapper button.bg-slate-100 {
+  background-color: #2a3942 !important;
+  color: #8696a0 !important;
+}
+
+.whatsapp-dark .modal-content-wrapper button.bg-slate-100:hover {
+  background-color: #374248 !important;
+  color: #e9edef !important;
+}
+
+/* Activities filter panel */
+.whatsapp-dark .activities-filter-panel {
+  background-color: #111b21 !important;
+  border-color: #222e35 !important;
+  color: #e9edef !important;
+}
+
+/* Senior UI/UX Dynamic Island Top Pill & Loading Spinner Keyframes */
+@keyframes dynamicPillDropExpand {
+  0% {
+    transform: translate3d(-50%, -130%, 0) scale(0.65);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  65% {
+    transform: translate3d(-50%, 4px, 0) scale(1.02);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+@keyframes dynamicPillRetract {
+  0% {
+    transform: translate3d(-50%, 0, 0) scale(1);
+    opacity: 1;
+  }
+  35% {
+    transform: translate3d(-50%, 2px, 0) scale(0.96);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(-50%, -140%, 0) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes spinnerRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinnerDash {
+  0% {
+    stroke-dasharray: 1px, 200px;
+    stroke-dashoffset: 0px;
+  }
+  50% {
+    stroke-dasharray: 100px, 200px;
+    stroke-dashoffset: -15px;
+  }
+  100% {
+    stroke-dasharray: 100px, 200px;
+    stroke-dashoffset: -125px;
+  }
+}
+
+.animate-pill-in {
+  animation: dynamicPillDropExpand 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-pill-out {
+  animation: dynamicPillRetract 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-spinner-rotate {
+  animation: spinnerRotate 1.6s linear infinite;
+  will-change: transform;
+}
+
+.animate-spinner-dash {
+  animation: spinnerDash 1.4s ease-in-out infinite;
+  stroke-linecap: round;
+}
+

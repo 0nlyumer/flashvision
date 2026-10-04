@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useApp } from '../../context/AppContext';
+import GlobalPagination from '../ui/GlobalPagination';
 
-export default function OmsAdjustment({ pendingItems = [], onCancel, handleStartRun }) {
+export default function OmsAdjustment({ pendingItems = [], onCancel, handleStartRun, editingPlanDate }) {
     // pendingItems already contains only the selected items from ProductionOMS list.
     const selectedData = pendingItems;
     
     // Manage input state for adjustments
+    const { state } = useApp();
     const [adjustments, setAdjustments] = useState({});
+    const [planDate, setPlanDate] = useState(editingPlanDate || '');
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
+
+    const displayedData = state?.isGlobalPaginated
+        ? selectedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+        : selectedData;
 
     useEffect(() => {
         const initAdj = {};
@@ -20,11 +31,12 @@ export default function OmsAdjustment({ pendingItems = [], onCancel, handleStart
     };
 
     const submitRuns = () => {
-        // Just start run for each, using the adjusted quantities
-        selectedData.forEach(item => {
-            const adjQty = adjustments[item.itemCode] || item.quantity;
-            handleStartRun({ ...item, producedQty: adjQty });
-        });
+        if (!planDate) return;
+        const payload = selectedData.map(item => ({
+            ...item,
+            producedQty: adjustments[item.itemCode] || item.quantity
+        }));
+        handleStartRun(payload, planDate);
     };
 
     return (
@@ -41,21 +53,20 @@ export default function OmsAdjustment({ pendingItems = [], onCancel, handleStart
 
             {/* Table replacing Bento */}
             <div className="bg-surface-container-lowest rounded-[2rem] shadow-[0_20px_40px_rgba(0,28,56,0.06)] overflow-hidden border border-outline-variant/10 mb-8">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto custom-scrollbar">
                     <table className="w-full text-left border-collapse min-w-[1200px]">
                         <thead>
                             <tr className="bg-surface-container-low/50">
                                 <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">Sale Order / Date</th>
                                 <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">Customer Name</th>
                                 <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">Product / Item Code</th>
-                                <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10">Required Material</th>
                                 <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10 text-right">Order Metres</th>
                                 <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/10 text-right">Output Metres</th>
                                 <th className="py-5 px-6 text-[11px] font-extrabold uppercase tracking-widest text-primary border-b border-outline-variant/10 text-right min-w-[200px]">Production Metres</th>
                             </tr>
                         </thead>
                         <tbody className="group">
-                            {selectedData.length > 0 ? selectedData.map((item) => (
+                            {displayedData.length > 0 ? displayedData.map((item) => (
                                 <tr key={item.itemCode} className="border-b border-outline-variant/10 transition-colors hover:bg-surface-container-lowest">
                                     <td className="py-6 px-6 align-middle">
                                         <div className="flex flex-col gap-1">
@@ -70,12 +81,6 @@ export default function OmsAdjustment({ pendingItems = [], onCancel, handleStart
                                         <div className="flex flex-col gap-1">
                                             <span className="font-bold text-on-surface text-sm">{item.productName || 'Unknown Item'}</span>
                                             <span className="font-mono text-[10px] bg-slate-100 text-slate-600 px-1 py-0.5 rounded w-fit">{item.itemCode}</span>
-                                        </div>
-                                    </td>
-                                    <td className="py-6 px-6 align-middle">
-                                        <div className="flex flex-col gap-1">
-                                            <span className="text-xs font-semibold text-on-surface">{item.requiredFabricName || 'None'}</span>
-                                            {item.hasShortage && <span className="text-[10px] text-error font-bold flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">warning</span>Shortage</span>}
                                         </div>
                                     </td>
                                     <td className="py-6 px-6 align-middle text-right">
@@ -104,11 +109,18 @@ export default function OmsAdjustment({ pendingItems = [], onCancel, handleStart
                         </tbody>
                     </table>
                 </div>
+                
+                <GlobalPagination 
+                    totalItems={selectedData.length}
+                    itemsPerPage={itemsPerPage}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                />
             </div>
 
             {/* Summary Section */}
-            <div className="bg-surface-container rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between">
-                <div className="flex space-x-12 mb-6 md:mb-0">
+            <div className="bg-surface-container rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex flex-wrap gap-12 mb-6 md:mb-0">
                     <div>
                         <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Total Selected Items</p>
                         <p className="text-3xl font-manrope font-black text-on-surface">{selectedData.length > 0 ? selectedData.length.toString().padStart(2, '0') : '00'}</p>
@@ -119,11 +131,20 @@ export default function OmsAdjustment({ pendingItems = [], onCancel, handleStart
                             {Object.values(adjustments).reduce((acc, v) => acc + parseInt(v || 0, 10), 0)}<span className="text-sm font-bold ml-1">m</span>
                         </p>
                     </div>
+                    <div className="min-w-[200px]">
+                        <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Plan Date <span className="text-error">*</span></p>
+                        <input 
+                            type="date" 
+                            value={planDate}
+                            onChange={(e) => setPlanDate(e.target.value)}
+                            className="w-full bg-surface-container-lowest border-none ring-1 ring-outline-variant/30 focus:ring-primary rounded-xl px-4 py-2.5 text-sm font-bold text-on-surface outline-none transition-all"
+                        />
+                    </div>
                 </div>
                 <button 
                     onClick={submitRuns}
-                    disabled={selectedData.length === 0}
-                    className="bg-gradient-to-br from-primary to-primary-container text-on-primary px-10 py-5 rounded-xl font-bold text-lg flex items-center space-x-4 shadow-xl hover:shadow-primary/20 transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={selectedData.length === 0 || !planDate}
+                    className="bg-gradient-to-br from-primary to-primary-container text-on-primary px-10 py-5 rounded-xl font-bold text-lg flex items-center space-x-4 shadow-xl hover:shadow-primary/20 transition-all active:scale-95 group disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                     <span>Confirm Production Plan</span>
                     <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">precision_manufacturing</span>

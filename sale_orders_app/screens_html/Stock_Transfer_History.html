@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flashvision - Stock Transfer History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@500;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        @layer utilities {
+            .glass-nav {
+                background-color: rgba(225, 226, 232, 0.8); /* surface-variant at 80% */
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+            }
+            .ambient-shadow {
+                box-shadow: 0 20px 40px rgba(0, 28, 56, 0.06);
+            }
+            .ghost-border {
+                border: 1px solid rgba(193, 199, 210, 0.15); /* outline-variant at 15% */
+            }
+            .primary-gradient {
+                background: linear-gradient(135deg, #004277, #005a9e);
+            }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#ffc29d",
+                        "outline-variant": "#c1c7d2",
+                        "outline": "#727782",
+                        "surface-container": "#ecedf4",
+                        "on-primary-fixed": "#001c38",
+                        "inverse-primary": "#a2c9ff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#004881",
+                        "on-tertiary-fixed-variant": "#743500",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-container": "#8e4302",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#445f7f",
+                        "secondary-container": "#bed9ff",
+                        "surface-variant": "#e1e2e8",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbc8",
+                        "tertiary-fixed-dim": "#ffb68a",
+                        "surface-dim": "#d8dae0",
+                        "on-tertiary-fixed": "#321300",
+                        "on-primary": "#ffffff",
+                        "secondary": "#456080",
+                        "on-secondary-fixed-variant": "#2d4867",
+                        "surface-bright": "#f8f9ff",
+                        "inverse-on-surface": "#eff0f7",
+                        "on-surface": "#191c20",
+                        "surface-container-low": "#f2f3fa",
+                        "secondary-fixed-dim": "#adc9ed",
+                        "on-error": "#ffffff",
+                        "on-background": "#191c20",
+                        "inverse-surface": "#2e3035",
+                        "secondary-fixed": "#d1e4ff",
+                        "error": "#ba1a1a",
+                        "surface": "#f8f9ff",
+                        "primary-fixed": "#d3e4ff",
+                        "on-secondary-fixed": "#001d36",
+                        "surface-tint": "#1260a5",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "primary-container": "#005a9e",
+                        "primary": "#004277",
+                        "background": "#f8f9ff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e7e8ee",
+                        "surface-container-highest": "#e1e2e8",
+                        "on-surface-variant": "#414750",
+                        "on-primary-container": "#b1d1ff",
+                        "tertiary": "#6b3000"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {},
+                    "fontFamily": {
+                        "headline": [
+                            "Manrope"
+                        ],
+                        "display": [
+                            "Manrope"
+                        ],
+                        "body": [
+                            "Inter"
+                        ],
+                        "label": [
+                            "Inter"
+                        ]
+                    },
+                    "fontSize": {}
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen flex">
+<!-- SideNavBar -->
+<nav class="bg-surface-container-low dark:bg-surface-container-low h-screen w-72 flex flex-col shadow-sm fixed left-0 top-0 z-50 py-8 hidden md:flex">
+<!-- Header -->
+<div class="px-6 mb-10 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest shrink-0">
+<img alt="Inventory Dashboard" class="w-full h-full object-cover" data-alt="A sophisticated, high-contrast abstract rendering of a logistics network node. The image features deep oceanic blues and crisp whites, representing precision and technical reliability. Soft, ambient light illuminates a central, perfectly spherical hub connected by fine, glowing lines. The mood is calm, authoritative, and deeply professional." src="https://lh3.googleusercontent.com/aida/ADBb0ui0ws5suY4J0sC7Zah29dgwD6PiUkdzO27Z6wd-J5o5fAlDeLxRJQ3ArhVV58mXNx-rrpw4-sSM607gSsJyA9MCyJiSYN3YAnkCxpKn1PrY0bDT_-1KY2G5NVh96A6TIlT-tWxmc__3-yLxDV0m4vjg5qLRpPl9Bbq6Xy2Q9HHDFLhs4ro-wY79tuNLacQu9yqefZOoRmjmb-ekdoRGVKaRlJsM8piNqGYVTCN_6jiKmySi7Ch1lnFoTM7zQi6pWqKYW2R52D7zJ4o"/>
+</div>
+<div>
+<h1 class="font-headline text-lg font-extrabold text-on-primary-fixed-variant dark:text-primary-fixed-dim tracking-tight">Global Operations</h1>
+<p class="font-body text-xs tracking-wide text-on-surface-variant dark:text-on-surface-variant mt-0.5">Synth-Logistics v4.2</p>
+</div>
+</div>
+<!-- Main Nav Tabs -->
+<div class="flex-1 px-4 space-y-2">
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">factory</span>
+<span class="font-body text-sm tracking-wide">Production</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-body text-sm tracking-wide">Scheduling</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">verified</span>
+<span class="font-body text-sm tracking-wide">Quality Control</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-lg font-semibold" href="#">
+<span class="material-symbols-outlined fill">local_shipping</span>
+<span class="font-body text-sm tracking-wide">Shipping</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-body text-sm tracking-wide">Analytics</span>
+</a>
+</div>
+<!-- Footer Nav Tabs -->
+<div class="px-4 mt-auto space-y-2">
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-body text-sm tracking-wide">Support</span>
+</a>
+<a class="group flex items-center gap-4 px-6 py-4 cursor-pointer text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-all duration-300 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body text-sm tracking-wide">Sign Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-72 flex flex-col min-h-screen bg-surface relative">
+<!-- TopNavBar (Mobile Only Fallback or Top Action Bar) -->
+<header class="flex justify-between items-center px-8 w-full sticky top-0 z-40 bg-surface dark:bg-surface h-16 md:hidden">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-on-surface-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<span class="font-headline text-xl font-bold tracking-tight text-primary dark:text-primary-fixed-dim">InventoryCore</span>
+</div>
+</header>
+<!-- Page Header & Actions -->
+<div class="px-10 pt-16 pb-8 flex justify-between items-end">
+<div class="space-y-2">
+<p class="font-body text-sm text-on-surface-variant uppercase tracking-widest font-semibold">Shipping</p>
+<h2 class="font-display text-[2.75rem] leading-none font-bold text-on-surface tracking-tight">Stock Transfer History</h2>
+<p class="font-body text-on-surface-variant max-w-2xl mt-4">Registry of all internal stock movements across regional distribution centers.</p>
+</div>
+<button class="primary-gradient text-on-primary rounded-lg px-6 py-3 font-body font-medium flex items-center gap-2 hover:opacity-90 transition-opacity ambient-shadow">
+<span class="material-symbols-outlined text-[1.25rem]">add</span>
+                New Transfer
+            </button>
+</div>
+<!-- Filter/Search Bar (Glassmorphism) -->
+<div class="px-10 mb-8 z-30 sticky top-4 hidden md:block">
+<div class="glass-nav rounded-xl px-6 py-4 flex items-center justify-between ambient-shadow ghost-border">
+<div class="flex items-center gap-6 w-full max-w-3xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/20 rounded-lg py-3 pl-12 pr-4 text-sm font-body text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:border-outline-variant/40 transition-all" placeholder="Search by Transfer ID, Destination, or Chemical Class..." type="text"/>
+</div>
+<button class="flex items-center gap-2 text-primary font-body font-semibold text-sm px-4 py-2 hover:bg-surface-container-low rounded-lg transition-colors shrink-0">
+<span class="material-symbols-outlined">filter_list</span>
+                        Filters
+                    </button>
+</div>
+<div class="flex items-center gap-4 shrink-0">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container-low ml-2 cursor-pointer">
+<img alt="Manager Profile" class="w-full h-full object-cover" data-alt="A cinematic, high-key portrait of a logistics manager in a modern, brightly lit distribution center. The lighting is crisp and cool, emphasizing precision. The subject wears a sharp, minimalist dark blue uniform, contrasting perfectly with the pristine white background. The mood is focused and quietly authoritative, reflecting high-end corporate professionalism." src="https://lh3.googleusercontent.com/aida/ADBb0uhm70SzZUMd13FPFRF_H8r09DkYE9OPZXZrifDmN4GCBTL80sgEH4JLPs7tlu_sRsr1Y4BPI3ZeNCYHPPPqK3xR_M3sSivrY2Doc7ji8WwJ8BYANn5ql0flAv6OfIV39ZvfJKHrrsv5u2XvywTiW8jg4OvpcPPL5RAoCaWSpPQKWz6nJzIGfbSMcVN1CBxOW1ZDE5t9e_ttYoAWw25njhXXQuU4NFgQjbxoXkhgl7UyXeudaGPFfGtdxQ6_c-pZORCLZhXK-S7UrL4"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Content Area -->
+<div class="px-10 pb-20 flex-1">
+<!-- Data Grid (Bento Style Layout instead of simple table) -->
+<div class="grid grid-cols-1 gap-6">
+<!-- Status Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
+<div class="bg-surface-container-low rounded-xl p-6 ghost-border">
+<p class="font-body text-sm text-on-surface-variant mb-2">Total Transfers (30d)</p>
+<p class="font-headline text-3xl font-bold text-on-surface">1,248</p>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-6 ambient-shadow ghost-border relative overflow-hidden">
+<div class="absolute right-0 top-0 w-24 h-full bg-primary/5 -skew-x-12 translate-x-4"></div>
+<p class="font-body text-sm text-on-surface-variant mb-2">In Transit</p>
+<div class="flex items-end gap-3">
+<p class="font-headline text-3xl font-bold text-primary">86</p>
+<span class="material-symbols-outlined text-primary mb-1">local_shipping</span>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 ghost-border">
+<p class="font-body text-sm text-on-surface-variant mb-2">Pending Approval</p>
+<p class="font-headline text-3xl font-bold text-tertiary">14</p>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 ghost-border">
+<p class="font-body text-sm text-on-surface-variant mb-2">Flagged</p>
+<p class="font-headline text-3xl font-bold text-error">2</p>
+</div>
+</div>
+<!-- Complex List Header -->
+<div class="bg-surface-container-highest/30 rounded-t-xl px-6 py-4 flex items-center justify-between text-xs font-body font-semibold text-on-surface-variant tracking-wider uppercase">
+<div class="w-2/12">Transfer ID &amp; Date</div>
+<div class="w-3/12">Route (Source → Destination)</div>
+<div class="w-3/12">Payload Summary</div>
+<div class="w-2/12">Status</div>
+<div class="w-2/12 text-right">Actions</div>
+</div>
+<!-- List Items (Cards) -->
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 ambient-shadow ghost-border flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-surface-bright transition-colors relative overflow-hidden group">
+<!-- Custom Status Indicator Bar -->
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="w-full md:w-2/12 space-y-1">
+<p class="font-headline text-sm font-bold text-on-surface">TRX-8924-A</p>
+<p class="font-body text-xs text-on-surface-variant">Oct 24, 2023 • 08:30 AM</p>
+</div>
+<div class="w-full md:w-3/12 flex items-center gap-3">
+<div>
+<p class="font-body text-sm font-medium text-on-surface">Sector 7 (N. Am)</p>
+<p class="font-body text-xs text-on-surface-variant">Hub Alpha</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm">arrow_forward</span>
+<div>
+<p class="font-body text-sm font-medium text-on-surface">Sector 4 (EU)</p>
+<p class="font-body text-xs text-on-surface-variant">Hub Delta</p>
+</div>
+</div>
+<div class="w-full md:w-3/12 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">science</span>
+</div>
+<div>
+<p class="font-body text-sm text-on-surface">Poly-Resin Base (Class B)</p>
+<p class="font-body text-xs text-on-surface-variant">1,200 kg • 4 Pallets</p>
+</div>
+</div>
+<div class="w-full md:w-2/12">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-container/50 text-on-secondary-container text-xs font-semibold tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                In Transit
+                            </span>
+</div>
+<div class="w-full md:w-2/12 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg transition-colors" title="View">
+<span class="material-symbols-outlined text-[1.25rem]">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[1.25rem]">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/30 rounded-lg transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[1.25rem]">delete</span>
+</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-6 ambient-shadow ghost-border flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-surface-bright transition-colors relative overflow-hidden group">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-surface-variant"></div>
+<div class="w-full md:w-2/12 space-y-1">
+<p class="font-headline text-sm font-bold text-on-surface">TRX-8923-B</p>
+<p class="font-body text-xs text-on-surface-variant">Oct 23, 2023 • 14:15 PM</p>
+</div>
+<div class="w-full md:w-3/12 flex items-center gap-3">
+<div>
+<p class="font-body text-sm font-medium text-on-surface">Sector 2 (APAC)</p>
+<p class="font-body text-xs text-on-surface-variant">Facility Omega</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-sm">arrow_forward</span>
+<div>
+<p class="font-body text-sm font-medium text-on-surface">Sector 7 (N. Am)</p>
+<p class="font-body text-xs text-on-surface-variant">Hub Alpha</p>
+</div>
+</div>
+<div class="w-full md:w-3/12 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container-low flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface-variant">precision_manufacturing</span>
+</div>
+<div>
+<p class="font-body text-sm text-on-surface">Component M-42</p>
+<p class="font-body text-xs text-on-surface-variant">800 Units • 2 Crates</p>
+</div>
+</div>
+<div class="w-full md:w-2/12">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-xs font-semibold tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+                                Delivered
+                            </span>
+</div>
+<div class="w-full md:w-2/12 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg transition-colors" title="View">
+<span class="material-symbols-outlined text-[1.25rem]">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[1.25rem]">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/30 rounded-lg transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[1.25rem]">delete</span>
+</button>
+</div>
+</div>
+<!-- Item 3 (Attention State) -->
+<div class="bg-surface-container-lowest rounded-xl p-6 ambient-shadow ghost-border flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-surface-bright transition-colors relative overflow-hidden group border border-tertiary/20">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
+<div class="w-full md:w-2/12 space-y-1">
+<p class="font-headline text-sm font-bold text-on-surface">TRX-8922-C</p>
+<p class="font-body text-xs text-on-surface-variant">Oct 23, 2023 • 09:00 AM</p>
+</div>
+<div class="w-full md:w-3/12 flex items-center gap-3">
+<div>
+<p class="font-body text-sm font-medium text-on-surface">Sector 4 (EU)</p>
+<p class="font-body text-xs text-on-surface-variant">Hub Beta</p>
+</div>
+<span class="material-symbols-outlined text-tertiary text-sm">priority_high</span>
+<div>
+<p class="font-body text-sm font-medium text-on-surface">Sector 1 (SA)</p>
+<p class="font-body text-xs text-on-surface-variant">Facility Gamma</p>
+</div>
+</div>
+<div class="w-full md:w-3/12 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-tertiary-container/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary">warning</span>
+</div>
+<div>
+<p class="font-body text-sm text-on-surface">Solvent X-9 (Hazmat)</p>
+<p class="font-body text-xs text-tertiary font-medium">Delayed at Customs</p>
+</div>
+</div>
+<div class="w-full md:w-2/12">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary-container/10 text-tertiary text-xs font-semibold tracking-wide border border-tertiary/20">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                                Flagged
+                            </span>
+</div>
+<div class="w-full md:w-2/12 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg transition-colors" title="View">
+<span class="material-symbols-outlined text-[1.25rem]">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg transition-colors" title="Edit">
+<span class="material-symbols-outlined text-[1.25rem]">edit</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/30 rounded-lg transition-colors" title="Delete">
+<span class="material-symbols-outlined text-[1.25rem]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="flex items-center justify-between mt-6 px-4">
+<p class="text-sm font-body text-on-surface-variant">Showing 1 to 3 of 1,248 entries</p>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-low text-sm font-medium transition-colors" disabled="">Previous</button>
+<button class="px-4 py-2 rounded-lg border border-outline-variant/30 bg-surface-container-lowest text-primary text-sm font-medium hover:bg-surface-container-low transition-colors shadow-sm">1</button>
+<button class="px-4 py-2 rounded-lg border border-outline-variant/30 text-on-surface text-sm font-medium hover:bg-surface-container-low transition-colors">2</button>
+<button class="px-4 py-2 rounded-lg border border-outline-variant/30 text-on-surface text-sm font-medium hover:bg-surface-container-low transition-colors">3</button>
+<span class="px-2 py-2 text-on-surface-variant">...</span>
+<button class="px-4 py-2 rounded-lg border border-outline-variant/30 text-on-surface text-sm font-medium hover:bg-surface-container-low transition-colors">Next</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative subtle background elements -->
+<div class="absolute bottom-0 right-0 w-[800px] h-[400px] bg-[url('{{DATA:IMAGE:IMAGE_47}}')] bg-cover bg-no-repeat opacity-5 pointer-events-none" data-alt="A highly abstract, macro-level view of a digital circuit board or synthetic mesh, rendered in deep monochromatic blues. The texture is extremely subtle, serving only as a quiet background watermark. The lines are razor-thin, suggesting infinite complexity and pristine organization, fitting for a premium tech interface."></div>
+</main>
+</body></html>

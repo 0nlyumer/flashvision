@@ -2,22 +2,38 @@ import React, { useState, useRef, useEffect } from 'react';
 import BulkUploadModal from './BulkUploadModal';
 import ProfileCardModal from './ProfileCardModal';
 import { useApp } from '../../context/AppContext';
+import { useDialog } from '../../context/DialogContext';
+import CustomSelect from '../ui/CustomSelect';
+import GlobalPagination from '../ui/GlobalPagination';
 
 export default function AddNewCustomer() {
   const { state, setCollection } = useApp();
+  const { appConfirm, appAlert } = useDialog();
   const [showHistory, setShowHistory] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [viewProfileData, setViewProfileData] = useState(null);
   
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+  
   const fileInputRef = useRef(null);
 
   const generateTrackingCode = () => {
-    return `CUST-${String(state.customers.length + 1).padStart(3, '0')}`;
+    const ids = (state.customers || []).map(c => {
+      const match = c.id?.match(/\d+/);
+      return match ? parseInt(match[0], 10) : 0;
+    });
+    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
+    return `CUST-${String(maxId + 1).padStart(3, '0')}`;
   };
 
   const [formData, setFormData] = useState({
-    id: '', name: '', email: '', phone: '', address: '', vat: '', terms: 'Net 30', image: null
+    id: '', name: '', contactPerson: '', email: '', phone: '', address: '', vat: '', terms: 'Net 30', image: null
   });
+
+  const displayedCustomers = state?.isGlobalPaginated
+    ? state.customers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : state.customers;
 
   useEffect(() => {
     if (!formData.id && !showHistory) {
@@ -35,8 +51,9 @@ export default function AddNewCustomer() {
   };
 
   const handleSave = () => {
-    if (!formData.name) return alert("Customer name is required");
+    if (!formData.name) { appAlert("Customer name is required"); return; }
     let updated = [...state.customers];
+    const isNew = !state.customers.some(c => c.id === formData.id);
     if (!formData.id.startsWith('CUST-')) {
       updated.push({ ...formData, id: formData.id || generateTrackingCode() });
     } else {
@@ -49,23 +66,131 @@ export default function AddNewCustomer() {
       }
     }
     setCollection('customers', updated);
+
+    // Auto-generate Chart of Account if new customer
+    if (isNew) {
+      const accounts = state.chartOfAccounts || [];
+      const accountExists = accounts.some(acc => acc.name.toLowerCase() === formData.name.toLowerCase());
+      if (!accountExists) {
+        const nextAccId = 'ACC-' + (4800 + accounts.length + 1);
+        const newAccount = {
+          id: nextAccId,
+          name: formData.name,
+          category: 'Customer',
+          debit: 0,
+          credit: 0
+        };
+        setCollection('chartOfAccounts', [...accounts, newAccount]);
+      }
+    }
+
     handleReset();
     setShowHistory(true);
   };
 
   const handleReset = () => {
-    setFormData({ id: generateTrackingCode(), name: '', email: '', phone: '', address: '', vat: '', terms: 'Net 30', image: null });
+    setFormData({ id: generateTrackingCode(), name: '', contactPerson: '', email: '', phone: '', address: '', vat: '', terms: 'Net 30', image: null });
   };
 
-  const handleEdit = (customer) => {
+  const handleEdit = async (customer) => {
+    if (!(await appConfirm('Are you sure you want to edit this customer?'))) return;
     setFormData(customer);
     setShowHistory(false);
   };
 
-  const handleDelete = (id) => {
-    if(window.confirm('Are you sure you want to delete this customer?')) {
+  const handleDelete = async (id) => {
+    if(await appConfirm('Are you sure you want to delete this customer?')) {
       const updated = state.customers.filter(c => c.id !== id);
       setCollection('customers', updated);
+    }
+  };
+
+  const handleBulkUpload = (csvText) => {
+    const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
+    if (lines.length < 2) {
+      appAlert("No valid data found in CSV file.");
+      return;
+    }
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+    
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      const firstCell = line.split(',')[0]?.trim().replace(/^["']|["']$/g, '').toLowerCase();
+      if (firstCell === 'end' || line.trim().toLowerCase() === 'end') {
+        break;
+      }
+
+      const values = [];
+      let currentVal = '';
+      let inQuotes = false;
+      for (let char of line) {
+        if (char === '"' || char === "'") {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          values.push(currentVal.trim());
+          currentVal = '';
+        } else {
+          currentVal += char;
+        }
+      }
+      values.push(currentVal.trim());
+      
+      const rowData = {};
+      headers.forEach((header, index) => {
+        rowData[header] = values[index]?.replace(/^["']|["']$/g, '') || '';
+      });
+      
+      const name = (rowData['Company Name'] || rowData['Company name'] || '').trim();
+      if (/[a-zA-Z0-9]/.test(name)) {
+        rows.push(rowData);
+      }
+    }
+
+    let updated = [...state.customers];
+    let accounts = [...(state.chartOfAccounts || [])];
+    let addedCount = 0;
+    let custCount = updated.length;
+
+    rows.forEach(row => {
+      const name = row['Company Name'] || row['Company name'];
+      if (!name) return;
+
+      const contact = row['Contact Person'] || row['Contact person'] || '';
+      const email = row['Email'] || row['email'] || '';
+      const phone = row['Phone'] || row['phone'] || '';
+      const address = row['Address'] || row['address'] || '';
+      const vat = row['VAT'] || row['vat'] || '';
+      const terms = row['Terms'] || row['terms'] || 'Net 30';
+
+      custCount++;
+      const id = `CUST-${String(custCount).padStart(3, '0')}`;
+
+      updated.push({
+        id, name, contactPerson: contact, email, phone, address, vat, terms, image: null
+      });
+
+      // Auto chart of accounts
+      const accountExists = accounts.some(acc => acc.name.toLowerCase() === name.toLowerCase());
+      if (!accountExists) {
+        const nextAccId = 'ACC-' + (4800 + accounts.length + 1);
+        accounts.push({
+          id: nextAccId,
+          name: name,
+          category: 'Customer',
+          debit: 0,
+          credit: 0
+        });
+      }
+      addedCount++;
+    });
+
+    if (addedCount > 0) {
+      setCollection('customers', updated);
+      setCollection('chartOfAccounts', accounts);
+      appAlert(`Successfully uploaded and created ${addedCount} customers!`);
+    } else {
+      appAlert("No valid customer entries were found in the file.");
     }
   };
 
@@ -134,6 +259,11 @@ export default function AddNewCustomer() {
                 <input name="name" value={formData.name} onChange={handleInputChange} type="text" placeholder="e.g. Acme Corporation" className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all" />
                 <label className="absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold text-primary uppercase tracking-wider">Company/Customer Name</label>
               </div>
+
+              <div className="relative group col-span-1 md:col-span-2">
+                <input name="contactPerson" value={formData.contactPerson} onChange={handleInputChange} type="text" placeholder="e.g. John Doe" className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all" />
+                <label className="absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold text-primary uppercase tracking-wider">Contact Person</label>
+              </div>
               
               <div className="relative group">
                 <input name="email" value={formData.email} onChange={handleInputChange} type="email" placeholder="e.g. billing@acme.corp" className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all" />
@@ -156,13 +286,17 @@ export default function AddNewCustomer() {
               </div>
 
               <div className="relative group">
-                 <select name="terms" value={formData.terms} onChange={handleInputChange} className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-transparent transition-all appearance-none">
-                  <option value="Net 30">Net 30</option>
-                  <option value="Net 60">Net 60</option>
-                  <option value="Due on Receipt">Due on Receipt</option>
-                </select>
-                <label className="absolute -top-2 left-3 bg-surface px-1 text-[10px] font-bold text-primary uppercase tracking-wider">Payment Terms</label>
-                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                <CustomSelect
+                  name="terms"
+                  value={formData.terms}
+                  onChange={handleInputChange}
+                  options={[
+                    { label: 'Net 30', value: 'Net 30' },
+                    { label: 'Net 60', value: 'Net 60' },
+                    { label: 'Due on Receipt', value: 'Due on Receipt' }
+                  ]}
+                  label="Payment Terms"
+                />
               </div>
             </div>
 
@@ -185,6 +319,7 @@ export default function AddNewCustomer() {
                 <thead>
                   <tr className="bg-surface-dim border-b border-outline-variant/30">
                     <th className="py-4 px-6 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Customer Name</th>
+                    <th className="py-4 px-6 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Contact Person</th>
                     <th className="py-4 px-6 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Email Contact</th>
                     <th className="py-4 px-6 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Phone</th>
                     <th className="py-4 px-6 text-xs font-bold text-on-surface-variant uppercase tracking-wider">Terms</th>
@@ -193,7 +328,7 @@ export default function AddNewCustomer() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/20 uppercase font-medium text-xs font-body text-on-surface">
-                  {state.customers.map((customer) => (
+                  {displayedCustomers.map((customer) => (
                     <tr key={customer.id} className="hover:bg-surface/50 transition-colors">
                       <td className="py-4 px-6 font-bold flex items-center gap-2">
                         {customer.image ? (
@@ -205,6 +340,7 @@ export default function AddNewCustomer() {
                         )}
                         {customer.name}
                       </td>
+                      <td className="py-4 px-6">{customer.contactPerson || '-'}</td>
                       <td className="py-4 px-6 lowercase normal-case">{customer.email}</td>
                       <td className="py-4 px-6 font-mono">{customer.phone}</td>
                       <td className="py-4 px-6">
@@ -232,6 +368,13 @@ export default function AddNewCustomer() {
                 </tbody>
               </table>
             </div>
+            
+            <GlobalPagination 
+              totalItems={state.customers.length}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
           </div>
         )}
       </div>
@@ -240,6 +383,7 @@ export default function AddNewCustomer() {
         isOpen={isBulkUploadOpen} 
         onClose={() => setIsBulkUploadOpen(false)} 
         entityName="Customers" 
+        onUpload={handleBulkUpload}
       />
       <ProfileCardModal 
         isOpen={!!viewProfileData} 
