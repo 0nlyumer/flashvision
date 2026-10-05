@@ -516,6 +516,28 @@ export const AppProvider = ({ children }) => {
   const pendingWriteRef = useRef(null);
   const isLocalUpsertInFlight = useRef(false);
   const lastSyncedStateRef = useRef('');
+  const lastSyncedUpdatedAtRef = useRef('');
+  const standaloneTablesSupportedRef = useRef(false);
+
+  const safeLocalStorageSet = (key, value) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      if (e?.name === 'QuotaExceededError' || e?.code === 22) {
+        console.warn(`[Storage] QuotaExceededError writing ${key}. Evicting non-essential cache.`);
+        try {
+          const keysToEvict = ['hr_uploaded_attendance', 'hr_generated_salaries', 'hr_overtime_requests', 'hr_leave_requests', 'routingTasks'];
+          keysToEvict.forEach(k => {
+            if (k !== key) localStorage.removeItem(k);
+          });
+          localStorage.setItem(key, value);
+        } catch (retryErr) {
+          console.warn(`[Storage] Could not persist ${key} locally after eviction:`, retryErr);
+        }
+      }
+    }
+  };
+
   const [isInitialLoadCompleted, setIsInitialLoadCompleted] = useState(false);
   const [activeSessions, setActiveSessions] = useState([]);
   const [state, setState] = useState(() => {
@@ -847,9 +869,19 @@ export const AppProvider = ({ children }) => {
       try {
         const { data, error } = await supabase
           .from('erp_state')
-          .select('state_data')
+          .select('state_data, updated_at')
           .eq('id', 'main_state')
           .maybeSingle();
+
+        // Check if standalone tables exist in database to avoid 404/400 errors
+        try {
+          const { error: tErr } = await supabase.from('hr_employees').select('id').limit(1);
+          if (!tErr) {
+            standaloneTablesSupportedRef.current = true;
+          }
+        } catch (_) {
+          standaloneTablesSupportedRef.current = false;
+        }
 
         // Fetch initial user sessions silently
         const { data: sData } = await supabase
@@ -867,6 +899,9 @@ export const AppProvider = ({ children }) => {
         }
 
         if (data && data.state_data) {
+          if (data.updated_at) {
+            lastSyncedUpdatedAtRef.current = data.updated_at;
+          }
           const erpData = data.state_data;
           if (erpData.buildVersion && erpData.buildVersion !== BUILD_VERSION) {
               console.warn("Client build version mismatch on load. Reloading...");
@@ -991,6 +1026,9 @@ export const AppProvider = ({ children }) => {
           filter: 'id=eq.main_state'
         },
         (payload) => {
+          if (payload.new?.updated_at) {
+            lastSyncedUpdatedAtRef.current = payload.new.updated_at;
+          }
           const erpData = payload.new?.state_data;
           if (erpData) {
             if (erpData.buildVersion && erpData.buildVersion !== BUILD_VERSION) {
@@ -1144,86 +1182,117 @@ export const AppProvider = ({ children }) => {
       )
       .subscribe();
 
-    // 3. High-speed realtime polling fallback (4s) for instant WhatsApp-like cross-device sync
-    const syncPollInterval = setInterval(() => {
+    // 3. Lightweight remote synchronization check (45s probe + window focus listener)
+    // Downloads only tiny updated_at metadata (~100 bytes) instead of downloading 300KB every 4s, saving 99% bandwidth!
+    const checkRemoteVersion = async () => {
       if (isRemoteSyncing.current || isLocalUpsertInFlight.current || pendingWriteRef.current !== null) return;
-      supabase
-        .from('erp_state')
-        .select('state_data')
-        .eq('id', 'main_state')
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data && data.state_data) {
-            const erpData = data.state_data;
-            if (erpData.lastUpdatedBy === clientId.current) return;
-            const syncStateCopy = getSanitizedSyncState(erpData);
-            const copyStr = JSON.stringify(syncStateCopy);
-            if (copyStr !== lastSyncedStateRef.current) {
-              isRemoteSyncing.current = true;
-              const toArray = (val) => Array.isArray(val) ? val : (val ? Object.values(val) : []);
-              const sanitized = {
-                ...erpData,
-                users: toArray(erpData.users),
-                customers: toArray(erpData.customers),
-                suppliers: toArray(erpData.suppliers),
-                items: toArray(erpData.items),
-                saleOrders: toArray(erpData.saleOrders),
-                productionPlans: toArray(erpData.productionPlans),
-                productionOutputs: toArray(erpData.productionOutputs),
-                deliveries: toArray(erpData.deliveries),
-                notifications: toArray(erpData.notifications),
-                returns: toArray(erpData.returns),
-                purchaseDemands: toArray(erpData.purchaseDemands),
-                purchaseOrders: toArray(erpData.purchaseOrders),
-                inwardGatePasses: toArray(erpData.inwardGatePasses),
-                grns: toArray(erpData.grns),
-                stockTransfers: toArray(erpData.stockTransfers),
-                otherConsumptions: toArray(erpData.otherConsumptions),
-                auditLogs: toArray(erpData.auditLogs),
-                chats: toArray(erpData.chats),
-                approvals: toArray(erpData.approvals),
-                gatePassActivities: toArray(erpData.gatePassActivities),
-                salesInvoices: toArray(erpData.salesInvoices),
-                purchaseInvoices: toArray(erpData.purchaseInvoices),
-                paymentVouchers: toArray(erpData.paymentVouchers),
-                chartOfAccounts: toArray(erpData.chartOfAccounts),
-                hr_employees_list: toArray(erpData.hr_employees_list),
-                hr_uploaded_attendance: toArray(erpData.hr_uploaded_attendance),
-                hr_loan_requests: toArray(erpData.hr_loan_requests),
-                hr_loan_ledger: toArray(erpData.hr_loan_ledger),
-                boms: toArray(erpData.boms),
-                rawMaterialPhases: toArray(erpData.rawMaterialPhases),
-                finishedGoodPhases: toArray(erpData.finishedGoodPhases)
-              };
+      try {
+        const { data, error } = await supabase
+          .from('erp_state')
+          .select('updated_at')
+          .eq('id', 'main_state')
+          .maybeSingle();
 
-              lastSyncedStateRef.current = copyStr;
-              setState(prev => {
-                const nextState = seedStateIfEmpty(sanitized);
-                const nextCurrentUser = updateMatchedCurrentUser(prev.currentUser, nextState.users);
-                return {
-                  ...nextState,
-                  currentUser: nextCurrentUser,
-                  themeSettings: prev.themeSettings,
-                  displaySettings: prev.displaySettings,
-                  dashboardLayout: prev.dashboardLayout,
-                  dashboardBackground: prev.dashboardBackground,
-                  documentWarehouseBinders: prev.documentWarehouseBinders
-                };
-              });
-              setTimeout(() => {
-                isRemoteSyncing.current = false;
-              }, 100);
-            }
-          }
-        })
-        .catch(err => console.warn("Sync poll check error:", err));
-    }, 4000);
+        if (error || !data || !data.updated_at) return;
+        if (data.updated_at === lastSyncedUpdatedAtRef.current) return;
+
+        // Remote database was updated by another client! Fetch full state:
+        const { data: fullData, error: fullError } = await supabase
+          .from('erp_state')
+          .select('state_data, updated_at')
+          .eq('id', 'main_state')
+          .maybeSingle();
+
+        if (fullError || !fullData || !fullData.state_data) return;
+
+        const erpData = fullData.state_data;
+        if (erpData.lastUpdatedBy === clientId.current) {
+          lastSyncedUpdatedAtRef.current = fullData.updated_at;
+          return;
+        }
+
+        const syncStateCopy = getSanitizedSyncState(erpData);
+        const copyStr = JSON.stringify(syncStateCopy);
+        if (copyStr !== lastSyncedStateRef.current) {
+          isRemoteSyncing.current = true;
+          lastSyncedUpdatedAtRef.current = fullData.updated_at;
+          const toArray = (val) => Array.isArray(val) ? val : (val ? Object.values(val) : []);
+          const sanitized = {
+            ...erpData,
+            users: toArray(erpData.users),
+            customers: toArray(erpData.customers),
+            suppliers: toArray(erpData.suppliers),
+            items: toArray(erpData.items),
+            saleOrders: toArray(erpData.saleOrders),
+            productionPlans: toArray(erpData.productionPlans),
+            productionOutputs: toArray(erpData.productionOutputs),
+            deliveries: toArray(erpData.deliveries),
+            notifications: toArray(erpData.notifications),
+            returns: toArray(erpData.returns),
+            purchaseDemands: toArray(erpData.purchaseDemands),
+            purchaseOrders: toArray(erpData.purchaseOrders),
+            inwardGatePasses: toArray(erpData.inwardGatePasses),
+            grns: toArray(erpData.grns),
+            stockTransfers: toArray(erpData.stockTransfers),
+            otherConsumptions: toArray(erpData.otherConsumptions),
+            auditLogs: toArray(erpData.auditLogs),
+            chats: toArray(erpData.chats),
+            approvals: toArray(erpData.approvals),
+            gatePassActivities: toArray(erpData.gatePassActivities),
+            salesInvoices: toArray(erpData.salesInvoices),
+            purchaseInvoices: toArray(erpData.purchaseInvoices),
+            paymentVouchers: toArray(erpData.paymentVouchers),
+            chartOfAccounts: toArray(erpData.chartOfAccounts),
+            hr_employees_list: toArray(erpData.hr_employees_list),
+            hr_uploaded_attendance: toArray(erpData.hr_uploaded_attendance),
+            hr_loan_requests: toArray(erpData.hr_loan_requests),
+            hr_loan_ledger: toArray(erpData.hr_loan_ledger),
+            boms: toArray(erpData.boms),
+            rawMaterialPhases: toArray(erpData.rawMaterialPhases),
+            finishedGoodPhases: toArray(erpData.finishedGoodPhases)
+          };
+
+          lastSyncedStateRef.current = copyStr;
+          setState(prev => {
+            const nextState = seedStateIfEmpty(sanitized);
+            const nextCurrentUser = updateMatchedCurrentUser(prev.currentUser, nextState.users);
+            return {
+              ...nextState,
+              currentUser: nextCurrentUser,
+              themeSettings: prev.themeSettings,
+              displaySettings: prev.displaySettings,
+              dashboardLayout: prev.dashboardLayout,
+              dashboardBackground: prev.dashboardBackground,
+              documentWarehouseBinders: prev.documentWarehouseBinders
+            };
+          });
+          setTimeout(() => {
+            isRemoteSyncing.current = false;
+          }, 100);
+        }
+      } catch (err) {
+        console.warn("Sync poll check error:", err);
+      }
+    };
+
+    const syncPollInterval = setInterval(checkRemoteVersion, 45000);
+
+    const handleWindowFocus = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        checkRemoteVersion();
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    window.addEventListener('visibilitychange', handleWindowFocus);
 
     return () => {
       supabase.removeChannel(channel);
       supabase.removeChannel(usersChannel);
       supabase.removeChannel(sessionsChannel);
       clearInterval(syncPollInterval);
+      window.removeEventListener('focus', handleWindowFocus);
+      window.removeEventListener('visibilitychange', handleWindowFocus);
     };
   }, []);
 
@@ -1295,11 +1364,14 @@ export const AppProvider = ({ children }) => {
       try {
           const { data, error } = await supabase
               .from('erp_state')
-              .select('state_data')
+              .select('state_data, updated_at')
               .eq('id', 'main_state')
               .maybeSingle();
           if (error) throw error;
           if (data && data.state_data) {
+              if (data.updated_at) {
+                lastSyncedUpdatedAtRef.current = data.updated_at;
+              }
               const remote = data.state_data;
               
               const syncStateCopy = getSanitizedSyncState(remote);
@@ -1395,12 +1467,12 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-    const timer = setInterval(checkConnection, 3000);
+    const timer = setInterval(checkConnection, 30000);
     return () => clearInterval(timer);
   }, []);
 
   const syncToStandaloneTables = async (targetState) => {
-    if (!targetState) return;
+    if (!targetState || !standaloneTablesSupportedRef.current) return;
     try {
       const promises = [];
 
@@ -1612,15 +1684,15 @@ export const AppProvider = ({ children }) => {
   }, [isOnline, syncStatus]);
 
   useEffect(() => {
-    localStorage.setItem('aj_synthetic_erp', JSON.stringify(state));
+    safeLocalStorageSet('aj_synthetic_erp', JSON.stringify(state));
     if (state.currentUser) {
-      localStorage.setItem('aj_current_user', JSON.stringify(state.currentUser));
+      safeLocalStorageSet('aj_current_user', JSON.stringify(state.currentUser));
     }
     
     // Write key items to separate localStorage keys for backwards compatibility/sync!
     isLocalStorageWriting.current = true;
     if (state.hr_employees_list) {
-      localStorage.setItem('hr_employees_list', JSON.stringify(state.hr_employees_list));
+      safeLocalStorageSet('hr_employees_list', JSON.stringify(state.hr_employees_list));
       // Dispatch storage event to trigger updates in the same window context
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'hr_employees_list',
@@ -1629,7 +1701,7 @@ export const AppProvider = ({ children }) => {
       }));
     }
     if (state.hr_uploaded_attendance) {
-      localStorage.setItem('hr_uploaded_attendance', JSON.stringify(state.hr_uploaded_attendance));
+      safeLocalStorageSet('hr_uploaded_attendance', JSON.stringify(state.hr_uploaded_attendance));
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'hr_uploaded_attendance',
         newValue: JSON.stringify(state.hr_uploaded_attendance),
@@ -1637,7 +1709,7 @@ export const AppProvider = ({ children }) => {
       }));
     }
     if (state.hr_overtime_requests) {
-      localStorage.setItem('hr_overtime_requests', JSON.stringify(state.hr_overtime_requests));
+      safeLocalStorageSet('hr_overtime_requests', JSON.stringify(state.hr_overtime_requests));
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'hr_overtime_requests',
         newValue: JSON.stringify(state.hr_overtime_requests),
@@ -1645,7 +1717,7 @@ export const AppProvider = ({ children }) => {
       }));
     }
     if (state.hr_leave_requests) {
-      localStorage.setItem('hr_leave_requests', JSON.stringify(state.hr_leave_requests));
+      safeLocalStorageSet('hr_leave_requests', JSON.stringify(state.hr_leave_requests));
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'hr_leave_requests',
         newValue: JSON.stringify(state.hr_leave_requests),
@@ -1653,7 +1725,7 @@ export const AppProvider = ({ children }) => {
       }));
     }
     if (state.hr_generated_salaries) {
-      localStorage.setItem('hr_generated_salaries', JSON.stringify(state.hr_generated_salaries));
+      safeLocalStorageSet('hr_generated_salaries', JSON.stringify(state.hr_generated_salaries));
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'hr_generated_salaries',
         newValue: JSON.stringify(state.hr_generated_salaries),
@@ -1661,25 +1733,25 @@ export const AppProvider = ({ children }) => {
       }));
     }
     if (state.users) {
-      localStorage.setItem('fv_users_list', JSON.stringify(state.users));
+      safeLocalStorageSet('fv_users_list', JSON.stringify(state.users));
     }
     if (state.hr_loan_requests) {
-      localStorage.setItem('hr_loan_requests', JSON.stringify(state.hr_loan_requests));
+      safeLocalStorageSet('hr_loan_requests', JSON.stringify(state.hr_loan_requests));
     }
     if (state.hr_loan_ledger) {
-      localStorage.setItem('hr_loan_ledger', JSON.stringify(state.hr_loan_ledger));
+      safeLocalStorageSet('hr_loan_ledger', JSON.stringify(state.hr_loan_ledger));
     }
     if (state.hr_advance_requests) {
-      localStorage.setItem('hr_advance_requests', JSON.stringify(state.hr_advance_requests));
+      safeLocalStorageSet('hr_advance_requests', JSON.stringify(state.hr_advance_requests));
     }
     if (state.routingRules) {
-      localStorage.setItem('hr_routing_rules_config', JSON.stringify(state.routingRules));
+      safeLocalStorageSet('hr_routing_rules_config', JSON.stringify(state.routingRules));
     }
     if (state.routingTasks) {
-      localStorage.setItem('routingTasks', JSON.stringify(state.routingTasks));
+      safeLocalStorageSet('routingTasks', JSON.stringify(state.routingTasks));
     }
     if (state.approvals) {
-      localStorage.setItem('approvals', JSON.stringify(state.approvals));
+      safeLocalStorageSet('approvals', JSON.stringify(state.approvals));
     }
     isLocalStorageWriting.current = false;
 
@@ -1726,18 +1798,20 @@ export const AppProvider = ({ children }) => {
       const sanitizedSyncState = JSON.parse(JSON.stringify(syncState));
 
       isLocalUpsertInFlight.current = true;
+      const writeTime = new Date().toISOString();
       supabase
         .from('erp_state')
         .upsert({
           id: 'main_state',
           state_data: sanitizedSyncState,
-          updated_at: new Date().toISOString()
+          updated_at: writeTime
         })
         .then(({ error }) => {
           if (error) {
             console.warn("Supabase erp_state sync write warning:", error);
             setSyncStatus('offline_retry');
           } else {
+            lastSyncedUpdatedAtRef.current = writeTime;
             syncToStandaloneTables(state);
             lastSyncedStateRef.current = currentSyncStateStr;
             setSyncStatus('idle');
@@ -1753,7 +1827,7 @@ export const AppProvider = ({ children }) => {
             isLocalUpsertInFlight.current = false;
           }, 500);
         });
-    }, 10);
+    }, 1200);
 
     return () => {
       if (pendingWriteRef.current) {
