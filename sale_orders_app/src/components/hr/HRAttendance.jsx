@@ -112,7 +112,8 @@ export default function HRAttendance({ isMobile }) {
   // Real-time Permission Sync Event Listener
   const [permTick, setPermTick] = useState(0);
   useEffect(() => {
-    const handlePermissionsUpdated = () => {
+    const handlePermissionsUpdated = (e) => {
+      if (e && e.type === 'storage' && e.key && !e.key.includes('perm')) return;
       setPermTick(t => t + 1);
     };
     window.addEventListener('fv-permissions-updated', handlePermissionsUpdated);
