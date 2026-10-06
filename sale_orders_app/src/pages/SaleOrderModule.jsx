@@ -156,7 +156,7 @@ export default function SaleOrderModule() {
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    setSearchParams({ tab: tabId });
+    setSearchParams({ tab: tabId }, { replace: true });
   };
 
   const subNavConfig = {

@@ -8,23 +8,25 @@ import LedgerTaxDashboard from '../components/finance/LedgerTaxDashboard';
 import Vouchers from '../components/finance/Vouchers';
 import { useSearchParams } from 'react-router-dom';
 
-// Finance Module ka main page controller
 export default function FinanceModule() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState(() => {
-    const urlTab = searchParams.get('tab');
-    return urlTab || 'overview';
-  });
+  const tabInUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(() => tabInUrl || 'overview');
+  const [visitedTabs, setVisitedTabs] = useState(() => new Set([tabInUrl || 'overview']));
 
-  // Tab dynamic change hook handler
   useEffect(() => {
     const targetTab = searchParams.get('tab') || 'overview';
     if (targetTab !== activeTab) {
       setActiveTab(targetTab);
+      setVisitedTabs(prev => {
+        if (prev.has(targetTab)) return prev;
+        const next = new Set(prev);
+        next.add(targetTab);
+        return next;
+      });
     }
-  }, [searchParams, activeTab]);
+  }, [searchParams]);
 
-  // Sub-navigation tabs configure mapping
   const tabs = [
     { id: 'overview', label: 'Finance Overview', icon: 'monitoring' },
     { id: 'sales-invoice', label: 'Sales Invoice', icon: 'receipt' },
@@ -36,7 +38,13 @@ export default function FinanceModule() {
 
   const handleTabSelect = (id) => {
     setActiveTab(id);
-    setSearchParams({ tab: id });
+    setVisitedTabs(prev => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    setSearchParams({ tab: id }, { replace: true });
   };
 
   const subNavConfig = {
@@ -49,13 +57,37 @@ export default function FinanceModule() {
 
   return (
     <Layout subNavConfig={subNavConfig}>
-      <div className="max-w-full mx-auto w-full animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both">
-        {activeTab === 'overview' && <FinanceDashboard />}
-        {activeTab === 'sales-invoice' && <SalesInvoice />}
-        {activeTab === 'purchase-invoice' && <PurchaseInvoice />}
-        {activeTab === 'chart-of-accounts' && <ChartOfAccounts />}
-        {activeTab === 'ledger-tax' && <LedgerTaxDashboard />}
-        {activeTab === 'vouchers' && <Vouchers />}
+      <div className="max-w-full mx-auto w-full">
+        {visitedTabs.has('overview') && (
+          <div style={{ display: activeTab === 'overview' ? 'block' : 'none' }}>
+            <FinanceDashboard />
+          </div>
+        )}
+        {visitedTabs.has('sales-invoice') && (
+          <div style={{ display: activeTab === 'sales-invoice' ? 'block' : 'none' }}>
+            <SalesInvoice />
+          </div>
+        )}
+        {visitedTabs.has('purchase-invoice') && (
+          <div style={{ display: activeTab === 'purchase-invoice' ? 'block' : 'none' }}>
+            <PurchaseInvoice />
+          </div>
+        )}
+        {visitedTabs.has('chart-of-accounts') && (
+          <div style={{ display: activeTab === 'chart-of-accounts' ? 'block' : 'none' }}>
+            <ChartOfAccounts />
+          </div>
+        )}
+        {visitedTabs.has('ledger-tax') && (
+          <div style={{ display: activeTab === 'ledger-tax' ? 'block' : 'none' }}>
+            <LedgerTaxDashboard />
+          </div>
+        )}
+        {visitedTabs.has('vouchers') && (
+          <div style={{ display: activeTab === 'vouchers' ? 'block' : 'none' }}>
+            <Vouchers />
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -1427,9 +1427,10 @@ export const AppProvider = ({ children }) => {
     };
   }, []);
 
-  // Continuous 3s Network Health Check and Auto-Recovery without page refresh
+  // Continuous 30s Network Health Check and Auto-Recovery without page refresh
   useEffect(() => {
     let failureCount = 0;
+    let slowCount = 0;
     const checkConnection = async () => {
         const start = Date.now();
         try {
@@ -1438,9 +1439,14 @@ export const AppProvider = ({ children }) => {
             if (!error) {
                 failureCount = 0;
                 setIsOnline(true);
-                if (duration > 3000) {
-                    setNetworkQuality('slow');
+                // Only consider network slow if latency consistently exceeds 8000ms across multiple checks
+                if (duration > 8000) {
+                    slowCount++;
+                    if (slowCount >= 3) {
+                        setNetworkQuality('slow');
+                    }
                 } else {
+                    slowCount = 0;
                     setNetworkQuality('good');
                 }
 
@@ -1456,11 +1462,11 @@ export const AppProvider = ({ children }) => {
                 });
             } else {
                 failureCount++;
-                if (failureCount >= 2) setNetworkQuality('slow');
+                if (failureCount >= 3) setNetworkQuality('slow');
             }
         } catch (e) {
             failureCount++;
-            if (failureCount >= 3) {
+            if (failureCount >= 4) {
                 setIsOnline(false);
                 setNetworkQuality('offline');
             }

@@ -22,7 +22,11 @@ import { useSearchParams } from 'react-router-dom';
 
 export default function InventoryDashboard() {
   const { state } = useApp();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabInUrl = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(() => tabInUrl || 'dashboard');
+  const [visitedTabs, setVisitedTabs] = useState(() => new Set([tabInUrl || 'dashboard']));
+
   const [selectedDepartments, setSelectedDepartments] = useState(() => {
       const saved = localStorage.getItem('InvDashboard_departments');
       return saved ? JSON.parse(saved) : [];
@@ -47,18 +51,29 @@ export default function InventoryDashboard() {
     { id: 'grn', label: 'Goods Receiving Note' },
     { id: 'stock-transfer', label: 'Stock Transfer', icon: 'sync_alt' },
   ];
-  const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
      const tab = searchParams.get('tab');
-     if (tab && tabs.find(t => t.id === tab)) {
+     if (tab && tabs.find(t => t.id === tab) && tab !== activeTab) {
          setActiveTab(tab);
+         setVisitedTabs(prev => {
+             if (prev.has(tab)) return prev;
+             const next = new Set(prev);
+             next.add(tab);
+             return next;
+         });
      }
   }, [searchParams]);
 
   const handleTabSelect = (id) => {
      setActiveTab(id);
-     setSearchParams({ tab: id });
+     setVisitedTabs(prev => {
+         if (prev.has(id)) return prev;
+         const next = new Set(prev);
+         next.add(id);
+         return next;
+     });
+     setSearchParams({ tab: id }, { replace: true });
   };
 
   const subNavConfig = {
@@ -85,7 +100,6 @@ export default function InventoryDashboard() {
   return (
     <Layout subNavConfig={subNavConfig}>
       <div className="max-w-full px-6 mx-auto w-full">
-        
         {/* Global Department Filter */}
         {activeTab !== 'rate-profile' && activeTab !== 'reorder-levels' && activeTab !== 'cloth-conversion' && (
           <div className="flex justify-end mb-4 pr-4 animate-in fade-in slide-in-from-top-2 duration-500">
@@ -100,22 +114,78 @@ export default function InventoryDashboard() {
           </div>
         )}
 
-        {/* Tab Content */}
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both">
-          {activeTab === 'dashboard' && <InvDashboard selectedDepartments={selectedDepartments} />}
-          {activeTab === 'stock' && <InvStock selectedDepartments={selectedDepartments} />}
-          {activeTab === 'rate-profile' && <ItemRateProfile />}
-          {activeTab === 'reorder-levels' && <ReorderLevelSettings />}
-          {activeTab === 'cloth-conversion' && <ClothQualitySetup />}
-          {activeTab === 'adjustment' && <InvAdjustment selectedDepartments={selectedDepartments} />}
-          {activeTab === 'ledger' && <InvLedger selectedDepartments={selectedDepartments} />}
-          {activeTab === 'return' && <InvReturn selectedDepartments={selectedDepartments} />}
-          {activeTab === 'purchase-demand' && <PurchaseDemand selectedDepartments={selectedDepartments} />}
-          {activeTab === 'purchase-order' && <PurchaseOrder selectedDepartments={selectedDepartments} />}
-          {activeTab === 'inward-gate-pass' && <InwardGatePass />}
-          {activeTab === 'grn' && <GoodsReceivingNote />}
-          {activeTab === 'stock-transfer' && <StockTransfer onHistoryClick={() => handleTabSelect('stock-transfer-history')} />}
-          {activeTab === 'stock-transfer-history' && <StockTransferHistory onNewTransferClick={() => handleTabSelect('stock-transfer')} />}
+        {/* Tab Content with Instant Warm Tab Caching */}
+        <div className="w-full">
+          {visitedTabs.has('dashboard') && (
+            <div style={{ display: activeTab === 'dashboard' ? 'block' : 'none' }}>
+              <InvDashboard selectedDepartments={selectedDepartments} />
+            </div>
+          )}
+          {visitedTabs.has('stock') && (
+            <div style={{ display: activeTab === 'stock' ? 'block' : 'none' }}>
+              <InvStock selectedDepartments={selectedDepartments} />
+            </div>
+          )}
+          {visitedTabs.has('rate-profile') && (
+            <div style={{ display: activeTab === 'rate-profile' ? 'block' : 'none' }}>
+              <ItemRateProfile />
+            </div>
+          )}
+          {visitedTabs.has('reorder-levels') && (
+            <div style={{ display: activeTab === 'reorder-levels' ? 'block' : 'none' }}>
+              <ReorderLevelSettings />
+            </div>
+          )}
+          {visitedTabs.has('cloth-conversion') && (
+            <div style={{ display: activeTab === 'cloth-conversion' ? 'block' : 'none' }}>
+              <ClothQualitySetup />
+            </div>
+          )}
+          {visitedTabs.has('adjustment') && (
+            <div style={{ display: activeTab === 'adjustment' ? 'block' : 'none' }}>
+              <InvAdjustment selectedDepartments={selectedDepartments} />
+            </div>
+          )}
+          {visitedTabs.has('ledger') && (
+            <div style={{ display: activeTab === 'ledger' ? 'block' : 'none' }}>
+              <InvLedger selectedDepartments={selectedDepartments} />
+            </div>
+          )}
+          {visitedTabs.has('return') && (
+            <div style={{ display: activeTab === 'return' ? 'block' : 'none' }}>
+              <InvReturn selectedDepartments={selectedDepartments} />
+            </div>
+          )}
+          {visitedTabs.has('purchase-demand') && (
+            <div style={{ display: activeTab === 'purchase-demand' ? 'block' : 'none' }}>
+              <PurchaseDemand selectedDepartments={selectedDepartments} />
+            </div>
+          )}
+          {visitedTabs.has('purchase-order') && (
+            <div style={{ display: activeTab === 'purchase-order' ? 'block' : 'none' }}>
+              <PurchaseOrder selectedDepartments={selectedDepartments} />
+            </div>
+          )}
+          {visitedTabs.has('inward-gate-pass') && (
+            <div style={{ display: activeTab === 'inward-gate-pass' ? 'block' : 'none' }}>
+              <InwardGatePass />
+            </div>
+          )}
+          {visitedTabs.has('grn') && (
+            <div style={{ display: activeTab === 'grn' ? 'block' : 'none' }}>
+              <GoodsReceivingNote />
+            </div>
+          )}
+          {visitedTabs.has('stock-transfer') && (
+            <div style={{ display: activeTab === 'stock-transfer' ? 'block' : 'none' }}>
+              <StockTransfer onHistoryClick={() => handleTabSelect('stock-transfer-history')} />
+            </div>
+          )}
+          {visitedTabs.has('stock-transfer-history') && (
+            <div style={{ display: activeTab === 'stock-transfer-history' ? 'block' : 'none' }}>
+              <StockTransferHistory onNewTransferClick={() => handleTabSelect('stock-transfer')} />
+            </div>
+          )}
         </div>
       </div>
     </Layout>

@@ -56,24 +56,9 @@ const RootLayout = () => {
           return () => clearTimeout(t);
       }
 
-      // 3. Detect transition from Good -> Slow connection
-      if (isOnline && networkQuality === 'slow' && lastState.networkQuality === 'good') {
-          setNotificationMsg("Slow Connection Detected. Cloud synchronization might be delayed.");
-          setNotificationType("warning");
-          setShowNotification(true);
-          const t = setTimeout(() => setShowNotification(false), 5000);
-          setLastState(prev => ({ ...prev, networkQuality: 'slow' }));
-          return () => clearTimeout(t);
-      }
-
-      // 4. Detect transition from Slow -> Good connection
-      if (isOnline && networkQuality === 'good' && lastState.networkQuality === 'slow') {
-          setNotificationMsg("Connection stabilized. Syncing changes...");
-          setNotificationType("success");
-          setShowNotification(true);
-          const t = setTimeout(() => setShowNotification(false), 5000);
-          setLastState(prev => ({ ...prev, networkQuality: 'good' }));
-          return () => clearTimeout(t);
+      // Update network quality state quietly without intrusive toast popups
+      if (isOnline && networkQuality !== lastState.networkQuality) {
+          setLastState(prev => ({ ...prev, networkQuality }));
       }
   }, [isOnline, networkQuality]);
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '../components/Layout';
 import HRDashboard from '../components/hr/HRDashboard';
 import HRDirectory from '../components/hr/HRDirectory';
@@ -21,7 +21,7 @@ export default function HRModule() {
   const isMobile = false;
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const allTabs = [
+  const allTabs = useMemo(() => [
     { id: 'dashboard', screenId: 'hrDashboard', label: 'HR Dashboard', icon: 'dashboard' },
     { id: 'directory', screenId: 'hrDirectory', label: 'Employee Directory', icon: 'groups' },
     { id: 'onboarding', screenId: 'hrOnboarding', label: 'Onboarding Wizard', icon: 'person_add' },
@@ -33,52 +33,41 @@ export default function HRModule() {
     { id: 'advance', screenId: 'hrAdvance', label: 'Advance Request', icon: 'account_balance' },
     { id: 'salary', screenId: 'hrSalary', label: 'Salary Generation', icon: 'account_balance_wallet' },
     { id: 'settings', screenId: 'hrSettings', label: 'HR Settings', icon: 'settings' }
-  ];
+  ], []);
 
-  const permittedTabs = allTabs.filter(tab => hasPermission('hr', tab.screenId));
-  const defaultTab = permittedTabs.length > 0 ? permittedTabs[0].id : '';
+  const permittedTabs = useMemo(() => {
+    return allTabs.filter(tab => hasPermission ? hasPermission('hr', tab.screenId) : true);
+  }, [allTabs, hasPermission]);
 
-  const currentTabInUrl = searchParams.get('tab');
-  const initialActiveTab = (currentTabInUrl && permittedTabs.some(t => t.id === currentTabInUrl))
-    ? currentTabInUrl
-    : defaultTab;
+  const defaultTab = permittedTabs.length > 0 ? permittedTabs[0].id : 'dashboard';
 
-  const [activeTab, setActiveTab] = useState(initialActiveTab);
+  const tabInUrl = searchParams.get('tab');
+  const validUrlTab = (tabInUrl && permittedTabs.some(t => t.id === tabInUrl)) ? tabInUrl : null;
 
+  const [activeTab, setActiveTab] = useState(() => validUrlTab || defaultTab);
+
+  // Visited tabs cache for instant 0ms tab switching & state preservation
+  const [visitedTabs, setVisitedTabs] = useState(() => new Set([validUrlTab || defaultTab]));
+
+  // Sync when browser Back/Forward is clicked
   useEffect(() => {
-    const targetTab = searchParams.get('tab') || defaultTab;
-    if (targetTab && permittedTabs.some(t => t.id === targetTab) && targetTab !== activeTab) {
-      if (window.hrAttendanceIsDirty) {
-        const handleSearchParamsInterception = async () => {
-          const proceed = await appConfirm(
-            "Unsaved Changes Detected\n\nYou have unsaved progress in the Attendance Sheet. If you proceed, all unsaved entries will be discarded.\n\nAre you sure you wish to leave this screen without saving?",
-            "Unsaved Progress",
-            "Leave Without Saving",
-            "Cancel & Stay"
-          );
-          if (proceed) {
-            window.hrAttendanceIsDirty = false;
-            if (window.hrAttendanceResetChanges) window.hrAttendanceResetChanges();
-            setActiveTab(targetTab);
-          } else {
-            setSearchParams({ tab: activeTab }, { replace: true });
-          }
-        };
-        handleSearchParamsInterception();
-      } else {
-        setActiveTab(targetTab);
-      }
-    } else if (!currentTabInUrl && defaultTab && activeTab !== defaultTab) {
-      setActiveTab(defaultTab);
+    if (validUrlTab && validUrlTab !== activeTab) {
+      setActiveTab(validUrlTab);
+      setVisitedTabs(prev => {
+        if (prev.has(validUrlTab)) return prev;
+        const next = new Set(prev);
+        next.add(validUrlTab);
+        return next;
+      });
     }
-  }, [searchParams, defaultTab, permittedTabs]);
+  }, [validUrlTab, activeTab]);
 
   const handleTabSelect = async (id) => {
     if (id === activeTab) return;
 
     if (window.hrAttendanceIsDirty) {
       const proceed = await appConfirm(
-        "Unsaved Changes Detected\n\nYou have unsaved progress in the Attendance Sheet. If you proceed, all unsaved entries will be discarded.\n\nAre you sure you wish to leave this screen without saving?",
+        `Unsaved Changes Detected\n\nYou have unsaved progress in the Attendance Sheet. If you proceed, all unsaved entries will be discarded.\n\nAre you sure you wish to leave this screen without saving?`,
         "Unsaved Progress",
         "Leave Without Saving",
         "Cancel & Stay"
@@ -89,8 +78,16 @@ export default function HRModule() {
       window.hrAttendanceIsDirty = false;
       if (window.hrAttendanceResetChanges) window.hrAttendanceResetChanges();
     }
+
+    // Switch on the spot instantly!
     setActiveTab(id);
-    setSearchParams({ tab: id });
+    setVisitedTabs(prev => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+    setSearchParams({ tab: id }, { replace: true });
   };
 
   const subNavConfig = {
@@ -103,20 +100,63 @@ export default function HRModule() {
 
   return (
     <Layout subNavConfig={subNavConfig}>
-      <div key={activeTab} className="w-full max-w-full px-0 mx-0 h-full min-h-[calc(100vh-5rem)] flex flex-col flex-1 animate-in fade-in duration-200">
-        {activeTab === 'dashboard' && <HRDashboard isMobile={isMobile} />}
-        {activeTab === 'directory' && <HRDirectory isMobile={isMobile} />}
-        {activeTab === 'onboarding' && <HROnboarding isMobile={isMobile} />}
-        {activeTab === 'attendance' && <HRAttendance isMobile={isMobile} />}
-        {activeTab === 'overtime' && <HROvertime isMobile={isMobile} />}
-        {activeTab === 'leave' && <HRLeaveRequest isMobile={isMobile} />}
-        {activeTab === 'loan' && <HRLoanRequest isMobile={isMobile} />}
-        {activeTab === 'loanLedger' && <HRLoanLedger isMobile={isMobile} />}
-        {activeTab === 'advance' && <HRAdvanceRequest isMobile={isMobile} />}
-        {activeTab === 'salary' && <HRSalaryGeneration isMobile={isMobile} />}
-        {activeTab === 'settings' && <HRSettings isMobile={isMobile} />}
+      <div className="w-full max-w-full px-0 mx-0 h-full min-h-[calc(100vh-5rem)] flex flex-col flex-1">
+        {visitedTabs.has('dashboard') && (
+          <div style={{ display: activeTab === 'dashboard' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HRDashboard isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('directory') && (
+          <div style={{ display: activeTab === 'directory' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HRDirectory isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('onboarding') && (
+          <div style={{ display: activeTab === 'onboarding' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HROnboarding isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('attendance') && (
+          <div style={{ display: activeTab === 'attendance' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HRAttendance isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('overtime') && (
+          <div style={{ display: activeTab === 'overtime' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HROvertime isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('leave') && (
+          <div style={{ display: activeTab === 'leave' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HRLeaveRequest isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('loan') && (
+          <div style={{ display: activeTab === 'loan' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HRLoanRequest isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('loanLedger') && (
+          <div style={{ display: activeTab === 'loanLedger' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HRLoanLedger isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('advance') && (
+          <div style={{ display: activeTab === 'advance' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HRAdvanceRequest isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('salary') && (
+          <div style={{ display: activeTab === 'salary' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HRSalaryGeneration isMobile={isMobile} />
+          </div>
+        )}
+        {visitedTabs.has('settings') && (
+          <div style={{ display: activeTab === 'settings' ? 'flex' : 'none' }} className="flex-col flex-1 w-full animate-in fade-in duration-150">
+            <HRSettings isMobile={isMobile} />
+          </div>
+        )}
       </div>
     </Layout>
   );
 }
-
