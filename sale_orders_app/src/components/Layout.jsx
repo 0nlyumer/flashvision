@@ -1,3 +1,4 @@
+import AICopilot from './ui/AICopilot';
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
@@ -808,9 +809,9 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
                   }, 0);
                 }}
                 onDragEnd={() => setDraggingLayout(null)}
-                onClick={handleSidebarClick}
-                className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-md ${isSidebarHorizontal ? '' : 'mb-2'} shrink-0 bg-transparent overflow-hidden cursor-pointer hover:scale-105 transition-transform`}
-                title="Click to change Position (Clockwise) or Drag"
+                onClick={() => setIsAICopilotOpen(prev => !prev)}
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-md ${isSidebarHorizontal ? '' : 'mb-2'} shrink-0 bg-transparent overflow-hidden cursor-pointer hover:scale-110 active:scale-95 transition-transform ring-2 ring-cyan-400/40 hover:ring-cyan-400 shadow-cyan-500/20`}
+                title="FlashVision AI Brain (Voice & Document Assistant) - Click to Open"
               >
                 <img src="/favicon.svg" alt="Flashvision Logo" className="w-full h-full object-cover pointer-events-none" />
               </div>
@@ -1003,50 +1004,7 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
 
                {/* Right Section: Actions */}
                <div className="flex flex-row items-center gap-2 shrink-0">
-                 <button 
-                    onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); }}
-                    className="relative w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors"
-                    title="Notifications"
-                 >
-                     <div className="relative">
-                         <span className="material-symbols-outlined text-[18px]">notifications</span>
-                         {unreadCount > 0 && (
-                             <span className="absolute -top-1 -right-1 w-4 h-4 bg-error text-[8px] text-white rounded-full flex items-center justify-center font-bold shadow-sm">{unreadCount > 9 ? '9+' : unreadCount}</span>
-                         )}
-                     </div>
-                 </button>
                  
-                 {showNotifications && (
-                     <div className="absolute bottom-full right-4 mb-2 bg-surface border border-outline-variant/20 shadow-xl rounded-2xl overflow-hidden z-50 max-h-60 w-72 flex flex-col" onClick={(e) => e.stopPropagation()}>
-                         <div className="p-2 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-lowest">
-                             <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface">Notifications</span>
-                             {unreadCount > 0 && (
-                                 <button onClick={markAllNotificationsAsRead} className="text-[9px] text-primary hover:underline font-semibold">Mark all read</button>
-                             )}
-                         </div>
-                         <div className="overflow-y-auto custom-scrollbar flex-1 bg-surface-container-lowest/50 text-[10px]">
-                             {notifications.length === 0 ? (
-                                 <div className="p-4 text-center text-on-surface-variant">No notifications</div>
-                             ) : (
-                                 notifications.map(notif => (
-                                     <div key={notif.id} className={`p-2.5 border-b border-outline-variant/5 last:border-0 hover:bg-surface-container-low transition-colors ${!notif.read ? 'bg-primary/5' : ''}`}>
-                                         <div className="flex gap-1.5 items-start">
-                                             <span className="material-symbols-outlined text-[14px] mt-0.5 text-primary">info</span>
-                                             <div>
-                                                 <div className="font-bold text-on-surface">{notif.title}</div>
-                                                 <div className="text-[9px] text-on-surface-variant leading-tight">{notif.message}</div>
-                                             </div>
-                                         </div>
-                                     </div>
-                                 ))
-                             )}
-                         </div>
-                     </div>
-                 )}
-
-                 <button className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors" title="Support">
-                     <span className="material-symbols-outlined text-[18px]">help</span>
-                 </button>
                  <NavLink to="/theme" onClick={() => !isPinned && setIsHovered(false)} className={({ isActive }) => `w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isActive ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'}`} title="Theme">
                      <span className="material-symbols-outlined text-[18px]">palette</span>
                  </NavLink>
@@ -1180,56 +1138,8 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
                  )}
               </div>
               
-              {/* Notifications / Support Area */}
-              <div className="p-4 border-t border-outline-variant/10 flex gap-1 relative">
-                 <button 
-                    onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); }}
-                    className="relative flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors text-[10px] font-bold uppercase tracking-wider"
-                 >
-                     <div className="relative">
-                         <span className="material-symbols-outlined text-[18px]">notifications</span>
-                         {unreadCount > 0 && (
-                             <span className="absolute -top-1 -right-1 w-3 h-3 bg-error text-[8px] text-white rounded-full flex items-center justify-center font-bold shadow-sm">{unreadCount > 9 ? '9+' : unreadCount}</span>
-                         )}
-                     </div>
-                     Alerts
-                 </button>
-
-                 {/* Notifications Dropdown */}
-                 {showNotifications && (
-                     <div className="absolute bottom-full left-4 right-4 mb-2 bg-surface border border-outline-variant/20 shadow-xl rounded-2xl overflow-hidden z-50 max-h-80 flex flex-col" onClick={(e) => e.stopPropagation()}>
-                         <div className="p-3 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-lowest">
-                             <span className="text-xs font-bold uppercase tracking-wider text-on-surface">Notifications</span>
-                             {unreadCount > 0 && (
-                                 <button onClick={markAllNotificationsAsRead} className="text-[10px] text-primary hover:underline font-semibold">Mark all read</button>
-                             )}
-                         </div>
-                         <div className="overflow-y-auto custom-scrollbar flex-1 bg-surface-container-lowest/50">
-                             {notifications.length === 0 ? (
-                                 <div className="p-6 text-center text-on-surface-variant text-xs">No notifications</div>
-                             ) : (
-                                 notifications.map(notif => (
-                                     <div key={notif.id} className={`p-3 border-b border-outline-variant/5 last:border-0 hover:bg-surface-container-low transition-colors ${!notif.read ? 'bg-primary/5' : ''}`}>
-                                         <div className="flex gap-2 items-start">
-                                             <span className={`material-symbols-outlined text-base mt-0.5 ${notif.type === 'success' ? 'text-emerald-500' : notif.type === 'error' ? 'text-error' : 'text-primary'}`} style={{ fontVariationSettings: "'FILL' 1" }}>
-                                                 {notif.type === 'success' ? 'check_circle' : notif.type === 'error' ? 'error' : 'info'}
-                                             </span>
-                                             <div>
-                                                 <div className="text-xs font-bold text-on-surface">{notif.title}</div>
-                                                 <div className="text-[10px] text-on-surface-variant mt-0.5 leading-tight">{notif.message}</div>
-                                                 <div className="text-[9px] text-on-surface-variant/70 mt-1">{new Date(notif.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                                             </div>
-                                         </div>
-                                     </div>
-                                 ))
-                             )}
-                         </div>
-                     </div>
-                 )}
-                 <button className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors text-[10px] font-bold uppercase tracking-wider">
-                     <span className="material-symbols-outlined text-[18px]">help</span>
-                     Support
-                 </button>
+              {/* Quick Action Links */}
+              <div className="p-4 border-t border-outline-variant/10 flex gap-2">
                  <NavLink to="/theme" onClick={() => !isPinnedActive && setIsHovered(false)} className={({ isActive }) => `flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-colors text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'}`}>
                      <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>palette</span>
                      Theme
