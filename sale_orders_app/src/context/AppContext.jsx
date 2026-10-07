@@ -812,6 +812,63 @@ export const AppProvider = ({ children }) => {
     }
   }, [state.themeSettings]);
 
+
+  // Intelligent Enterprise Two-Way Union Merge (Prevents Remote Sync from Overwriting Local Newly-Saved Documents)
+  const smartUnionMerge = (prevState, remoteState) => {
+    if (!prevState) return remoteState;
+    if (!remoteState) return prevState;
+
+    const merged = { ...remoteState };
+
+    const collectionsToMerge = [
+      'saleOrders', 'salesInvoices', 'purchaseInvoices', 'paymentVouchers',
+      'purchaseDemands', 'purchaseOrders', 'inwardGatePasses', 'grns',
+      'stockTransfers', 'productionPlans', 'productionOutputs', 'deliveries',
+      'returns', 'otherConsumptions', 'adjustments', 'boms', 'customers',
+      'suppliers', 'items', 'chats', 'approvals', 'routingTasks', 'routingRules',
+      'hr_employees_list', 'hr_uploaded_attendance', 'hr_overtime_requests',
+      'hr_leave_requests', 'hr_loan_requests', 'hr_loan_ledger', 'hr_advance_requests',
+      'documentWarehouseBinders'
+    ];
+
+    collectionsToMerge.forEach(key => {
+      const prevArr = Array.isArray(prevState[key]) ? prevState[key] : [];
+      const remoteArr = Array.isArray(remoteState[key]) ? remoteState[key] : [];
+
+      if (prevArr.length === 0) {
+        merged[key] = remoteArr;
+        return;
+      }
+      if (remoteArr.length === 0) {
+        merged[key] = prevArr;
+        return;
+      }
+
+      // Map remote items by unique identifier
+      const remoteMap = new Map();
+      remoteArr.forEach(item => {
+        const id = item?.id || item?.orderId || item?.invoiceNumber || item?.itemCode || item?.username;
+        if (id !== undefined && id !== null) {
+          remoteMap.set(String(id), item);
+        }
+      });
+
+      const result = [...remoteArr];
+
+      // Identify any locally created items that haven't reached remote database yet and PRESERVE them!
+      prevArr.forEach(localItem => {
+        const id = localItem?.id || localItem?.orderId || localItem?.invoiceNumber || localItem?.itemCode || localItem?.username;
+        if (id !== undefined && id !== null && !remoteMap.has(String(id))) {
+          result.unshift(localItem); // Retain locally saved document safely
+        }
+      });
+
+      merged[key] = result;
+    });
+
+    return merged;
+  };
+
   const getSanitizedSyncState = (stateObj) => {
     if (!stateObj) return {};
     const cleanState = { ...stateObj };
@@ -819,7 +876,7 @@ export const AppProvider = ({ children }) => {
     delete cleanState.displaySettings;
     delete cleanState.dashboardLayout;
     delete cleanState.dashboardBackground;
-    delete cleanState.documentWarehouseBinders;
+    // Retain documentWarehouseBinders in cloud state so documents are never lost across devices/logins!
     delete cleanState.currentUser;
     if (cleanState.users) {
       cleanState.users = cleanState.users.map(u => {
@@ -965,7 +1022,8 @@ export const AppProvider = ({ children }) => {
           lastSyncedStateRef.current = JSON.stringify(syncStateCopy);
 
           setState(prev => {
-            const nextState = seedStateIfEmpty(sanitized);
+            const mergedState = smartUnionMerge(prev, sanitized);
+            const nextState = seedStateIfEmpty(mergedState);
             let effectiveUser = prev.currentUser || (() => {
               try {
                 const u = localStorage.getItem('aj_current_user');
@@ -1100,7 +1158,8 @@ export const AppProvider = ({ children }) => {
             lastSyncedStateRef.current = JSON.stringify(syncStateCopy);
 
             setState(prev => {
-              const nextState = seedStateIfEmpty(sanitized);
+              const mergedState = smartUnionMerge(prev, sanitized);
+              const nextState = seedStateIfEmpty(mergedState);
               const nextCurrentUser = updateMatchedCurrentUser(prev.currentUser, nextState.users);
               return {
                 ...nextState,
@@ -1841,6 +1900,19 @@ export const AppProvider = ({ children }) => {
       }
     };
   }, [state, isOnline, networkQuality]);
+
+  // Ensure pending state writes are flushed if user closes or reloads page
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (pendingWriteRef.current) {
+        clearTimeout(pendingWriteRef.current);
+        pendingWriteRef.current = null;
+        triggerSyncWrite();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [state]);
 
   // Subscribe to user-specific and platform-specific settings from Supabase
   useEffect(() => {
