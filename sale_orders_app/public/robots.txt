@@ -1,0 +1,9 @@
+# FlashVision ERP - Search Engine Crawling Policy
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /favicon.svg
+Disallow: /admin-setup
+Disallow: /document-warehouse
+
+Sitemap: https://flashvision-erp.web.app/sitemap.xml

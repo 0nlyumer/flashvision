@@ -2,13 +2,99 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flashvision ERP</title>
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>FlashVision ERP — Enterprise Logistics, Sales & Management Portal</title>
+    <meta name="title" content="FlashVision ERP — Enterprise Logistics, Sales & Management Portal" />
+    <meta name="description" content="FlashVision ERP is an advanced cloud enterprise resource planning system for logistics, inventory control, sales order processing, manufacturing, HR payroll, and real-time business intelligence." />
+    <meta name="keywords" content="FlashVision ERP, FlashVision, Flashvision Logistics, Flashvision Portal, Cloud ERP, Order Management System, Manufacturing ERP, Pakistan ERP, Warehouse Management, Inventory Control, Humanoid AI ERP" />
+    <meta name="author" content="FlashVision Technologies" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <link rel="canonical" href="https://flashvision-erp.web.app/" />
+
+    <!-- Favicon & Mobile Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#06b6d4" />
+    <meta name="application-name" content="FlashVision ERP" />
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://flashvision-erp.web.app/" />
+    <meta property="og:site_name" content="FlashVision ERP" />
+    <meta property="og:title" content="FlashVision ERP — Enterprise Logistics, Sales & Management Portal" />
+    <meta property="og:description" content="Official FlashVision Cloud ERP platform for real-time sales orders, manufacturing, inventory control, and automated business workflows." />
+    <meta property="og:image" content="https://flashvision-erp.web.app/favicon.svg" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://flashvision-erp.web.app/" />
+    <meta name="twitter:title" content="FlashVision ERP — Enterprise Logistics, Sales & Management Portal" />
+    <meta name="twitter:description" content="Official FlashVision Cloud ERP platform for real-time sales orders, manufacturing, inventory control, and automated business workflows." />
+    <meta name="twitter:image" content="https://flashvision-erp.web.app/favicon.svg" />
+
+    <!-- Schema.org JSON-LD Structured Data for Google Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://flashvision-erp.web.app/#organization",
+          "name": "FlashVision ERP",
+          "alternateName": ["FlashVision Logistics", "FlashVision Management System"],
+          "url": "https://flashvision-erp.web.app/",
+          "logo": "https://flashvision-erp.web.app/favicon.svg",
+          "description": "Enterprise cloud ERP and logistics system for industrial operations and management."
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://flashvision-erp.web.app/#software",
+          "name": "FlashVision ERP",
+          "operatingSystem": "Web, Windows, Android, iOS",
+          "applicationCategory": "BusinessApplication",
+          "description": "Full-featured Enterprise Resource Planning suite with real-time inventory, sales orders, attendance, and AI Copilot assistance.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://flashvision-erp.web.app/#website",
+          "url": "https://flashvision-erp.web.app/",
+          "name": "FlashVision ERP Portal",
+          "publisher": {
+            "@id": "https://flashvision-erp.web.app/#organization"
+          }
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
+    <!-- Fallback Semantic HTML for Web Crawlers and Search Engines before JS Hydration -->
+    <noscript>
+      <header style="padding: 24px; font-family: sans-serif; background: #090d16; color: #fff;">
+        <h1>FlashVision ERP — Enterprise Cloud Portal</h1>
+        <p>Welcome to the official FlashVision ERP operations center. Comprehensive logistics, sales order management, warehouse stocks, HR payroll, and manufacturing intelligence.</p>
+        <p>Please enable JavaScript to access the interactive web application interface.</p>
+      </header>
+    </noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-<script>window.onerror = function(msg, url, lineNo, columnNo, error) { document.body.innerHTML = "<div style=\"color:red; background:black; padding:20px; z-index:9999; position:absolute; top:0; left:0; width:100%; height:100%; font-size:20px;\"><h1>CRASH:</h1><pre>" + msg + "\n" + (error && error.stack) + "</pre></div>"; return false; }</script>
+<script>
+window.onerror = function(msg, url, lineNo, columnNo, error) { 
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    document.body.innerHTML = "<div style=\"color:red; background:black; padding:20px; z-index:9999; position:absolute; top:0; left:0; width:100%; height:100%; font-size:20px;\"><h1>CRASH:</h1><pre>" + msg + "\n" + (error && error.stack) + "</pre></div>";
+  }
+  return false; 
+};
+</script>
