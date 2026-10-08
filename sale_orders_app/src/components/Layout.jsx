@@ -9,6 +9,7 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
   const [isPinned, setIsPinned] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isAICopilotOpen, setIsAICopilotOpen] = useState(false);
   const { 
       state, 
       setState, 
