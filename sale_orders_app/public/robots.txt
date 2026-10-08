@@ -2,6 +2,7 @@
 User-agent: *
 Allow: /
 Allow: /login
+Allow: /sitemap.xml
 Allow: /favicon.svg
 Disallow: /admin-setup
 Disallow: /document-warehouse
