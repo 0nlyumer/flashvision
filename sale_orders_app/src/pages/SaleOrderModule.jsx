@@ -1,5 +1,4 @@
 import FGCombinationBuilder from "../components/ui/FGCombinationBuilder";
-import FGQuickConfigModal from "../components/ui/FGQuickConfigModal";
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Layout from '../components/Layout';
@@ -120,7 +119,6 @@ const DEFAULT_SALE_ORDER_LAYOUT = {
 };
 
 export default function SaleOrderModule() {
-  const [isFgConfigModalOpen, setIsFgConfigModalOpen] = useState(false);
   const navigate = useNavigate();
   const { state, setState, setCollection, addSaleOrder, updateSaleOrderItemStatus, toggleGlobalPagination } = useApp();
   const { appConfirm, appAlert } = useDialog();
@@ -1840,16 +1838,7 @@ export default function SaleOrderModule() {
             <div className="px-8 py-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
               <h2 className="text-lg font-bold text-primary font-headline">Order Line Items</h2>
               <div className="flex items-center gap-3">
-                <button
-                type="button"
-                onClick={() => setIsFgConfigModalOpen(true)}
-                className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-sm font-bold transition-colors px-3.5 py-2.5 rounded-lg shadow-sm"
-                title="Configure FG Attributes (Paper, Gauge, Color, Fabric, Packing)"
-              >
-                <span className="material-symbols-outlined text-[18px]">tune</span>
-                <span>Configuration</span>
-              </button>
-              <button type="button" onClick={() => navigate('/settings?tab=finish-good')} className="flex items-center gap-2 text-primary text-sm font-bold hover:bg-primary/5 transition-colors px-4 py-2.5 rounded-lg border border-primary/40 border-dashed shadow-sm">
+                <button type="button" onClick={() => navigate('/settings?tab=finish-good')} className="flex items-center gap-2 text-primary text-sm font-bold hover:bg-primary/5 transition-colors px-4 py-2.5 rounded-lg border border-primary/40 border-dashed shadow-sm">
                   <span className="material-symbols-outlined text-[18px]">category</span> Add Finish Good
                 </button>
                 <button type="button" onClick={addNewItem} className="flex items-center gap-2 text-white text-sm font-bold hover:opacity-90 transition-opacity bg-primary px-5 py-2.5 rounded-lg shadow-md">

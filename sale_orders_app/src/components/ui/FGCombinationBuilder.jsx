@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import {
   DEFAULT_FG_CONFIG,
   generateFGDisplayName,
   matchItemToCombination,
-  createFinishedGoodFromCombo,
-  getCombinationBadgeList
+  createFinishedGoodFromCombo
 } from '../../utils/fgCombinationUtils';
 import FGQuickConfigModal from './FGQuickConfigModal';
 
@@ -13,14 +13,17 @@ export default function FGCombinationBuilder({
   onSelectItem,
   allowCreation = false,
   allowQuickConfig = true,
-  className = '',
-  buttonClassName = '',
-  compact = false,
-  placeholder = 'Combination Builder'
+  placeholder = 'Builder',
+  compact = true,
+  buttonClassName = ''
 }) {
   const { state } = useApp();
   const [isOpen, setIsOpen] = useState(false);
   const [isQuickConfigOpen, setIsQuickConfigOpen] = useState(false);
+
+  const triggerRef = useRef(null);
+  const panelRef = useRef(null);
+  const [panelCoords, setPanelCoords] = useState({ top: 0, left: 0, width: 1040 });
 
   // Configuration options from global state or defaults
   const config = state.fg_combinations_config || DEFAULT_FG_CONFIG;
@@ -37,22 +40,7 @@ export default function FGCombinationBuilder({
     packing: ''
   });
 
-  const popoverRef = useRef(null);
-
-  // Close when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  // Compute available fabric colors based on selected fabric
+  // Available fabric colors based on selected fabric
   const availableFabricColors = useMemo(() => {
     if (!combo.fabricName) return [];
     const found = (config.fabrics || []).find(f => f.name === combo.fabricName);
@@ -116,123 +104,169 @@ export default function FGCombinationBuilder({
 
   const handleCreateNew = () => {
     if (!allowCreation || !generatedName) return;
-    const newItem = createFinishedGoodFromCombo(combo, state.items, masking);
+    const newItem = createFinishedGoodFromCombo(combo, config, finishedGoods.length + 1);
     if (onSelectItem) {
       onSelectItem(newItem);
     }
     setIsOpen(false);
   };
 
+  // Auto-adjust positioning according to table position and screen boundaries
+  const updateCoordinates = () => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    // Desired width for single horizontal row
+    const targetWidth = Math.min(1080, screenWidth - 32);
+
+    // Default left aligns with trigger
+    let left = rect.left;
+
+    // If panel would overflow the right edge of the screen, shift it left
+    if (left + targetWidth > screenWidth - 16) {
+      left = screenWidth - 16 - targetWidth;
+    }
+
+    // CRITICAL: Guarantee it NEVER goes off-screen to the left (prevents clipping into sidebar)
+    if (left < 16) {
+      left = 16;
+    }
+
+    // Vertical positioning: below trigger if space available, otherwise above
+    const estimatedHeight = 110;
+    const spaceBelow = screenHeight - rect.bottom;
+    let top = rect.bottom + 6;
+
+    if (spaceBelow < estimatedHeight + 10 && rect.top > estimatedHeight + 10) {
+      top = rect.top - estimatedHeight - 6;
+    }
+
+    setPanelCoords({
+      top: Math.round(top),
+      left: Math.round(left),
+      width: Math.round(targetWidth)
+    });
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    updateCoordinates();
+
+    const handleScrollOrResize = () => {
+      updateCoordinates();
+    };
+
+    window.addEventListener('resize', handleScrollOrResize);
+    window.addEventListener('scroll', handleScrollOrResize, true);
+
+    const handleClickOutside = (e) => {
+      if (
+        (triggerRef.current && triggerRef.current.contains(e.target)) ||
+        (panelRef.current && panelRef.current.contains(e.target)) ||
+        e.target.closest('[role="dialog"]')
+      ) {
+        return;
+      }
+      setIsOpen(false);
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('resize', handleScrollOrResize);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
   return (
-    <div className={`relative inline-block ${className}`} ref={popoverRef}>
-      {/* Toggle Button */}
+    <div className="relative inline-flex items-center shrink-0" ref={triggerRef}>
+      {/* 1. Toggle Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        title="Open Finished Goods Combination Builder"
-        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
-          isOpen || activeAttributeCount > 0
-            ? 'bg-cyan-500/15 border-cyan-500 text-cyan-600 dark:text-cyan-400 shadow-sm'
-            : 'bg-surface-container-low hover:bg-surface-container border-outline-variant/30 text-on-surface-variant hover:text-on-surface'
+        title={isOpen ? "Hide Combination Builder" : "Open Finished Goods Combination Builder"}
+        className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all border shrink-0 shadow-sm ${
+          isOpen
+            ? 'bg-cyan-500/20 border-cyan-500 text-cyan-700 dark:text-cyan-300 ring-2 ring-cyan-500/30'
+            : activeAttributeCount > 0
+            ? 'bg-cyan-500/15 border-cyan-500/60 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/25'
+            : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
         } ${buttonClassName}`}
       >
-        <span className="material-symbols-outlined text-[18px]">
-          {activeAttributeCount > 0 ? 'view_in_ar' : 'tune'}
+        <span className="material-symbols-outlined text-[17px]">
+          {isOpen ? 'expand_less' : activeAttributeCount > 0 ? 'view_in_ar' : 'tune'}
         </span>
-        {!compact && <span>{placeholder}</span>}
-        {activeAttributeCount > 0 && (
-          <span className="w-5 h-5 rounded-full bg-cyan-600 text-white text-[10px] font-black flex items-center justify-center shrink-0">
+        <span>{isOpen ? 'Hide Builder' : placeholder}</span>
+        {activeAttributeCount > 0 && !isOpen && (
+          <span className="w-4 h-4 rounded-full bg-cyan-600 text-white text-[9px] font-black flex items-center justify-center shrink-0">
             {activeAttributeCount}
           </span>
         )}
       </button>
 
-      {/* Popover Builder Interface */}
-      {isOpen && (
-        <div className="absolute z-50 left-0 sm:left-auto sm:right-0 mt-2 w-[95vw] sm:w-[620px] max-w-[650px] bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.25)] p-5 text-on-surface animate-in fade-in zoom-in-95 duration-200">
-          
-          {/* Header */}
-          <div className="flex items-center justify-between pb-3 mb-4 border-b border-outline-variant/15">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[18px]">dashboard_customize</span>
-              </div>
-              <div>
-                <h3 className="text-sm font-extrabold text-on-surface flex items-center gap-2">
-                  FG Combination Builder
-                  <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-600 border border-cyan-500/30">
-                    Synthetic Leather
-                  </span>
-                </h3>
-                <p className="text-[11px] text-on-surface-variant">
-                  {allowCreation ? 'Segmented attribute builder with instant item creation' : 'Multi-attribute filter for Finished Goods'}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              {allowQuickConfig && (
-                <button
-                  type="button"
-                  onClick={() => setIsQuickConfigOpen(true)}
-                  className="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-cyan-600 transition-colors"
-                  title="Configure Attributes & Masking Rules"
-                >
-                  <span className="material-symbols-outlined text-[18px]">settings</span>
-                </button>
-              )}
-              {activeAttributeCount > 0 && (
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="text-[11px] font-bold text-red-500 hover:underline px-2 py-1"
-                >
-                  Reset
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Segmented Attribute Dropdowns Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+      {/* 2. Auto-Adjusting Single Horizontal Row Combination Builder Panel (Portal) */}
+      {isOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={panelRef}
+          style={{
+            position: 'fixed',
+            top: `${panelCoords.top}px`,
+            left: `${panelCoords.left}px`,
+            width: `${panelCoords.width}px`,
+            zIndex: 9999
+          }}
+          className="bg-white/95 dark:bg-[#0c1322]/95 backdrop-blur-xl border border-cyan-500/40 rounded-2xl p-2.5 shadow-[0_15px_45px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-150 text-slate-800 dark:text-slate-100 ring-1 ring-cyan-500/20"
+        >
+          {/* ROW 1: Single Horizontal Row of 7 Dropdowns + Action Controls */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200/60 dark:border-slate-800 scrollbar-thin">
             
-            {/* 1. Paper / Texture Code */}
-            <div>
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant block mb-1">
-                Paper / Texture
-              </label>
+            {/* Header Mini Badge */}
+            <div className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-cyan-600 dark:text-cyan-400 shrink-0 px-1">
+              <span className="material-symbols-outlined text-[16px]">view_in_ar</span>
+              <span className="hidden sm:inline">FG Combo:</span>
+            </div>
+
+            {/* 1. Paper / Texture */}
+            <div className="shrink-0 w-[120px]">
               <select
                 value={combo.paperCode}
                 onChange={(e) => handleSelectField('paperCode', e.target.value)}
-                className="w-full bg-surface border border-outline-variant/30 rounded-xl px-2.5 py-2 text-xs font-bold text-on-surface focus:ring-2 focus:ring-cyan-500/30 outline-none"
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
+                  combo.paperCode ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                }`}
+                title="Paper / Texture Pattern"
               >
-                <option value="">Any Texture</option>
+                <option value="">Texture ▾</option>
                 {(config.paperCodes || []).map(p => (
                   <option key={p.id} value={p.code}>
-                    {p.code} ({p.name})
+                    {p.code} - {p.name}
                   </option>
                 ))}
               </select>
             </div>
 
             {/* 2. Base Item / Gauge */}
-            <div>
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant block mb-1">
-                Item / Gauge
-              </label>
+            <div className="shrink-0 w-[125px]">
               <select
                 value={combo.baseItem}
                 onChange={(e) => handleSelectField('baseItem', e.target.value)}
-                className="w-full bg-surface border border-outline-variant/30 rounded-xl px-2.5 py-2 text-xs font-bold text-on-surface focus:ring-2 focus:ring-cyan-500/30 outline-none"
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
+                  combo.baseItem ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                }`}
+                title="Gauge / Base Item"
               >
-                <option value="">Any Gauge</option>
+                <option value="">Gauge / Item ▾</option>
                 {(config.gauges || []).map(g => (
                   <option key={g.id} value={g.name}>
                     {g.name}
@@ -242,16 +276,16 @@ export default function FGCombinationBuilder({
             </div>
 
             {/* 3. Top Color */}
-            <div>
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant block mb-1">
-                Top Color
-              </label>
+            <div className="shrink-0 w-[110px]">
               <select
                 value={combo.color}
                 onChange={(e) => handleSelectField('color', e.target.value)}
-                className="w-full bg-surface border border-outline-variant/30 rounded-xl px-2.5 py-2 text-xs font-bold text-on-surface focus:ring-2 focus:ring-cyan-500/30 outline-none"
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
+                  combo.color ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                }`}
+                title="Top Surface Color"
               >
-                <option value="">Any Color</option>
+                <option value="">Top Color ▾</option>
                 {(config.colors || []).map(c => (
                   <option key={c.id} value={c.name}>
                     {c.name}
@@ -261,35 +295,33 @@ export default function FGCombinationBuilder({
             </div>
 
             {/* 4. Layers */}
-            <div>
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant block mb-1">
-                Layers
-              </label>
+            <div className="shrink-0 w-[100px]">
               <select
                 value={combo.layers}
                 onChange={(e) => handleSelectField('layers', e.target.value)}
-                className="w-full bg-surface border border-outline-variant/30 rounded-xl px-2.5 py-2 text-xs font-bold text-on-surface focus:ring-2 focus:ring-cyan-500/30 outline-none"
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
+                  combo.layers ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                }`}
+                title="Layers Specification"
               >
-                <option value="">Any Layer</option>
-                {(config.layers || []).map(l => (
-                  <option key={l.id} value={l.name}>
-                    {l.name}
-                  </option>
+                <option value="">Layers ▾</option>
+                {['1 Layer', '2 Layer', '3 Layer', '4 Layer'].map(l => (
+                  <option key={l} value={l}>{l}</option>
                 ))}
               </select>
             </div>
 
             {/* 5. Backing Fabric */}
-            <div>
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant block mb-1">
-                Backing Fabric
-              </label>
+            <div className="shrink-0 w-[115px]">
               <select
                 value={combo.fabricName}
                 onChange={(e) => handleSelectField('fabricName', e.target.value)}
-                className="w-full bg-surface border border-outline-variant/30 rounded-xl px-2.5 py-2 text-xs font-bold text-on-surface focus:ring-2 focus:ring-cyan-500/30 outline-none"
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
+                  combo.fabricName ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                }`}
+                title="Backing Fabric"
               >
-                <option value="">Any Fabric</option>
+                <option value="">Fabric ▾</option>
                 {(config.fabrics || []).map(f => (
                   <option key={f.id} value={f.name}>
                     {f.name}
@@ -299,147 +331,162 @@ export default function FGCombinationBuilder({
             </div>
 
             {/* 6. Fabric Color */}
-            <div>
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant block mb-1">
-                Fabric Color
-              </label>
+            <div className="shrink-0 w-[105px]">
               <select
                 value={combo.fabricColor}
                 onChange={(e) => handleSelectField('fabricColor', e.target.value)}
                 disabled={!combo.fabricName || availableFabricColors.length === 0}
-                className="w-full bg-surface border border-outline-variant/30 rounded-xl px-2.5 py-2 text-xs font-bold text-on-surface focus:ring-2 focus:ring-cyan-500/30 outline-none disabled:opacity-40 disabled:cursor-not-allowed"
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none disabled:opacity-40 disabled:cursor-not-allowed ${
+                  combo.fabricColor ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                }`}
+                title="Backing Fabric Color"
               >
-                <option value="">Any Fabric Color</option>
+                <option value="">Fabric Col ▾</option>
                 {availableFabricColors.map((col, idx) => (
-                  <option key={idx} value={col}>
-                    {col}
-                  </option>
+                  <option key={idx} value={col}>{col}</option>
                 ))}
               </select>
             </div>
 
-            {/* 7. Packing (Masked attribute) */}
-            <div className="col-span-2 sm:col-span-3">
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant">
-                  Packing Specification
-                </label>
-                {masking.maskPacking && (
-                  <span className="text-[9px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[12px]">visibility_off</span>
-                    Masked from display title
-                  </span>
-                )}
-              </div>
+            {/* 7. Packing */}
+            <div className="shrink-0 w-[115px]">
               <select
                 value={combo.packing}
                 onChange={(e) => handleSelectField('packing', e.target.value)}
-                className="w-full bg-surface border border-outline-variant/30 rounded-xl px-3 py-2 text-xs font-bold text-on-surface focus:ring-2 focus:ring-cyan-500/30 outline-none"
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
+                  combo.packing ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                }`}
+                title={masking.maskPacking ? "Packing attribute (Masked from title, preserved in DB)" : "Packing Specification"}
               >
-                <option value="">Select Packing Type (Optional)</option>
+                <option value="">Packing {masking.maskPacking ? '🔒' : ''} ▾</option>
                 {(config.packings || []).map(pk => (
                   <option key={pk.id} value={pk.name}>
-                    {pk.name} ({pk.size} {pk.uom})
+                    {pk.name} ({pk.size}{pk.uom})
                   </option>
                 ))}
               </select>
             </div>
 
+            {/* Action Controls: Reset, Settings Gear (Configuration), and Close */}
+            <div className="flex items-center gap-1 shrink-0 ml-auto pl-1">
+              {activeAttributeCount > 0 && (
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-red-500 transition-colors"
+                  title="Reset All Selections"
+                >
+                  <span className="material-symbols-outlined text-[17px]">restart_alt</span>
+                </button>
+              )}
+
+              {allowQuickConfig && (
+                <button
+                  type="button"
+                  onClick={() => setIsQuickConfigOpen(true)}
+                  className="p-1.5 rounded-lg hover:bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 transition-colors"
+                  title="FG Combination Configuration (Attributes, Lookups, Masking)"
+                >
+                  <span className="material-symbols-outlined text-[17px]">settings</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                title="Close Builder"
+              >
+                <span className="material-symbols-outlined text-[17px]">close</span>
+              </button>
+            </div>
+
           </div>
 
-          {/* Dynamic Combination Identity Banner */}
-          {generatedName && (
-            <div className="p-3.5 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-indigo-500/10 border border-cyan-500/30 rounded-xl mb-4">
-              <div className="text-[10px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 mb-1 flex items-center gap-1">
-                <span className="material-symbols-outlined text-[13px]">verified</span>
-                Standard Identity Name
-              </div>
-              <div className="font-extrabold text-xs text-on-surface font-headline break-words">
-                {generatedName}
-              </div>
-              {combo.packing && masking.maskPacking && (
-                <div className="mt-1.5 flex items-center gap-1 text-[10px] text-on-surface-variant font-medium">
-                  <span className="font-bold">Packing Attribute:</span> {combo.packing}
-                  <span className="text-amber-600 font-semibold">(Preserved in DB)</span>
+          {/* ROW 2: Dynamic Identity Preview & Matching Items / Registration Bar */}
+          <div className="flex items-center justify-between gap-3 pt-2 text-xs">
+            
+            {/* Generated Name Preview Badge */}
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              {generatedName ? (
+                <div className="flex items-center gap-1.5 bg-gradient-to-r from-cyan-500/15 via-blue-500/10 to-indigo-500/15 text-cyan-800 dark:text-cyan-200 px-2.5 py-1 rounded-lg border border-cyan-500/30 font-bold text-xs truncate max-w-xl shadow-xs">
+                  <span className="material-symbols-outlined text-[15px] text-cyan-600 dark:text-cyan-400 shrink-0">verified</span>
+                  <span className="truncate">{generatedName}</span>
                 </div>
+              ) : (
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 italic">
+                  Select attributes in the row above to build Finished Good combination
+                </span>
+              )}
+
+              {combo.packing && masking.maskPacking && (
+                <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 shrink-0">
+                  Packing: {combo.packing} (in DB)
+                </span>
               )}
             </div>
-          )}
 
-          {/* Matching Results List */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-on-surface-variant px-1">
-              <span>Matching Finished Goods ({matchingItems.length})</span>
-              {activeAttributeCount === 0 && (
-                <span className="text-[11px] font-normal italic">Select attributes to filter</span>
-              )}
-            </div>
-
-            <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
-              {matchingItems.map(item => (
-                <div
-                  key={item.id}
-                  onClick={() => handleChooseItem(item)}
-                  className="p-3 bg-surface hover:bg-cyan-500/10 border border-outline-variant/20 hover:border-cyan-500/40 rounded-xl cursor-pointer transition-all flex items-center justify-between group"
-                >
-                  <div className="flex-1 pr-3">
-                    <div className="font-bold text-xs text-on-surface group-hover:text-cyan-600 transition-colors">
-                      {item.name}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className="font-mono text-[10px] font-bold bg-surface-container-high px-1.5 py-0.5 rounded border border-outline-variant/20">
+            {/* Actions / Results */}
+            <div className="flex items-center gap-2 shrink-0">
+              
+              {/* If matching items exist: List clickable quick-select pills */}
+              {matchingItems.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400">
+                    Found ({matchingItems.length}):
+                  </span>
+                  {matchingItems.slice(0, 3).map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleChooseItem(item)}
+                      className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-cyan-500/20 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 hover:border-cyan-500 text-[11px] font-bold transition-all flex items-center gap-1.5 shadow-xs active:scale-95"
+                      title={`Select ${item.name}`}
+                    >
+                      <span>{item.name}</span>
+                      <span className="font-mono text-[9px] bg-slate-200 dark:bg-slate-700 px-1 py-0.2 rounded text-slate-600 dark:text-slate-300">
                         {item.sku}
                       </span>
-                      <span className="text-[10px] font-semibold text-tertiary">
-                        Stock: {item.stock || 0} {item.unit || item.uom || 'm'}
-                      </span>
-                      {item.price > 0 && (
-                        <span className="text-[10px] font-semibold text-primary">
-                          Rate: {item.price}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-lg bg-cyan-600 text-white text-[11px] font-bold opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                  >
-                    Select
-                  </button>
-                </div>
-              ))}
-
-              {activeAttributeCount > 0 && matchingItems.length === 0 && (
-                <div className="p-4 text-center border border-dashed border-outline-variant/30 rounded-xl bg-surface">
-                  <p className="text-xs font-semibold text-on-surface-variant">
-                    No matching Finished Good found in database.
-                  </p>
+                    </button>
+                  ))}
+                  {matchingItems.length > 3 && (
+                    <span className="text-[10px] font-bold text-slate-400">
+                      +{matchingItems.length - 3} more
+                    </span>
+                  )}
                 </div>
               )}
-            </div>
 
-            {/* Sales Order Creation Action */}
-            {allowCreation && activeAttributeCount >= 2 && !exactMatchExists && generatedName && (
-              <div className="pt-3 border-t border-outline-variant/15 flex items-center justify-between gap-3 bg-surface-container-low p-3 rounded-xl mt-3">
-                <div className="text-[11px] text-on-surface-variant">
-                  This combination does not exist yet. Register it now for this Sales Order:
-                </div>
+              {/* No match indicator */}
+              {activeAttributeCount > 0 && matchingItems.length === 0 && (
+                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">info</span>
+                  {allowCreation ? 'Not registered in warehouse' : 'No matching items'}
+                </span>
+              )}
+
+              {/* Register as New Finished Good: Allowed ONLY in Sales Order screen */}
+              {allowCreation && activeAttributeCount >= 2 && !exactMatchExists && generatedName && (
                 <button
                   type="button"
                   onClick={handleCreateNew}
-                  className="bg-primary hover:bg-primary/90 text-white text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 shrink-0 shadow-sm transition-all active:scale-95"
+                  className="bg-primary hover:bg-primary/90 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-md transition-all active:scale-95 shrink-0"
+                  title="Register this new Finished Good and add to Sales Order"
                 >
-                  <span className="material-symbols-outlined text-[16px]">add_circle</span>
-                  + Register As New FG
+                  <span className="material-symbols-outlined text-[15px]">add_circle</span>
+                  <span>+ Register As New FG</span>
                 </button>
-              </div>
-            )}
+              )}
+
+            </div>
+
           </div>
 
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Quick Config Modal */}
+      {/* 3. Non-blocking Quick Configuration Modal */}
       {allowQuickConfig && (
         <FGQuickConfigModal
           isOpen={isQuickConfigOpen}
