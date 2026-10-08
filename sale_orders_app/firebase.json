@@ -31,7 +31,8 @@
           }
         ]
       }
-    ]
+    ],
+    "site": "flashvision-erp"
   },
   "database": {
     "rules": "database.rules.json"

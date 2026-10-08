@@ -1238,6 +1238,7 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
           </span>
         </button>
       )}
+      <AICopilot isOpen={isAICopilotOpen} onClose={() => setIsAICopilotOpen(false)} />
     </div>
   );
 }
