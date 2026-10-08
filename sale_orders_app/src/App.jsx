@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, Navigate, useLocation } from 'react-router-dom';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import SaleOrderModule from './pages/SaleOrderModule';
-import SaleOrderReturn from './pages/SaleOrderReturn';
-import DeliveryDashboard from './pages/DeliveryDashboard';
-import InventoryDashboard from './pages/InventoryDashboard';
-import ProductionOMS from './pages/ProductionOMS';
-import ProductionModule from './pages/ProductionModule';
-import UserControlDashboard from './pages/UserControlDashboard';
-import SettingsDashboard from './pages/SettingsDashboard';
-import ThemeSettings from './pages/ThemeSettings';
-import HRModule from './pages/HRModule';
-import DocumentWarehouse from './pages/DocumentWarehouse';
-import ChatModule from './pages/ChatModule';
-import FinanceModule from './pages/FinanceModule';
-import UserProfile from './pages/UserProfile';
-
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { createBrowserRouter, RouterProvider, Navigate, useLocation, Outlet } from 'react-router-dom';
 import GlobalNavGuard from './components/GlobalNavGuard';
 import { useApp } from './context/AppContext';
-
 import CallingOverlay from './components/CallingOverlay';
+import PageLoadingSkeleton from './components/ui/PageLoadingSkeleton';
+
+// Fast synchronous load for initial entry
+import Login from './pages/Login';
+
+// High-Performance Dynamic Code Splitting for enterprise modules
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const SaleOrderModule = lazy(() => import('./pages/SaleOrderModule'));
+const SaleOrderReturn = lazy(() => import('./pages/SaleOrderReturn'));
+const DeliveryDashboard = lazy(() => import('./pages/DeliveryDashboard'));
+const InventoryDashboard = lazy(() => import('./pages/InventoryDashboard'));
+const ProductionOMS = lazy(() => import('./pages/ProductionOMS'));
+const ProductionModule = lazy(() => import('./pages/ProductionModule'));
+const UserControlDashboard = lazy(() => import('./pages/UserControlDashboard'));
+const SettingsDashboard = lazy(() => import('./pages/SettingsDashboard'));
+const ThemeSettings = lazy(() => import('./pages/ThemeSettings'));
+const HRModule = lazy(() => import('./pages/HRModule'));
+const DocumentWarehouse = lazy(() => import('./pages/DocumentWarehouse'));
+const ChatModule = lazy(() => import('./pages/ChatModule'));
+const FinanceModule = lazy(() => import('./pages/FinanceModule'));
+const UserProfile = lazy(() => import('./pages/UserProfile'));
 
 const RootLayout = () => {
   const { isOnline, networkQuality, syncStatus } = useApp() || { isOnline: true, networkQuality: 'good', syncStatus: 'idle' };
@@ -65,7 +67,9 @@ const RootLayout = () => {
   return (
     <>
       <GlobalNavGuard />
-      <Outlet />
+      <Suspense fallback={<PageLoadingSkeleton message="Opening workspace..." />}>
+        <Outlet />
+      </Suspense>
       <CallingOverlay />
 
       {/* Floating Center Notification Alert */}

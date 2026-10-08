@@ -94,6 +94,19 @@ ALTER TABLE public.call_sessions REPLICA IDENTITY FULL;
 ALTER TABLE public.routing_rules REPLICA IDENTITY FULL;
 ALTER TABLE public.routing_tasks REPLICA IDENTITY FULL;
 
+-- 11. Enterprise Performance Indexes (PostgreSQL Optimization Best Practices)
+CREATE INDEX IF NOT EXISTS idx_erp_state_jsonb ON public.erp_state USING GIN (state_data);
+CREATE INDEX IF NOT EXISTS idx_messages_sender ON public.messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_receiver ON public.messages(receiver_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON public.messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_call_sessions_status ON public.call_sessions(status);
+CREATE INDEX IF NOT EXISTS idx_call_sessions_caller ON public.call_sessions(caller_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_username ON public.user_sessions(username);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_last_active ON public.user_sessions(last_active DESC);
+CREATE INDEX IF NOT EXISTS idx_routing_tasks_status ON public.routing_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_routing_tasks_rule_id ON public.routing_tasks(rule_id);
+
+
 -- 9. Insert current complete live state data into erp_state
 INSERT INTO public.erp_state (id, state_data, updated_at)
 VALUES (
