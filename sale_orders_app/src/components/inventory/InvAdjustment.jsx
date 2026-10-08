@@ -1,3 +1,4 @@
+import FGCombinationBuilder from "../ui/FGCombinationBuilder";
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import PrintLayout from '../ui/PrintLayout';
@@ -295,7 +296,10 @@ export default function InvAdjustment({ selectedDepartments = [], onBack }) {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                           {/* Searchable Item Selection */}
                           <div className="relative">
-                            <label className="block text-sm font-bold text-on-surface mb-2 tracking-wide uppercase text-[10px]">Select Item</label>
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="text-sm font-bold text-on-surface tracking-wide uppercase text-[10px]">Select Item</label>
+                              <FGCombinationBuilder compact={true} allowCreation={false} onSelectItem={(chosen) => { updateLine(line.id, 'itemId', chosen.id); setItemSearchQuery(''); setOpenItemDropdownId(null); }} />
+                            </div>
                             <div 
                                 className="relative cursor-pointer"
                                 onClick={() => setOpenItemDropdownId(openItemDropdownId === line.id ? null : line.id)}

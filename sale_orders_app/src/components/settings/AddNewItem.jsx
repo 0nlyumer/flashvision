@@ -1,3 +1,4 @@
+import FGQuickConfigModal from "../ui/FGQuickConfigModal";
 import React, { useState, useRef, useEffect } from 'react';
 import BulkUploadModal from './BulkUploadModal';
 import ProfileCardModal from './ProfileCardModal';
@@ -12,6 +13,7 @@ export default function AddNewItem() {
   const [showHistory, setShowHistory] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [categoryType, setCategoryType] = useState('Finished Goods');
+  const [isFgConfigOpen, setIsFgConfigOpen] = useState(false);
   const [viewProfileData, setViewProfileData] = useState(null);
   const [formErrors, setFormErrors] = useState({});
 
@@ -562,6 +564,17 @@ export default function AddNewItem() {
                      <span className="material-symbols-outlined text-[20px]">add</span>
                    </button>
                  </div>
+                 {categoryType === 'Finished Goods' && (
+                   <button
+                     type="button"
+                     onClick={() => setIsFgConfigOpen(true)}
+                     className="h-11 px-4 flex-shrink-0 bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/25 rounded-xl flex items-center gap-2 text-xs font-bold transition-all shadow-sm"
+                     title="Configure Finished Goods Attributes, Lookup Values & Masking"
+                   >
+                     <span className="material-symbols-outlined text-[18px]">tune</span>
+                     <span>FG Combination Configuration</span>
+                   </button>
+                 )}
 
                  <div className="w-full md:w-1/2 flex items-center gap-2">
                    <div className="relative w-full">

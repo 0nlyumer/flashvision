@@ -1,3 +1,4 @@
+import FGCombinationBuilder from "../ui/FGCombinationBuilder";
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 
@@ -176,7 +177,8 @@ export default function BOMCalculator({ onClose }) {
                          {/* Searchable FG Dropdown with Configured BOMs Only */}
                          <div className="relative" ref={fgDropdownRef}>
                              <label className="block text-xs uppercase tracking-wider font-bold text-on-surface-variant mb-2">Select Configured Finish Good</label>
-                             <div className="relative">
+                             <div className="flex items-center gap-2">
+<div className="relative">
                                  <input 
                                      type="text"
                                      value={selectedFG ? (bomEnabledFGs.find(i => i.id === selectedFG)?.name || '') : fgSearchStr}
@@ -196,6 +198,8 @@ export default function BOMCalculator({ onClose }) {
                                      search
                                  </span>
                              </div>
+<FGCombinationBuilder compact={true} allowCreation={false} onSelectItem={(chosen) => { setSelectedFG(chosen.id); setFgSearchStr(chosen.name); setFgDropdownOpen(false); }} />
+</div>
 
                              {fgDropdownOpen && (
                                  <div className="absolute top-full left-0 right-0 mt-2 bg-surface border border-outline-variant/20 rounded-xl shadow-lg max-h-60 overflow-y-auto z-50 py-2">

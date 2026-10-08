@@ -1,3 +1,4 @@
+import FGCombinationBuilder from "../ui/FGCombinationBuilder";
 import React, { useState, useRef, useEffect } from 'react';
 import ResizableHeader from '../ui/ResizableHeader';
 import { useApp } from '../../context/AppContext';
@@ -354,7 +355,8 @@ export default function StockTransfer({ onHistoryClick }) {
                                     )})}
                                     <tr className="group hover:bg-surface-container-low transition-colors duration-150 relative">
                                         <td colSpan="5" className="py-4 px-4 border-outline-variant/5 relative" ref={dropdownRef}>
-                                            <div className="relative w-full">
+                                            <div className="flex items-center gap-2">
+                                              <div className="relative w-full">
                                                 <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
                                                 <input 
                                                     className="w-full bg-surface-container-lowest border-none rounded-md py-2.5 pl-10 pr-4 text-sm focus:ring-1 focus:ring-primary transition-all placeholder-outline-variant" 
@@ -393,6 +395,8 @@ export default function StockTransfer({ onHistoryClick }) {
                                                         )}
                                                     </div>
                                                 )}
+                                              </div>
+                                              <FGCombinationBuilder compact={true} allowCreation={false} onSelectItem={(chosen) => handleAddItem(chosen)} />
                                             </div>
                                         </td>
                                     </tr>

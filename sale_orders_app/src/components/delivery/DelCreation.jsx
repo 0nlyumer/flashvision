@@ -1,3 +1,4 @@
+import FGCombinationBuilder from "../ui/FGCombinationBuilder";
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import ResizableHeader from '../ui/ResizableHeader';
@@ -375,7 +376,8 @@ export default function DelCreation({ onGenerateChallan }) {
         {dcMode === 'Sale Orders' ? (
         <>
         <div className="mb-8 flex flex-col gap-4">
-            <div className="relative w-full sm:max-w-md">
+            <div className="flex flex-wrap items-center gap-3 w-full sm:max-w-2xl">
+<div className="relative w-full sm:max-w-md">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline" style={{ fontVariationSettings: "'FILL' 0" }}>person_search</span>
                 <input 
                     value={searchQuery}
@@ -385,6 +387,8 @@ export default function DelCreation({ onGenerateChallan }) {
                     type="text" 
                 />
             </div>
+<FGCombinationBuilder compact={false} placeholder="Filter FG Combination" allowCreation={false} onSelectItem={(chosen) => setSearchQuery(chosen.name)} />
+</div>
             {viewMode === 'Item-wise' && availableOutputTypes.length > 0 && (
                 <div className="flex flex-wrap gap-2 items-center w-full bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/10 shadow-sm">
                     <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mr-2 flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">filter_list</span> Output Types Filter:</span>

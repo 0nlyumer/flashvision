@@ -1,3 +1,4 @@
+import FGCombinationBuilder from "../ui/FGCombinationBuilder";
 import React, { useState, useEffect, Suspense, useRef, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Canvas } from '@react-three/fiber';
@@ -332,6 +333,7 @@ export default function ItemLibrary() {
                         className="w-full pl-10 pr-4 py-2.5 bg-surface border border-outline-variant/30 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                      />
                   </div>
+                  <FGCombinationBuilder compact={false} placeholder="Combination" allowCreation={false} onSelectItem={(chosen) => setSearchQuery(chosen.name)} />
                   {/* Settings Dropdown Button */}
                   <div className="relative" ref={colSettingsRef}>
                       <button 

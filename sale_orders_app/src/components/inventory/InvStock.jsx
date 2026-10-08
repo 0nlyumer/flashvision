@@ -1,3 +1,4 @@
+import FGCombinationBuilder from "../ui/FGCombinationBuilder";
 import React, { useState, Suspense, useRef, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Canvas } from '@react-three/fiber';
@@ -391,6 +392,7 @@ export default function InvStock({ selectedDepartments = [], selectable = false,
                   className="w-full pl-10 pr-4 py-2.5 bg-surface border border-outline-variant/30 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               />
             </div>
+<FGCombinationBuilder compact={false} placeholder="Combination Filter" allowCreation={false} onSelectItem={(chosen) => setSearchTerm(chosen.name)} />
           </div>
           
           {filteredRows.some(i => i.category?.toLowerCase() === 'finished goods' || i.rawMaterialType?.toLowerCase() === 'finished good' || i.category?.toLowerCase() === 'finish good') && availableTypes.length > 0 && (
