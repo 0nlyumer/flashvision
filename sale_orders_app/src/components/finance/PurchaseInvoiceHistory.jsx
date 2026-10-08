@@ -526,7 +526,7 @@ export default function PurchaseInvoiceHistory({ onViewCreate }) {
             <div className="p-8 overflow-y-auto space-y-8 flex-1">
               <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-b border-surface-container pb-6">
                 <div>
-                  <h1 className="text-2xl font-black text-primary tracking-tight mb-1">FLASHVISION LOGISTICS</h1>
+                  <h1 className="text-2xl font-black text-on-surface tracking-tight mb-1">FLASHVISION LOGISTICS</h1>
                   <p className="text-xs text-on-surface-variant leading-relaxed">
                     123 Logistics Avenue, Industrial Estate, TX 75001<br />
                     Phone: +1 (555) 123-4567 | Email: finance@flashvision.com

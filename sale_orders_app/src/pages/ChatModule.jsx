@@ -2928,7 +2928,7 @@ export default function ChatModule() {
           <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in select-none">
             <div className="bg-white w-full max-w-md rounded-[32px] p-6 shadow-2xl animate-scale-up mx-4 select-none">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-sm font-black text-primary uppercase tracking-wider flex items-center gap-2">
+                <h2 className="text-sm font-black text-on-surface uppercase tracking-wider flex items-center gap-2">
                   <span className="material-symbols-outlined text-[20px]">filter_alt</span>
                   Filter Options
                 </h2>

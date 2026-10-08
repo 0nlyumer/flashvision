@@ -320,7 +320,7 @@ export default function StockTransfer({ onHistoryClick }) {
                                     <tr className="text-on-surface-variant text-xs uppercase tracking-wider font-semibold border-b border-surface-variant/30 bg-surface-container-low">
                                         <ResizableHeader className="pb-3 pt-3 px-4 font-semibold" style={{ width: '35%' }}>Item Info</ResizableHeader>
                                         <ResizableHeader className="pb-3 pt-3 px-4 text-right font-semibold" style={{ width: '20%' }}>Available Stock</ResizableHeader>
-                                        <ResizableHeader className="pb-3 pt-3 px-4 text-right font-semibold text-primary" style={{ width: '25%' }}>Transfer Qty</ResizableHeader>
+                                        <ResizableHeader className="pb-3 pt-3 px-4 text-right font-semibold text-on-surface-variant" style={{ width: '25%' }}>Transfer Qty</ResizableHeader>
                                         <ResizableHeader className="pb-3 pt-3 px-4 text-center font-semibold" style={{ width: '15%' }}>UOM</ResizableHeader>
                                         <th className="pb-3 pt-3 w-10 border-l border-outline-variant/10"></th>
                                     </tr>

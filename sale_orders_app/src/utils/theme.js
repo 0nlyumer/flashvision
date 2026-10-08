@@ -1,63 +1,91 @@
-export const applyTheme = (settings) => {
+export const applyTheme = (settings = {}) => {
   const root = document.documentElement;
 
-  // 1. Color Mode (Light/Dark)
+  // 1. Color Mode (Light / TradingView Pure Black OLED Dark Architecture)
   if (settings.colorMode === 'dark') {
     root.classList.add('dark');
-    // Dark background variables
-    root.style.setProperty('--color-background', '#0f172a');
-    root.style.setProperty('--color-surface', '#1e293b');
-    root.style.setProperty('--color-surface-container', '#334155');
-    root.style.setProperty('--color-surface-container-low', '#1e293b');
-    root.style.setProperty('--color-on-surface', '#f8fafc');
-    root.style.setProperty('--color-on-surface-variant', '#cbd5e1');
-    root.style.setProperty('--color-outline-variant', '#475569');
+    // TradingView Pure Black OLED Dark Mode Palette
+    root.style.setProperty('--color-background', '#0b0e14'); // Pure dark canvas
+    root.style.setProperty('--color-surface', '#131722');    // TradingView primary widget surface
+    root.style.setProperty('--color-surface-container-lowest', '#080a0f');
+    root.style.setProperty('--color-surface-container-low', '#0f121a');
+    root.style.setProperty('--color-surface-container', '#161a25'); // Elevated surface
+    root.style.setProperty('--color-surface-container-high', '#1c202d');
+    root.style.setProperty('--color-surface-container-highest', '#242836');
+    root.style.setProperty('--color-on-background', '#f0f3fa');
+    root.style.setProperty('--color-on-surface', '#f0f3fa'); // Crisp white text
+    root.style.setProperty('--color-on-surface-variant', '#868993'); // Muted label text
+    root.style.setProperty('--color-outline-variant', '#242832'); // Clean 1px micro-border
+    root.style.setProperty('--color-outline', '#2f3442');
   } else {
     root.classList.remove('dark');
-    // Light background variables
-    root.style.setProperty('--color-background', '#f8f9ff');
+    // Crisp Modern Light Mode Palette
+    root.style.setProperty('--color-background', '#f8fafc');
     root.style.setProperty('--color-surface', '#ffffff');
-    root.style.setProperty('--color-surface-container', '#ecedf4');
-    root.style.setProperty('--color-surface-container-low', '#f2f3fa');
-    root.style.setProperty('--color-on-surface', '#191c20');
-    root.style.setProperty('--color-on-surface-variant', '#414750');
-    root.style.setProperty('--color-outline-variant', '#c1c7d2');
+    root.style.setProperty('--color-surface-container-lowest', '#ffffff');
+    root.style.setProperty('--color-surface-container-low', '#f1f5f9');
+    root.style.setProperty('--color-surface-container', '#e2e8f0');
+    root.style.setProperty('--color-surface-container-high', '#cbd5e1');
+    root.style.setProperty('--color-surface-container-highest', '#94a3b8');
+    root.style.setProperty('--color-on-background', '#0f172a');
+    root.style.setProperty('--color-on-surface', '#0f172a');
+    root.style.setProperty('--color-on-surface-variant', '#475569');
+    root.style.setProperty('--color-outline-variant', '#e2e8f0');
+    root.style.setProperty('--color-outline', '#cbd5e1');
   }
 
-  // 2. Primary Color
+  // 2. Primary & Action Color (With Adaptive Dark Mode Vibrancy)
+  const isDark = settings.colorMode === 'dark';
   const colors = {
-    indigo: { primary: '#6366f1', container: '#e0e7ff', onPrimary: '#ffffff', onPrimaryContainer: '#3730a3' },
-    emerald: { primary: '#10b981', container: '#d1fae5', onPrimary: '#ffffff', onPrimaryContainer: '#065f46' },
-    rose: { primary: '#f43f5e', container: '#ffe4e6', onPrimary: '#ffffff', onPrimaryContainer: '#881337' },
-    amber: { primary: '#f59e0b', container: '#fef3c7', onPrimary: '#ffffff', onPrimaryContainer: '#78350f' },
-    sky: { primary: '#0ea5e9', container: '#e0f2fe', onPrimary: '#ffffff', onPrimaryContainer: '#0c4a6e' },
+    tradingview: {
+      light: { primary: '#2962ff', container: '#dbeafe', onPrimary: '#ffffff', onPrimaryContainer: '#1e40af' },
+      dark: { primary: '#2962ff', container: 'rgba(41, 98, 255, 0.25)', onPrimary: '#ffffff', onPrimaryContainer: '#93c5fd' }
+    },
+    indigo: {
+      light: { primary: '#4f46e5', container: '#e0e7ff', onPrimary: '#ffffff', onPrimaryContainer: '#3730a3' },
+      dark: { primary: '#6366f1', container: 'rgba(99, 102, 241, 0.25)', onPrimary: '#ffffff', onPrimaryContainer: '#c7d2fe' }
+    },
+    emerald: {
+      light: { primary: '#059669', container: '#d1fae5', onPrimary: '#ffffff', onPrimaryContainer: '#065f46' },
+      dark: { primary: '#10b981', container: 'rgba(16, 185, 129, 0.25)', onPrimary: '#ffffff', onPrimaryContainer: '#a7f3d0' }
+    },
+    sky: {
+      light: { primary: '#0284c7', container: '#e0f2fe', onPrimary: '#ffffff', onPrimaryContainer: '#075985' },
+      dark: { primary: '#06b6d4', container: 'rgba(6, 182, 212, 0.25)', onPrimary: '#ffffff', onPrimaryContainer: '#bae6fd' }
+    },
+    rose: {
+      light: { primary: '#e11d48', container: '#ffe4e6', onPrimary: '#ffffff', onPrimaryContainer: '#9f1239' },
+      dark: { primary: '#f43f5e', container: 'rgba(244, 63, 94, 0.25)', onPrimary: '#ffffff', onPrimaryContainer: '#fecdd3' }
+    },
+    amber: {
+      light: { primary: '#d97706', container: '#fef3c7', onPrimary: '#ffffff', onPrimaryContainer: '#92400e' },
+      dark: { primary: '#f59e0b', container: 'rgba(245, 158, 11, 0.25)', onPrimary: '#ffffff', onPrimaryContainer: '#fde68a' }
+    }
   };
-  const selectedColor = colors[settings.primaryColor] || colors.indigo;
-  root.style.setProperty('--color-primary', selectedColor.primary);
-  root.style.setProperty('--color-on-primary', selectedColor.onPrimary);
-  
-  if (settings.colorMode === 'dark') {
-    root.style.setProperty('--color-primary-container', `${selectedColor.primary}33`); // 20% opacity
-    root.style.setProperty('--color-on-primary-container', selectedColor.container);
-  } else {
-    root.style.setProperty('--color-primary-container', selectedColor.container);
-    root.style.setProperty('--color-on-primary-container', selectedColor.onPrimaryContainer);
-  }
+
+  const selectedPalette = colors[settings.primaryColor] || colors.tradingview;
+  const activeColor = isDark ? selectedPalette.dark : selectedPalette.light;
+
+  root.style.setProperty('--color-primary', activeColor.primary);
+  root.style.setProperty('--color-on-primary', activeColor.onPrimary);
+  root.style.setProperty('--color-primary-container', activeColor.container);
+  root.style.setProperty('--color-on-primary-container', activeColor.onPrimaryContainer);
 
   // 3. Typography
   const fonts = {
     inter: '"Inter", sans-serif',
     roboto: '"Roboto", sans-serif',
     outfit: '"Outfit", sans-serif',
+    manrope: '"Manrope", sans-serif',
   };
-  const selectedFont = fonts[settings.fontStyle] || fonts.inter;
+  const selectedFont = fonts[settings.fontStyle] || fonts.manrope;
   root.style.setProperty('--font-body', selectedFont);
   root.style.setProperty('--font-headline', selectedFont);
 
   // 4. Border Radius
   const radius = {
     sharp: { default: '0px', lg: '0px', xl: '0px', '2xl': '0px', '3xl': '0px', full: '0px' },
-    rounded: { default: '0.125rem', lg: '0.25rem', xl: '0.5rem', '2xl': '1rem', '3xl': '1.5rem', full: '9999px' },
+    rounded: { default: '0.25rem', lg: '0.5rem', xl: '0.75rem', '2xl': '1rem', '3xl': '1.5rem', full: '9999px' },
     pill: { default: '1rem', lg: '1rem', xl: '1.5rem', '2xl': '2rem', '3xl': '3rem', full: '9999px' }
   };
   const selectedRadius = radius[settings.borderRadius] || radius.rounded;

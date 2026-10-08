@@ -282,7 +282,7 @@ export default function DelCreationSlip({ items = [], dcMode = 'Sale Orders', on
         <div className="grid grid-cols-12 gap-6">
           {/* Section 1: Header Details */}
           <div className="col-span-12 md:col-span-7 bg-surface-container-low p-8 rounded-xl flex flex-col gap-6">
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-2">Consignee Details</h2>
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-on-surface mb-2">Consignee Details</h2>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="flex flex-col gap-1.5 sm:col-span-2">
@@ -355,7 +355,7 @@ export default function DelCreationSlip({ items = [], dcMode = 'Sale Orders', on
           {/* Section 2: Logistics & Tracking */}
           <div className="col-span-12 md:col-span-5 bg-primary text-on-primary p-8 rounded-xl flex flex-col justify-between relative overflow-hidden">
             <div className="relative z-10 w-full">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-primary-fixed/60 mb-6">Logistics Section</h2>
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-on-surface-fixed/60 mb-6">Logistics Section</h2>
               <div className="flex flex-col gap-5 w-full">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[10px] font-bold text-primary-fixed/60 uppercase tracking-wider">Vehicle Number <span className="text-error-container">*</span></label>

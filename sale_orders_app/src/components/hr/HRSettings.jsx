@@ -301,7 +301,7 @@ export default function HRSettings({ isMobile }) {
                 </div>
                 
                 <div className="mt-6 relative z-10">
-                  <h3 className="font-headline text-md font-black text-on-surface leading-tight group-hover:text-primary transition-colors">Departments</h3>
+                  <h3 className="font-headline text-md font-black text-on-surface leading-tight group-hover:text-on-surface transition-colors">Departments</h3>
                   <p className="font-body text-[11px] text-on-surface-variant mt-1.5 font-medium leading-relaxed">
                     Manage company structure, headcounts, managers, and operational units.
                   </p>
@@ -357,7 +357,7 @@ export default function HRSettings({ isMobile }) {
                   <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <span className="material-symbols-outlined text-[32px] icon-fill">payments</span>
                   </div>
-                  <span className="material-symbols-outlined text-outline-variant group-hover:text-blue-600 transition-colors text-[20px] font-bold">arrow_forward</span>
+                  <span className="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors text-[20px] font-bold">arrow_forward</span>
                 </div>
                 
                 <div className="mt-6 relative z-10">

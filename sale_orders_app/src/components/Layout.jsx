@@ -33,6 +33,14 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
       syncStatus: 'idle'
   };
   
+  const isDarkMode = state?.themeSettings?.colorMode === 'dark';
+  const toggleThemeMode = () => {
+    const nextMode = isDarkMode ? 'light' : 'dark';
+    updateThemeSettings({
+      ...(state?.themeSettings || { primaryColor: 'tradingview', fontStyle: 'inter', borderRadius: 'rounded' }),
+      colorMode: nextMode
+    });
+  };
   const notifications = state?.notifications || [];
   const unreadCount = notifications.filter(n => !n.read).length;
   
@@ -191,6 +199,16 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
             {unreadCount > 0 && (
               <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-error rounded-full ring-2 ring-surface-container animate-pulse"></span>
             )}
+          </button>
+          <button 
+            type="button"
+            onClick={toggleThemeMode} 
+            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high cursor-pointer transition-colors"
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to TradingView Pure Black"}
+          >
+            <span className="material-symbols-outlined text-[20px] text-primary">
+              {isDarkMode ? "light_mode" : "dark_mode"}
+            </span>
           </button>
           <NavLink to="/theme" className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high cursor-pointer">
             <span className="material-symbols-outlined text-[22px]">palette</span>
@@ -1006,6 +1024,16 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
                {/* Right Section: Actions */}
                <div className="flex flex-row items-center gap-2 shrink-0">
                  
+                 <button 
+                     type="button"
+                     onClick={toggleThemeMode}
+                     className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer"
+                     title={isDarkMode ? "Switch to Light Mode" : "Switch to TradingView Pure Black"}
+                 >
+                     <span className="material-symbols-outlined text-[18px]">
+                       {isDarkMode ? "light_mode" : "dark_mode"}
+                     </span>
+                 </button>
                  <NavLink to="/theme" onClick={() => !isPinned && setIsHovered(false)} className={({ isActive }) => `w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isActive ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'}`} title="Theme">
                      <span className="material-symbols-outlined text-[18px]">palette</span>
                  </NavLink>
@@ -1141,6 +1169,17 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
               
               {/* Quick Action Links */}
               <div className="p-4 border-t border-outline-variant/10 flex gap-2">
+                 <button 
+                     type="button"
+                     onClick={toggleThemeMode}
+                     className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-colors text-[10px] font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary hover:bg-primary/5 cursor-pointer"
+                     title={isDarkMode ? "Switch to Light Mode" : "Switch to TradingView Pure Black"}
+                 >
+                     <span className="material-symbols-outlined text-[18px]">
+                       {isDarkMode ? "light_mode" : "dark_mode"}
+                     </span>
+                     {isDarkMode ? "Light" : "Dark"}
+                 </button>
                  <NavLink to="/theme" onClick={() => !isPinnedActive && setIsHovered(false)} className={({ isActive }) => `flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-colors text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-primary bg-primary/10' : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'}`}>
                      <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>palette</span>
                      Theme
@@ -1162,7 +1201,7 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
         onClick={() => { if (!isPinnedActive) setIsHovered(false); setShowNotifications(false); }}
         style={workspaceStyles}
         className={`flex-grow flex flex-col relative overflow-y-auto w-full max-h-full h-full transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)] cursor-default print:!p-0 print:bg-white print:max-h-none print:overflow-visible print:block ${
-          hasDashboardBackground ? 'bg-transparent' : 'bg-surface'
+          hasDashboardBackground ? 'bg-transparent' : 'bg-background'
         }`}
       >
         <div className={`w-full relative z-10 print:p-0 print:pr-0 transition-all duration-300 ${(location.pathname === '/document-warehouse' || (location.pathname === '/dashboard' && location.search.includes('tab=e-files'))) ? 'p-0 space-y-0 max-w-full h-full flex flex-col' : isSidebarHorizontal ? 'p-0 space-y-0 max-w-full' : (location.pathname === '/production-flow' || location.pathname.startsWith('/hr')) ? 'p-2 md:p-4 pr-4 space-y-4 max-w-full' : 'p-8 lg:p-12 pr-16 space-y-10 max-w-full'}`}>

@@ -91,7 +91,7 @@ export default function ProfileCardModal({ isOpen, onClose, data, type }) {
 
         {/* Modal Body */}
         <div className="p-8 overflow-y-auto custom-scrollbar bg-surface flex-1">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-6 flex items-center gap-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-on-surface mb-6 flex items-center gap-2">
             <span className="material-symbols-outlined text-[16px]">id_card</span>
             Detailed Profile View
           </h3>

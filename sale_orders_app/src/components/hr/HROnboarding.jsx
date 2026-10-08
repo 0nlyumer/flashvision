@@ -1467,7 +1467,7 @@ export default function HROnboarding({ isMobile }) {
           {/* E-Signature Control Panel (Right Side Pane) */}
           <div className="w-full lg:w-80 bg-slate-900 border-t lg:border-t-0 lg:border-l border-white/10 p-6 flex flex-col gap-6 text-white shrink-0 z-40 overflow-y-auto">
             <div>
-              <h4 className="font-headline text-sm font-bold text-primary flex items-center gap-1.5">
+              <h4 className="font-headline text-sm font-bold text-on-surface flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[20px]">draw</span>
                 E-Signature Verification
               </h4>

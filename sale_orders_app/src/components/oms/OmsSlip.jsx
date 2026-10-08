@@ -55,7 +55,7 @@ export default function OmsSlip({ activeRuns = [] }) {
                             <div className="xl:w-1/4 pr-8 xl:border-r border-outline-variant/20">
                                 <div className="mb-6">
                                     <span className="text-[10px] font-extrabold text-on-surface-variant uppercase tracking-widest mb-1 block">Production Routing Slip</span>
-                                    <h2 className="text-2xl font-manrope font-black text-primary">{run.id}</h2>
+                                    <h2 className="text-2xl font-manrope font-black text-on-surface">{run.id}</h2>
                                     <p className="text-sm font-medium text-on-surface-variant mt-1">Generated: {new Date(run.startTime).toLocaleString()}</p>
                                 </div>
                                 <button 

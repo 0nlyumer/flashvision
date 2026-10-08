@@ -192,7 +192,7 @@ export default function AdminSetup() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Add New Item Form */}
           <div className="bg-surface-container-lowest p-8 rounded-3xl pb-10 shadow-lg border border-white/50">
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-primary">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-on-surface">
               <span className="material-symbols-outlined">add_circle</span>
               Add New Product / Material
             </h2>
@@ -228,7 +228,7 @@ export default function AdminSetup() {
               {/* AJ Synthetic Specific Logic */}
               {newItemType === 'Finish Good' && (
                 <div className="mt-6 p-4 bg-primary/5 rounded-xl border border-primary/20 space-y-4">
-                  <h4 className="text-sm font-bold text-primary flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-on-surface flex items-center gap-2">
                     <span className="material-symbols-outlined text-[18px]">texture</span>
                     AJ Synthetic Fabric Logic
                   </h4>
@@ -284,7 +284,7 @@ export default function AdminSetup() {
       {activeTab === 'users' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 bg-surface-container-lowest p-8 rounded-3xl shadow-lg border border-white/50 h-fit">
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-primary">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-on-surface">
               <span className="material-symbols-outlined">person_add</span>
               Add New User
             </h2>

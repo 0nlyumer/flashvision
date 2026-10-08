@@ -1715,7 +1715,7 @@ export default function SaleOrderModule() {
                   <button type="button" onClick={() => setActiveTab('dashboard')} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm" title="Back to Dashboard"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
                </div>
                <div className="space-y-1">
-                 <h1 className="text-3xl font-extrabold tracking-tight text-primary font-headline">New Sale Order</h1>
+                 <h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-headline">New Sale Order</h1>
                  <p className="text-on-surface-variant font-body text-sm">Create and dispatch synthetic logistics requests.</p>
                </div>
             </div>
@@ -1749,7 +1749,7 @@ export default function SaleOrderModule() {
             <section className="lg:col-span-8 space-y-6 bg-surface-container-low p-8 rounded-xl border border-outline-variant/10 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-primary">person_search</span>
-                <h2 className="text-lg font-bold text-primary font-headline">Customer Information</h2>
+                <h2 className="text-lg font-bold text-on-surface font-headline">Customer Information</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 col-span-full relative" ref={custSearchRef}>
@@ -1806,7 +1806,7 @@ export default function SaleOrderModule() {
             <section className="lg:col-span-4 space-y-6 bg-surface-container-low p-8 rounded-xl border border-outline-variant/10 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-primary">assignment_turned_in</span>
-                <h2 className="text-lg font-bold text-primary font-headline">Sales & Terms</h2>
+                <h2 className="text-lg font-bold text-on-surface font-headline">Sales & Terms</h2>
               </div>
               <div className="space-y-5">
                 <div className="space-y-2">
@@ -1836,7 +1836,7 @@ export default function SaleOrderModule() {
           {/* Line Items Table with Dropdown Search */}
           <section className="bg-surface-container-lowest shadow-[0_20px_40px_rgba(0,28,56,0.06)] rounded-xl overflow-visible border border-outline-variant/10">
             <div className="px-8 py-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
-              <h2 className="text-lg font-bold text-primary font-headline">Order Line Items</h2>
+              <h2 className="text-lg font-bold text-on-surface font-headline">Order Line Items</h2>
               <div className="flex items-center gap-3">
                 <button type="button" onClick={() => navigate('/settings?tab=finish-good')} className="flex items-center gap-2 text-primary text-sm font-bold hover:bg-primary/5 transition-colors px-4 py-2.5 rounded-lg border border-primary/40 border-dashed shadow-sm">
                   <span className="material-symbols-outlined text-[18px]">category</span> Add Finish Good

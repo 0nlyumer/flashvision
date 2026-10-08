@@ -231,7 +231,7 @@ export default function PurchaseInvoice() {
               {/* Vendor Information Panel */}
               <section className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm overflow-hidden relative">
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary-fixed"></div>
-                <h4 className="text-sm font-bold text-primary flex items-center gap-2 mb-6 uppercase tracking-wider">
+                <h4 className="text-sm font-bold text-on-surface flex items-center gap-2 mb-6 uppercase tracking-wider">
                   <span className="material-symbols-outlined text-lg">factory</span>
                   Vendor Information
                 </h4>
