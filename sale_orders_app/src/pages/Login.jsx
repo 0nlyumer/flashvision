@@ -414,6 +414,14 @@ export default function Login() {
               <p className={`text-xs font-medium transition-colors duration-700 ${textMutedClass}`}>
                 Need access? <a href="mailto:admin@flashvision.com" className={`font-bold ml-1 hover:underline transition-colors duration-700 ${textClass}`}>Contact System Admin</a>
               </p>
+              <div className="mt-4 pt-3 border-t border-dashed border-gray-500/20 text-center">
+                <p className="text-[11px] font-semibold tracking-wider uppercase text-cyan-500/80">
+                  Synthetic Leather Manufacturing ERP
+                </p>
+                <p className={`text-[10px] mt-0.5 transition-colors duration-700 ${textMutedClass}`}>
+                  Engineered & Architected by <span className="font-bold text-slate-300">Omer Khan</span>
+                </p>
+              </div>
             </div>
           </div>
         </DraggablePanel>
