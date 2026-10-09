@@ -1006,7 +1006,7 @@ export default function ProductionModule() {
                     <div className="overflow-x-auto min-h-[300px]">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-surface-container-low/50">
+                                <tr className="bg-surface-container-low dark:bg-[#121620]">
                                     <ResizableHeader className="font-semibold px-6 py-4">Plan ID</ResizableHeader>
                                     <ResizableHeader className="font-semibold px-6 py-4">Creation Date</ResizableHeader>
                                     <ResizableHeader className="font-semibold px-6 py-4">Plan Date</ResizableHeader>
@@ -1192,7 +1192,7 @@ export default function ProductionModule() {
                     <div className="overflow-x-auto min-h-[350px]">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-surface-container-low/50">
+                                <tr className="bg-surface-container-low dark:bg-[#121620]">
                                     <th className="py-4 px-6 text-on-surface-variant text-xs font-bold uppercase tracking-wider">Sale Order #</th>
                                     <th className="py-4 px-6 text-on-surface-variant text-xs font-bold uppercase tracking-wider">Order Date</th>
                                     <th className="py-4 px-6 text-on-surface-variant text-xs font-bold uppercase tracking-wider">Item Code</th>

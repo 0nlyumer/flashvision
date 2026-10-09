@@ -4,19 +4,19 @@ export const applyTheme = (settings = {}) => {
   // 1. Color Mode (Obsidian Ultra Glass Dark / Pure Frosted Pearl Light)
   if (settings.colorMode === 'dark') {
     root.classList.add('dark');
-    // Exact Neutral Obsidian Dark Canvas (#0f0f0f) sampled from user screenshot
-    root.style.setProperty('--color-background', '#0f0f0f'); // Exact neutral dark canvas
-    root.style.setProperty('--color-surface', '#14171f');    // Frosted glass widget surface
-    root.style.setProperty('--color-surface-container-lowest', '#0a0a0c');
-    root.style.setProperty('--color-surface-container-low', '#101217');
-    root.style.setProperty('--color-surface-container', '#161922'); // Elevated glass surface
-    root.style.setProperty('--color-surface-container-high', '#1c202a');
-    root.style.setProperty('--color-surface-container-highest', '#232734');
+    // Deep Luxury Obsidian Palette
+    root.style.setProperty('--color-background', '#0b0e14'); // Deep obsidian luxury canvas
+    root.style.setProperty('--color-surface', '#121620');    // Frosted glass widget surface
+    root.style.setProperty('--color-surface-container-lowest', '#07090e');
+    root.style.setProperty('--color-surface-container-low', '#0e121a');
+    root.style.setProperty('--color-surface-container', '#141924'); // Elevated glass surface
+    root.style.setProperty('--color-surface-container-high', '#1a202e');
+    root.style.setProperty('--color-surface-container-highest', '#222a3d');
     root.style.setProperty('--color-on-background', '#f0f3fa');
     root.style.setProperty('--color-on-surface', '#f0f3fa'); // Crisp white text
     root.style.setProperty('--color-on-surface-variant', '#94a3b8'); // Muted label text
-    root.style.setProperty('--color-outline-variant', 'rgba(255, 255, 255, 0.06)'); // Soft glass micro-border
-    root.style.setProperty('--color-outline', 'rgba(255, 255, 255, 0.1)');
+    root.style.setProperty('--color-outline-variant', 'rgba(255, 255, 255, 0.07)'); // Soft glass micro-border
+    root.style.setProperty('--color-outline', 'rgba(255, 255, 255, 0.12)');
   } else {
     root.classList.remove('dark');
     // Pure Premium White Light Mode Palette

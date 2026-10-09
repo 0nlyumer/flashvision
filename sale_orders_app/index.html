@@ -12,8 +12,11 @@
           var isDark = !theme || theme.colorMode === 'dark';
           if (isDark) {
             document.documentElement.classList.add('dark');
-            document.documentElement.style.setProperty('--color-background', '#0f0f0f');
-            document.documentElement.style.setProperty('--color-surface', '#14171f');
+            document.documentElement.style.setProperty('--color-background', '#0b0e14');
+            document.documentElement.style.setProperty('--color-surface', '#121620');
+            document.documentElement.style.setProperty('--color-surface-container-lowest', '#07090e');
+            document.documentElement.style.setProperty('--color-surface-container-low', '#0e121a');
+            document.documentElement.style.setProperty('--color-surface-container', '#141924');
             document.documentElement.style.setProperty('--color-on-surface', '#f0f3fa');
             document.documentElement.style.setProperty('--color-primary', '#2962ff');
           } else {

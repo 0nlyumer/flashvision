@@ -1069,9 +1069,9 @@ label.text-on-surface-variant {
   border: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
-:not(.dark) .glass-surface,
-:not(.dark) .glass-card,
-:not(.dark) .glass-panel {
+html:not(.dark) .glass-surface,
+html:not(.dark) .glass-card,
+html:not(.dark) .glass-panel {
   background: rgba(255, 255, 255, 0.8) !important;
   box-shadow: 0 16px 36px -8px rgba(0, 28, 56, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
@@ -1085,38 +1085,39 @@ label.text-on-surface-variant {
 
   .dark body, 
   .dark #root {
-    background-color: #0f0f0f !important;
+    background-color: #0b0e14 !important;
     color: #f0f3fa;
   }
 
   /* Frosted Glass Dark Surfaces */
   .dark .bg-surface {
-    background-color: #14171f !important;
+    background-color: #121620 !important;
   }
 
   /* Convert hardcoded light backgrounds to Frosted Glass Surfaces */
   .dark .bg-white:not([data-keep-light]):not(.print-only) {
-    background-color: #14171f !important;
+    background-color: #121620 !important;
+    color: #f0f3fa !important;
   }
 
   .dark .bg-slate-50:not([data-keep-light]),
   .dark .bg-gray-50:not([data-keep-light]) {
-    background-color: #101217 !important;
+    background-color: #0e121a !important;
   }
 
   .dark .bg-slate-100:not([data-keep-light]),
   .dark .bg-gray-100:not([data-keep-light]) {
-    background-color: #161922 !important;
+    background-color: #141924 !important;
   }
 
   .dark .bg-slate-200:not([data-keep-light]),
   .dark .bg-gray-200:not([data-keep-light]) {
-    background-color: #1c202a !important;
+    background-color: #1a202e !important;
   }
 
   .dark .bg-slate-300:not([data-keep-light]),
   .dark .bg-gray-300:not([data-keep-light]) {
-    background-color: #232734 !important;
+    background-color: #222a3d !important;
   }
 
   /* High-Contrast Crisp Typography */
@@ -1174,9 +1175,9 @@ label.text-on-surface-variant {
   }
 
   /* Light Mode Clean Micro-Borders */
-  :not(.dark) .border-outline-variant,
-  :not(.dark) .border-slate-200,
-  :not(.dark) .border-slate-100 {
+  html:not(.dark) .border-outline-variant,
+  html:not(.dark) .border-slate-200,
+  html:not(.dark) .border-slate-100 {
     border-color: rgba(0, 0, 0, 0.05) !important;
   }
 
@@ -1200,10 +1201,10 @@ label.text-on-surface-variant {
     border-radius: 16px !important;
   }
 
-  :not(.dark) table,
-  :not(.dark) div:has(> table),
-  :not(.dark) .table-container,
-  :not(.dark) .overflow-x-auto:has(> table) {
+  html:not(.dark) table,
+  html:not(.dark) div:has(> table),
+  html:not(.dark) .table-container,
+  html:not(.dark) .overflow-x-auto:has(> table) {
     box-shadow: 0 0 24px rgba(41, 98, 255, 0.05), 0 4px 24px rgba(0, 28, 56, 0.04) !important;
     border: 1px solid rgba(0, 0, 0, 0.04) !important;
     border-radius: 16px !important;
@@ -1247,14 +1248,14 @@ label.text-on-surface-variant {
   }
 
   .dark .module-control-panel-glow {
-    background: rgba(18, 21, 28, 0.92) !important;
+    background: rgba(14, 18, 26, 0.88) !important;
     backdrop-filter: blur(28px) saturate(190%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 0 32px rgba(41, 98, 255, 0.08), 0 20px 50px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 0 32px rgba(41, 98, 255, 0.08), 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
   }
 
-  :not(.dark) .module-control-panel-glow {
+  html:not(.dark) .module-control-panel-glow {
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(28px) saturate(190%) !important;
     -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
@@ -1280,7 +1281,7 @@ label.text-on-surface-variant {
     box-shadow: 0 0 16px rgba(41, 98, 255, 0.16) !important;
   }
 
-  :not(.dark) .nav-module-btn:not(.active):hover {
+  html:not(.dark) .nav-module-btn:not(.active):hover {
     box-shadow: 0 0 16px rgba(41, 98, 255, 0.12) !important;
   }
 
@@ -1291,10 +1292,19 @@ label.text-on-surface-variant {
     border-spacing: 0 !important;
   }
 
-  .dark thead {
-    background-color: rgba(20, 23, 31, 0.85) !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
+  .dark table thead,
+  .dark thead,
+  .dark table thead tr,
+  .dark thead tr,
+  .dark table thead th,
+  .dark thead th,
+  .dark thead tr[class*="bg-"],
+  .dark thead th[class*="bg-"],
+  .dark [class*="bg-surface-container-low"] th,
+  .dark [class*="bg-surface-container"] th {
+    background-color: #121620 !important;
+    color: #94a3b8 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   }
 
   .dark th {
@@ -1303,7 +1313,7 @@ label.text-on-surface-variant {
     font-size: 0.72rem !important;
     letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
@@ -1325,32 +1335,32 @@ label.text-on-surface-variant {
   }
 
   /* Light Mode Clean Tables */
-  :not(.dark) table {
+  html:not(.dark) table {
     border-collapse: separate !important;
     border-spacing: 0 !important;
   }
 
-  :not(.dark) thead {
+  html:not(.dark) thead {
     background-color: rgba(248, 250, 252, 0.9) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
   }
 
-  :not(.dark) th {
+  html:not(.dark) th {
     border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
   }
 
-  :not(.dark) td {
+  html:not(.dark) td {
     border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
   }
 
-  :not(.dark) tbody tr:hover {
+  html:not(.dark) tbody tr:hover {
     background-color: rgba(0, 0, 0, 0.015) !important;
   }
 
@@ -1367,8 +1377,8 @@ label.text-on-surface-variant {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
   }
 
-  :not(.dark) span[class*="rounded-full"][class*="border"],
-  :not(.dark) span[class*="rounded-md"][class*="border"] {
+  html:not(.dark) span[class*="rounded-full"][class*="border"],
+  html:not(.dark) span[class*="rounded-md"][class*="border"] {
     border-color: rgba(0, 0, 0, 0.05) !important;
   }
 
@@ -1475,7 +1485,7 @@ h6:not([data-keep-color]) {
   transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
 }
 
-:not(.dark) .fg-builder-panel {
+html:not(.dark) .fg-builder-panel {
   background-color: rgba(255, 255, 255, 0.98) !important;
   color: #0f172a !important;
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
@@ -1506,7 +1516,7 @@ h6:not([data-keep-color]) {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-:not(.dark) .fg-builder-panel select {
+html:not(.dark) .fg-builder-panel select {
   background-color: #ffffff !important;
   color: #0f172a !important;
   border: 1px solid rgba(0, 0, 0, 0.12) !important;
@@ -1514,17 +1524,17 @@ h6:not([data-keep-color]) {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%232962ff' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5' /%3E%3C/svg%3E") !important;
 }
 
-:not(.dark) .fg-builder-panel select:hover {
+html:not(.dark) .fg-builder-panel select:hover {
   border-color: rgba(41, 98, 255, 0.45) !important;
   box-shadow: 0 2px 6px rgba(41, 98, 255, 0.08) !important;
 }
 
-:not(.dark) .fg-builder-panel select:focus {
+html:not(.dark) .fg-builder-panel select:focus {
   border-color: #2962ff !important;
   box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.18) !important;
 }
 
-:not(.dark) .fg-builder-panel select option {
+html:not(.dark) .fg-builder-panel select option {
   background-color: #ffffff !important;
   color: #0f172a !important;
 }
@@ -1553,7 +1563,7 @@ h6:not([data-keep-color]) {
 }
 
 /* Modal Internal Sections */
-:not(.dark) .fg-modal-card {
+html:not(.dark) .fg-modal-card {
   background-color: #ffffff !important;
   color: #0f172a !important;
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
@@ -1567,7 +1577,7 @@ h6:not([data-keep-color]) {
   box-shadow: 0 30px 75px rgba(0, 0, 0, 0.75), 0 0 24px rgba(41, 98, 255, 0.08) !important;
 }
 
-:not(.dark) .fg-modal-header {
+html:not(.dark) .fg-modal-header {
   background-color: #f8fafc !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
@@ -1577,7 +1587,7 @@ h6:not([data-keep-color]) {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
-:not(.dark) .fg-item-card {
+html:not(.dark) .fg-item-card {
   background-color: #fbfcfe !important;
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   color: #0f172a !important;
@@ -1589,14 +1599,14 @@ h6:not([data-keep-color]) {
   color: #f0f3fa !important;
 }
 
-:not(.dark) .fg-modal-card input,
-:not(.dark) .fg-modal-card select {
+html:not(.dark) .fg-modal-card input,
+html:not(.dark) .fg-modal-card select {
   background-color: #ffffff !important;
   color: #0f172a !important;
   border-color: rgba(0, 0, 0, 0.12) !important;
 }
 
-:not(.dark) .fg-modal-card select option {
+html:not(.dark) .fg-modal-card select option {
   background-color: #ffffff !important;
   color: #0f172a !important;
 }

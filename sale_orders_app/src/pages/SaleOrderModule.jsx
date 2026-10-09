@@ -1624,7 +1624,7 @@ export default function SaleOrderModule() {
                 /* ORDER-WISE TABLE with Auto-layout */
                 <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
                   <thead>
-                    <tr className="bg-surface-container-low/50 border-y border-outline-variant/10">
+                    <tr className="bg-surface-container-low dark:bg-[#121620] border-y border-outline-variant/10">
                       <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Order ID</ResizableHeader>
                       <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Date</ResizableHeader>
                       <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Customer</ResizableHeader>
@@ -1697,7 +1697,7 @@ export default function SaleOrderModule() {
                 /* ITEM-WISE TABLE with Auto-layout */
                 <table className="w-full text-left border-collapse table-auto whitespace-nowrap animate-in fade-in duration-300">
                   <thead>
-                    <tr className="bg-surface-container-low/50 border-y border-outline-variant/10">
+                    <tr className="bg-surface-container-low dark:bg-[#121620] border-y border-outline-variant/10">
                       <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Date</ResizableHeader>
                       <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Order Details</ResizableHeader>
                       <ResizableHeader className="px-6 py-4 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Item Info</ResizableHeader>
@@ -2262,7 +2262,7 @@ export default function SaleOrderModule() {
               <div className="overflow-x-auto min-h-[400px]">
                 <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
                     <thead>
-                      <tr className="bg-surface-container-low/50 border-y border-outline-variant/10">
+                      <tr className="bg-surface-container-low dark:bg-[#121620] border-y border-outline-variant/10">
                         <ResizableHeader className="px-8 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant w-1">Order ID & Date</ResizableHeader>
                         <ResizableHeader className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Customer</ResizableHeader>
                         <ResizableHeader className="px-6 py-5 text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Order Items Overview</ResizableHeader>
