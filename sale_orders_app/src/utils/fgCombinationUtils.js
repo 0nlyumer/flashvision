@@ -35,10 +35,10 @@ export const DEFAULT_FG_CONFIG = {
     { id: 'c9', name: 'Smoke Grey', hex: '#708090' }
   ],
   layers: [
-    { id: 'l1', name: '1 Layer' },
-    { id: 'l2', name: '2 Layer' },
-    { id: 'l3', name: '3 Layer' },
-    { id: 'l4', name: '4 Layer' }
+    { id: 'l1', name: '1L' },
+    { id: 'l2', name: '2L' },
+    { id: 'l3', name: '3L' },
+    { id: 'l4', name: '4L' }
   ],
   fabrics: [
     { id: 'f1', name: 'Knitted Cotton', colors: ['White', 'Black', 'Grey', 'Raw Ecru'] },
@@ -76,6 +76,19 @@ export const DEFAULT_FG_CONFIG = {
  * Standard generated item display name pattern:
  * {Paper Code} {Item Name} {Color} {Layers} ({Fabric Name} {Fabric Color})
  */
+/**
+ * Formats layer representation to concise "3L" format (never full word "Layer").
+ */
+export function formatLayerShort(layerStr = '') {
+  if (!layerStr) return '';
+  const trimmed = String(layerStr).trim();
+  const match = trimmed.match(/^(\d+)\s*(?:layer|layers|l)?$/i);
+  if (match) {
+    return `${match[1]}L`;
+  }
+  return trimmed.replace(/\s*layers?/gi, 'L').trim();
+}
+
 export function generateFGDisplayName(combo = {}, maskingConfig = {}) {
   const parts = [];
 
@@ -94,9 +107,9 @@ export function generateFGDisplayName(combo = {}, maskingConfig = {}) {
     parts.push(combo.color);
   }
 
-  // 4. Layers
+  // 4. Layers: Always short "3L" format (never full word "Layer")
   if (combo.layers && !maskingConfig.maskLayers) {
-    parts.push(combo.layers);
+    parts.push(formatLayerShort(combo.layers));
   }
 
   // 5. Backing Fabric & Color: in parentheses: ([Fabric Name] [Fabric Color])
@@ -171,11 +184,15 @@ export function matchItemToCombination(item, filter = {}) {
     }
   }
 
-  // 4. Layers
+  // 4. Layers (supports both '3L' and legacy '3 Layer')
   if (filter.layers) {
-    const lay = filter.layers.toLowerCase();
+    const layShort = formatLayerShort(filter.layers).toLowerCase();
+    const layRaw = filter.layers.toLowerCase();
     const detailsLayers = (details.layers || '').toLowerCase();
-    if (detailsLayers ? detailsLayers !== lay : !itemNameLower.includes(lay)) {
+    const detailsLayersShort = formatLayerShort(detailsLayers).toLowerCase();
+    const matchDetails = detailsLayers ? (detailsLayers === layRaw || detailsLayersShort === layShort) : false;
+    const matchText = itemNameLower.includes(layShort) || itemNameLower.includes(layRaw);
+    if (detailsLayers ? !matchDetails : !matchText) {
       return false;
     }
   }
@@ -239,18 +256,34 @@ export function parseRollSizeFromPacking(packing, packingsList = []) {
 
 export function createFinishedGoodFromCombo(combo = {}, stateItems = [], maskingConfig = {}, packingsConfig = [], defaultDept = '') {
   const displayName = generateFGDisplayName(combo, maskingConfig);
-  const fgCount = (stateItems || []).filter(i => i.category === 'Finished Goods' || i.type === 'Finish Good').length;
-  const sku = `FG-${String(fgCount + 1).padStart(3, '0')}`;
-  const timestamp = Date.now();
+
+  // Scan existing items to continue exact ITM-xxx serial number sequence
+  let maxItemNum = 0;
+  (stateItems || []).forEach(item => {
+    const code = String(item.sku || item.itemCode || item.code || item.id || '');
+    const match = code.match(/ITM-(\d+)/i);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (!isNaN(num) && num > maxItemNum) {
+        maxItemNum = num;
+      }
+    }
+  });
+
+  const fgCount = (stateItems || []).filter(i => i.category === 'Finished Goods' || i.type === 'Finish Good' || i.type === 'Finished Goods').length;
+  const nextSerialNum = maxItemNum > 0 ? maxItemNum + 1 : (fgCount + 1);
+  const sku = `ITM-${String(nextSerialNum).padStart(3, '0')}`;
+
   const rollSize = parseRollSizeFromPacking(combo.packing, packingsConfig || DEFAULT_FG_CONFIG.packings);
   const assignedDept = combo.department || defaultDept || DEFAULT_FG_CONFIG.defaultDepartment || 'Finished Goods';
+  const timestamp = Date.now();
 
   return {
-    id: `ITM-FG-${timestamp}`,
+    id: 'I' + timestamp,
     sku: sku,
     name: displayName,
     category: 'Finished Goods',
-    type: 'Finish Good',
+    type: 'Finished Goods',
     department: assignedDept,
     stockByDepartment: {
       [assignedDept]: 0
@@ -262,15 +295,16 @@ export function createFinishedGoodFromCombo(combo = {}, stateItems = [], masking
     rolls: 0,
     rollSize: rollSize,
     packingSize: rollSize,
+    uomNumber: rollSize,
     packingName: combo.packing || '',
-    specifications: `Synthetic Leather ${combo.baseItem || ''} - ${combo.layers || ''} on ${combo.fabricName || 'Standard Backing'}`,
+    specifications: `Synthetic Leather ${combo.baseItem || ''} - ${formatLayerShort(combo.layers) || ''} on ${combo.fabricName || 'Standard Backing'}`,
     status: 'Active',
     isNewFromOrder: true,
     combinationDetails: {
       paperCode: combo.paperCode || '',
       baseItem: combo.baseItem || '',
       color: combo.color || '',
-      layers: combo.layers || '',
+      layers: formatLayerShort(combo.layers) || '',
       fabricName: combo.fabricName || '',
       fabricColor: combo.fabricColor || '',
       packing: combo.packing || '',

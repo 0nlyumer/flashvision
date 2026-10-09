@@ -2068,34 +2068,16 @@ export default function SaleOrderModule() {
                           </div>
                         </td>
                         <td className="px-4 py-4 text-right align-top pt-11">
-                          <div className="flex flex-col items-end gap-1">
-                             <div className="flex items-center justify-end gap-1.5">
-                               <input type="number" min="1" value={item.qty} onChange={(e) => handleItemChange(item.id, 'qty', parseInt(e.target.value.replace(/\D/g, '') || 0))} className="w-24 text-right bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-2.5 text-sm font-extrabold focus:ring-2 focus:ring-primary/20 shadow-sm" />
-                               <span className="text-xs text-slate-400 font-bold w-6 text-left">{prodObj?.unit === 'Meters' ? 'm' : (prodObj?.unit || 'm') }</span>
-                             </div>
-                             <span className="text-[10px] text-primary/80 font-bold tracking-wide">
-                               {(item.rolls || 1)} roll × {(item.rollSize || actRollSz || 50)}m
-                             </span>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <input type="number" min="1" value={item.qty} onChange={(e) => handleItemChange(item.id, 'qty', parseInt(e.target.value.replace(/\D/g, '') || 0))} className="w-24 text-right bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-2.5 text-sm font-extrabold focus:ring-2 focus:ring-primary/20 shadow-sm" />
+                            <span className="text-xs text-slate-400 font-bold w-6 text-left">{prodObj?.unit === 'Meters' ? 'm' : (prodObj?.unit || 'm') }</span>
                           </div>
                         </td>
                         <td className="px-4 py-4 text-right align-top pt-11">
-                           <div className="flex flex-col items-center gap-1">
-                             <div className="flex items-center gap-1">
-                               <input type="number" min="1" value={item.rolls} onChange={(e) => handleItemChange(item.id, 'rolls', parseInt(e.target.value.replace(/\D/g, '') || 0))} className="w-16 text-right bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-2.5 text-sm font-extrabold focus:ring-2 focus:ring-primary/20 shadow-sm" />
-                               <span className="text-xs text-slate-400 font-bold">rolls</span>
-                             </div>
-                             <div className="flex items-center gap-1 mt-0.5" title="Packing / Roll size in meters">
-                               <span className="text-[10px] text-slate-400 font-semibold">Size:</span>
-                               <input 
-                                 type="number" 
-                                 min="1" 
-                                 value={item.rollSize || actRollSz || 50} 
-                                 onChange={(e) => handleItemChange(item.id, 'rollSize', parseFloat(e.target.value) || 1)} 
-                                 className="w-12 text-center bg-surface-container-low border border-outline-variant/40 rounded px-1 py-0.5 text-[10px] font-bold text-primary focus:ring-1 focus:ring-primary" 
-                               />
-                               <span className="text-[10px] text-slate-500 font-medium">m</span>
-                             </div>
-                           </div>
+                          <div className="flex items-center justify-center gap-1.5">
+                            <input type="number" min="1" value={item.rolls} onChange={(e) => handleItemChange(item.id, 'rolls', parseInt(e.target.value.replace(/\D/g, '') || 0))} className="w-16 text-right bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-2.5 text-sm font-extrabold focus:ring-2 focus:ring-primary/20 shadow-sm" />
+                            <span className="text-xs text-slate-400 font-bold">rolls</span>
+                          </div>
                         </td>
                         <td className="px-4 py-4 text-right align-top pt-11">
                           <input type="number" value={item.price} onChange={(e) => handleItemChange(item.id, 'price', parseFloat(e.target.value) || 0)} className="w-24 text-right bg-white border border-outline-variant/30 rounded-lg p-2.5 text-sm font-bold focus:ring-2 focus:ring-primary/20 shadow-sm" />
