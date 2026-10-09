@@ -6,7 +6,8 @@ import {
   getInitialFGConfig,
   generateFGDisplayName,
   matchItemToCombination,
-  createFinishedGoodFromCombo
+  createFinishedGoodFromCombo,
+  parseRollSizeFromPacking
 } from '../../utils/fgCombinationUtils';
 import FGQuickConfigModal from './FGQuickConfigModal';
 

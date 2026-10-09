@@ -19,14 +19,14 @@ export const applyTheme = (settings = {}) => {
     root.style.setProperty('--color-outline', 'rgba(255, 255, 255, 0.1)');
   } else {
     root.classList.remove('dark');
-    // Crisp Modern Frosted Pearl Light Mode Palette
-    root.style.setProperty('--color-background', '#f6f8fb');
-    root.style.setProperty('--color-surface', 'rgba(255, 255, 255, 0.85)');
+    // Pure Premium White Light Mode Palette
+    root.style.setProperty('--color-background', '#ffffff');
+    root.style.setProperty('--color-surface', '#ffffff');
     root.style.setProperty('--color-surface-container-lowest', '#ffffff');
-    root.style.setProperty('--color-surface-container-low', '#f8fafc');
-    root.style.setProperty('--color-surface-container', '#edf2f7');
-    root.style.setProperty('--color-surface-container-high', '#e2e8f0');
-    root.style.setProperty('--color-surface-container-highest', '#cbd5e1');
+    root.style.setProperty('--color-surface-container-low', '#fbfbfd');
+    root.style.setProperty('--color-surface-container', '#f6f8fb');
+    root.style.setProperty('--color-surface-container-high', '#edf2f7');
+    root.style.setProperty('--color-surface-container-highest', '#e2e8f0');
     root.style.setProperty('--color-on-background', '#0f172a');
     root.style.setProperty('--color-on-surface', '#0f172a');
     root.style.setProperty('--color-on-surface-variant', '#64748b');

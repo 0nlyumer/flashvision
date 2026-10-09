@@ -1180,6 +1180,110 @@ label.text-on-surface-variant {
     border-color: rgba(0, 0, 0, 0.05) !important;
   }
 
+  /* ========================================================
+     5% Ambient Glow ("Blow") Architecture for Tables & Flags
+     ======================================================== */
+  table,
+  div:has(> table),
+  .table-container,
+  .overflow-x-auto:has(> table) {
+    transition: box-shadow 0.3s ease, border-color 0.3s ease !important;
+  }
+
+  /* Subtle 5% Ambient Luminous Blow on Tables (Dark & Light) */
+  .dark table,
+  .dark div:has(> table),
+  .dark .table-container,
+  .dark .overflow-x-auto:has(> table) {
+    box-shadow: 0 0 24px rgba(41, 98, 255, 0.05), 0 8px 32px rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 16px !important;
+  }
+
+  :not(.dark) table,
+  :not(.dark) div:has(> table),
+  :not(.dark) .table-container,
+  :not(.dark) .overflow-x-auto:has(> table) {
+    box-shadow: 0 0 24px rgba(41, 98, 255, 0.05), 0 4px 24px rgba(0, 28, 56, 0.04) !important;
+    border: 1px solid rgba(0, 0, 0, 0.04) !important;
+    border-radius: 16px !important;
+  }
+
+  /* Subtle 5% Ambient Luminous Blow on Flags, Badges, and Status Chips */
+  .badge,
+  .status-pill,
+  .flag-pill,
+  span[class*="rounded-full"][class*="border"],
+  span[class*="rounded-full"][class*="bg-"],
+  span[class*="rounded-md"][class*="border"],
+  span[class*="rounded-lg"][class*="border"],
+  span[class*="rounded-xl"][class*="border"] {
+    box-shadow: 0 0 12px rgba(41, 98, 255, 0.07), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+    transition: box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s ease !important;
+  }
+
+  .dark .badge,
+  .dark .status-pill,
+  .dark .flag-pill,
+  .dark span[class*="rounded-full"][class*="border"],
+  .dark span[class*="rounded-full"][class*="bg-"] {
+    box-shadow: 0 0 14px rgba(41, 98, 255, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .badge:hover,
+  .status-pill:hover,
+  .flag-pill:hover,
+  span[class*="rounded-full"][class*="border"]:hover {
+    box-shadow: 0 0 18px rgba(41, 98, 255, 0.18), 0 3px 10px rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-0.5px);
+  }
+
+  /* ========================================================
+     Module Control Panel 5% Blow (Ambient Glow) & Luxury Glass
+     ======================================================== */
+  .module-control-panel-glow {
+    position: relative;
+    transition: box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+
+  .dark .module-control-panel-glow {
+    background: rgba(18, 21, 28, 0.92) !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 0 32px rgba(41, 98, 255, 0.08), 0 20px 50px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  }
+
+  :not(.dark) .module-control-panel-glow {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 0 30px rgba(41, 98, 255, 0.06), 0 16px 40px rgba(0, 28, 56, 0.06), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+  }
+
+  /* Upgraded Module Navigation Item with 5% Glow & Micro-interactions */
+  .nav-module-btn {
+    position: relative;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-module-btn:hover {
+    transform: scale(1.08);
+  }
+
+  .nav-module-btn.active {
+    box-shadow: 0 0 22px rgba(41, 98, 255, 0.45), 0 4px 14px rgba(41, 98, 255, 0.3) !important;
+  }
+
+  .dark .nav-module-btn:not(.active):hover {
+    box-shadow: 0 0 16px rgba(41, 98, 255, 0.16) !important;
+  }
+
+  :not(.dark) .nav-module-btn:not(.active):hover {
+    box-shadow: 0 0 16px rgba(41, 98, 255, 0.12) !important;
+  }
+
   /* Pure Glassmorphic Tables (Airy, Sleek, No Harsh Grid Lines) */
   .dark table {
     color: #e2e8f0 !important;

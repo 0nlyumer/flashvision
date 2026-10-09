@@ -1,4 +1,5 @@
 import FGCombinationBuilder from "../components/ui/FGCombinationBuilder";
+import { parseRollSizeFromPacking } from "../utils/fgCombinationUtils";
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Layout from '../components/Layout';
@@ -167,8 +168,9 @@ export default function SaleOrderModule() {
       id: Date.now(),
       itemCode: `ITM-${String(maxIdx + 1).padStart(3, '0')}`,
       itemId: '',
-      qty: 1,
+      qty: 50,
       rolls: 1,
+      rollSize: 50,
       price: 0,
       discount: 0,
       remarks: ""
@@ -212,8 +214,9 @@ export default function SaleOrderModule() {
       id: Date.now(),
       itemCode: `ITM-${String(maxIdx + 1).padStart(3, '0')}`,
       itemId: '',
-      qty: 1,
+      qty: 50,
       rolls: 1,
+      rollSize: 50,
       price: 0,
       discount: 0,
       remarks: ""
@@ -568,27 +571,59 @@ export default function SaleOrderModule() {
     setOrderMeta(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleItemChosen = (rowId, chosenProd) => {
+    setItems(prevItems => prevItems.map(item => {
+      if (item.id === rowId) {
+        const prodPrice = chosenProd ? (chosenProd.price || parseFloat(String(chosenProd.price).replace(/[^\d.]/g, '')) || 0) : 0;
+        const rollSz = Number(chosenProd?.rollSize || chosenProd?.packingSize || parseRollSizeFromPacking(chosenProd?.combinationDetails?.packing) || 50);
+        const currentRolls = Math.max(1, Number(item.rolls) || 1);
+        return {
+          ...item,
+          itemId: chosenProd.id,
+          price: prodPrice,
+          rollSize: rollSz,
+          rolls: currentRolls,
+          qty: currentRolls * rollSz // Auto total meters: Rolls * Roll Size!
+        };
+      }
+      return item;
+    }));
+  };
+
   const handleItemChange = (id, field, value) => {
     setItems(items.map(item => {
       if(item.id === id) {
           let updated = { ...item, [field]: value };
+          const selectedProd = state.items.find(i => i.id === (field === 'itemId' ? value : updated.itemId));
+          const prodRollSz = Number(selectedProd?.rollSize || selectedProd?.packingSize || parseRollSizeFromPacking(selectedProd?.combinationDetails?.packing) || 0);
+
           if (field === 'itemId') {
-              const selectedProd = state.items.find(i => i.id === value);
-              const prodPrice = selectedProd ? (selectedProd.price || parseFloat(selectedProd.price.replace(/[^\d.]/g, '')) || 0) : 0;
+              const prodPrice = selectedProd ? (selectedProd.price || parseFloat(String(selectedProd.price).replace(/[^\d.]/g, '')) || 0) : 0;
+              const resolvedRollSz = prodRollSz > 0 ? prodRollSz : (Number(item.rollSize) || 50);
+              const rollCount = Math.max(1, Number(item.rolls) || 1);
               updated.itemId = value;
               updated.price = prodPrice;
-              const rollSz = Number(selectedProd?.rollSize || selectedProd?.packingSize || 1);
-              updated.rolls = Math.ceil(updated.qty / rollSz);
-          }
-          if (field === 'qty') {
-               const selectedProd = state.items.find(i => i.id === updated.itemId);
-               const rollSz = Number(selectedProd?.rollSize || selectedProd?.packingSize || 1);
-               updated.rolls = Math.ceil(value / rollSz);
+              updated.rollSize = resolvedRollSz;
+              updated.rolls = rollCount;
+              updated.qty = rollCount * resolvedRollSz; // Auto-calculate total meters!
           }
           if (field === 'rolls') {
-               const selectedProd = state.items.find(i => i.id === updated.itemId);
-               const rollSz = Number(selectedProd?.rollSize || selectedProd?.packingSize || 1);
-               updated.qty = value * rollSz;
+               const rollCount = Math.max(0, parseInt(value) || 0);
+               const rollSz = Number(item.rollSize || prodRollSz || 50);
+               updated.rolls = rollCount;
+               updated.qty = rollCount * rollSz; // Total meters = roll quantity * roll size!
+          }
+          if (field === 'rollSize') {
+               const rollSz = Math.max(1, parseFloat(value) || 1);
+               const rollCount = Math.max(0, parseInt(item.rolls) || 0);
+               updated.rollSize = rollSz;
+               updated.qty = rollCount * rollSz; // Auto recalculate meters if roll size changes!
+          }
+          if (field === 'qty') {
+               const qtyVal = Math.max(0, parseFloat(value) || 0);
+               const rollSz = Number(item.rollSize || prodRollSz || 50);
+               updated.qty = qtyVal;
+               updated.rolls = rollSz > 0 ? Math.ceil(qtyVal / rollSz) : 1;
           }
           return updated;
       }
@@ -603,8 +638,9 @@ export default function SaleOrderModule() {
       id: Date.now(),
       itemCode: newItemCode,
       itemId: "",
-      qty: 1,
+      qty: 50,
       rolls: 1,
+      rollSize: 50,
       price: 0.00,
       discount: 0.00,
       remarks: ""
@@ -627,16 +663,23 @@ export default function SaleOrderModule() {
        paymentTerms: order.paymentTerms || 'Net 30',
        salesperson: order.salesperson || 'Alexander Pierce'
     });
-    setItems(order.items.map(it => ({
-       id: Date.now() + Math.random(),
-       itemCode: it.itemCode,
-       itemId: it.itemId,
-       qty: it.quantity || it.qty,
-       rolls: it.rolls || 1,
-       price: it.price || 0,
-       discount: it.discount || 0,
-       remarks: it.remarks || ""
-    })));
+    setItems(order.items.map(it => {
+       const prod = state.items.find(p => p.id === it.itemId);
+       const rollSz = Number(it.rollSize || prod?.rollSize || prod?.packingSize || parseRollSizeFromPacking(prod?.combinationDetails?.packing) || 50);
+       const rollCount = it.rolls || (rollSz > 0 ? Math.ceil((it.quantity || it.qty || 1) / rollSz) : 1);
+       return {
+         ...it,
+         id: it.id || Date.now() + Math.random(),
+         itemCode: it.itemCode,
+         itemId: it.itemId,
+         rollSize: rollSz,
+         rolls: rollCount,
+         qty: it.quantity || it.qty || (rollCount * rollSz),
+         price: it.price || 0,
+         discount: it.discount || 0,
+         remarks: it.remarks || ""
+       };
+    }));
     setActiveTab('create');
   };
 
@@ -684,6 +727,7 @@ export default function SaleOrderModule() {
         itemId: i.itemId,
         quantity: i.qty,
         rolls: i.rolls,
+        rollSize: i.rollSize || 50,
         status: 'Pending',
         producedQty: 0,
         deliveredQty: 0, 
@@ -1945,7 +1989,7 @@ export default function SaleOrderModule() {
                   {items.map((item, idx) => {
                      const itemSubtotal = (item.qty * item.price) - (item.discount || 0);
                      const prodObj = state.items.find(i => i.id === item.itemId);
-                     const actRollSz = prodObj?.rollSize || prodObj?.packingSize || 0;
+                     const actRollSz = item.rollSize || prodObj?.rollSize || prodObj?.packingSize || parseRollSizeFromPacking(prodObj?.combinationDetails?.packing) || 50;
                      const filteredItemsList = state.items.filter(i => 
                         (i.type === 'Finish Good' || i.category === 'Finished Goods') && 
                         (i.name.toLowerCase().includes((searchQueries[item.id] || '').toLowerCase()) || i.sku.toLowerCase().includes((searchQueries[item.id] || '').toLowerCase())) &&
@@ -2014,7 +2058,7 @@ export default function SaleOrderModule() {
                                        return [...(prevItems || []), chosen];
                                      });
                                    }
-                                   handleItemChange(item.id, 'itemId', chosen.id);
+                                   handleItemChosen(item.id, chosen);
                                    setSearchQueries({ ...searchQueries, [item.id]: chosen.name });
                                    setActiveSearchId(null);
                                  }}
@@ -2026,15 +2070,31 @@ export default function SaleOrderModule() {
                         <td className="px-4 py-4 text-right align-top pt-11">
                           <div className="flex flex-col items-end gap-1">
                              <div className="flex items-center justify-end gap-1.5">
-                               <input type="number" min="1" value={item.qty} onChange={(e) => handleItemChange(item.id, 'qty', parseInt(e.target.value.replace(/\D/g, '') || 0))} className="w-20 text-right bg-white border border-outline-variant/30 rounded-lg p-2.5 text-sm font-extrabold focus:ring-2 focus:ring-primary/20 shadow-sm" />
-                               <span className="text-xs text-slate-400 font-bold w-6 text-left">{prodObj?.unit === 'Meters' ? 'm' : (prodObj?.unit || '') }</span>
+                               <input type="number" min="1" value={item.qty} onChange={(e) => handleItemChange(item.id, 'qty', parseInt(e.target.value.replace(/\D/g, '') || 0))} className="w-24 text-right bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-2.5 text-sm font-extrabold focus:ring-2 focus:ring-primary/20 shadow-sm" />
+                               <span className="text-xs text-slate-400 font-bold w-6 text-left">{prodObj?.unit === 'Meters' ? 'm' : (prodObj?.unit || 'm') }</span>
                              </div>
+                             <span className="text-[10px] text-primary/80 font-bold tracking-wide">
+                               {(item.rolls || 1)} roll × {(item.rollSize || actRollSz || 50)}m
+                             </span>
                           </div>
                         </td>
                         <td className="px-4 py-4 text-right align-top pt-11">
                            <div className="flex flex-col items-center gap-1">
-                             <input type="number" min="1" value={item.rolls} onChange={(e) => handleItemChange(item.id, 'rolls', parseInt(e.target.value.replace(/\D/g, '') || 0))} className="w-16 text-right bg-white border border-outline-variant/30 rounded-lg p-2.5 text-sm font-extrabold focus:ring-2 focus:ring-primary/20 shadow-sm" />
-                             {actRollSz > 0 && <span className="text-[10px] text-slate-500 font-medium">{actRollSz}m/roll</span>}
+                             <div className="flex items-center gap-1">
+                               <input type="number" min="1" value={item.rolls} onChange={(e) => handleItemChange(item.id, 'rolls', parseInt(e.target.value.replace(/\D/g, '') || 0))} className="w-16 text-right bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-2.5 text-sm font-extrabold focus:ring-2 focus:ring-primary/20 shadow-sm" />
+                               <span className="text-xs text-slate-400 font-bold">rolls</span>
+                             </div>
+                             <div className="flex items-center gap-1 mt-0.5" title="Packing / Roll size in meters">
+                               <span className="text-[10px] text-slate-400 font-semibold">Size:</span>
+                               <input 
+                                 type="number" 
+                                 min="1" 
+                                 value={item.rollSize || actRollSz || 50} 
+                                 onChange={(e) => handleItemChange(item.id, 'rollSize', parseFloat(e.target.value) || 1)} 
+                                 className="w-12 text-center bg-surface-container-low border border-outline-variant/40 rounded px-1 py-0.5 text-[10px] font-bold text-primary focus:ring-1 focus:ring-primary" 
+                               />
+                               <span className="text-[10px] text-slate-500 font-medium">m</span>
+                             </div>
                            </div>
                         </td>
                         <td className="px-4 py-4 text-right align-top pt-11">

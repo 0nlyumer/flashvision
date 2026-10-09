@@ -18,6 +18,10 @@
             document.documentElement.style.setProperty('--color-primary', '#2962ff');
           } else {
             document.documentElement.classList.remove('dark');
+            document.documentElement.style.setProperty('--color-background', '#ffffff');
+            document.documentElement.style.setProperty('--color-surface', '#ffffff');
+            document.documentElement.style.setProperty('--color-on-surface', '#0f172a');
+            document.documentElement.style.setProperty('--color-primary', '#2962ff');
           }
         } catch(e) {}
       })();

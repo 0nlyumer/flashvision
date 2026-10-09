@@ -860,7 +860,7 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
             sidebarPosition === 'right' ? 'right-6 top-6 bottom-6 w-[72px] flex-col' :
             'left-6 right-6 bottom-6 h-[72px] flex-row'
           } flex gap-4`}>
-            <div className={`flex-1 bg-surface-container-high/90 backdrop-blur-xl rounded-[36px] shadow-sm border border-outline-variant/30 flex ${isSidebarHorizontal ? 'flex-row px-6 py-0' : 'flex-col py-6 px-0'} items-center gap-6 overflow-auto hide-scrollbar`}>
+            <div className={`flex-1 module-control-panel-glow rounded-[36px] flex ${isSidebarHorizontal ? 'flex-row px-6 py-0' : 'flex-col py-6 px-0'} items-center gap-6 overflow-auto hide-scrollbar`}>
               <div 
                 draggable
                 onDragStart={(e) => {
@@ -899,19 +899,31 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
                       }
                     }}
                     className={({ isActive }) => 
-                      `w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group relative ${isActive ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-primary'}`
+                      `w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 group relative cursor-pointer ${
+                        isActive 
+                          ? 'bg-gradient-to-tr from-primary to-blue-500 text-white shadow-[0_0_20px_rgba(41,98,255,0.45)] ring-1 ring-white/30 scale-105' 
+                          : 'text-on-surface-variant bg-surface-container-low/40 hover:bg-surface-container-highest hover:text-primary hover:scale-105 hover:shadow-[0_0_14px_rgba(41,98,255,0.18)]'
+                      }`
                     } 
                     title={link.label}
                   >
                     {({ isActive }) => (
-                      <span className="material-symbols-outlined text-[24px] transition-transform duration-300 group-hover:scale-110" style={{ fontVariationSettings: isActive ? "'FILL' 1" : undefined }}>{link.icon}</span>
+                      <>
+                        <span className="material-symbols-outlined text-[24px] transition-transform duration-300 group-hover:scale-115" style={{ fontVariationSettings: isActive ? "'FILL' 1" : undefined }}>{link.icon}</span>
+                        {isActive && !isSidebarHorizontal && (
+                          <span className="absolute -right-1 top-1/2 -translate-y-1/2 w-1.5 h-5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)] pointer-events-none" />
+                        )}
+                        {isActive && isSidebarHorizontal && (
+                          <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)] pointer-events-none" />
+                        )}
+                      </>
                     )}
                   </NavLink>
                 ))}
               </nav>
             </div>
             
-            <div className={`${isSidebarHorizontal ? 'h-[72px] px-2' : 'w-[72px] py-2 min-h-[110px]'} shrink-0 bg-surface-container-high/90 backdrop-blur-xl rounded-[36px] shadow-sm border border-outline-variant/30 flex ${isSidebarHorizontal ? 'flex-row' : 'flex-col'} items-center justify-center gap-1.5`}>
+            <div className={`${isSidebarHorizontal ? 'h-[72px] px-2' : 'w-[72px] py-2 min-h-[110px]'} shrink-0 module-control-panel-glow rounded-[36px] flex ${isSidebarHorizontal ? 'flex-row' : 'flex-col'} items-center justify-center gap-1.5`}>
               <button 
                 type="button"
                 onClick={toggleThemeMode} 
@@ -940,7 +952,11 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
                         }
                       }
                     }}
-                    className={({ isActive }) => `w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${isActive ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container-highest hover:text-primary group'}`} 
+                    className={({ isActive }) => `w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-gradient-to-tr from-primary to-blue-500 text-white shadow-[0_0_20px_rgba(41,98,255,0.45)] ring-1 ring-white/30 scale-105' 
+                      : 'text-on-surface-variant bg-surface-container-low/40 hover:bg-surface-container-highest hover:text-primary group hover:shadow-[0_0_14px_rgba(41,98,255,0.18)]'
+                  }`} 
                     title="Settings"
                   >
                     <span className="material-symbols-outlined text-[24px] transition-transform duration-300 group-hover:rotate-90" style={{ fontVariationSettings: "'FILL' 1" }}>settings</span>

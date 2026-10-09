@@ -206,11 +206,36 @@ export function matchItemToCombination(item, filter = {}) {
 /**
  * Creates a new Finished Good item object from combination attributes.
  */
-export function createFinishedGoodFromCombo(combo = {}, stateItems = [], maskingConfig = {}) {
+/**
+ * Parses numeric roll size (in meters) from a packing specification string or object.
+ */
+export function parseRollSizeFromPacking(packing, packingsList = []) {
+  if (!packing) return 50;
+  if (typeof packing === 'number' && packing > 0) return packing;
+  
+  if (Array.isArray(packingsList)) {
+    const found = packingsList.find(p => p.name === packing || p.id === packing);
+    if (found && Number(found.size) > 0) {
+      return Number(found.size);
+    }
+  }
+
+  const str = String(packing);
+  const match = str.match(/(\d+(?:\.\d+)?)\s*(?:m|mtr|meter|meters|\b)/i);
+  if (match && match[1]) {
+    const parsed = parseFloat(match[1]);
+    if (parsed > 0) return parsed;
+  }
+
+  return 50;
+}
+
+export function createFinishedGoodFromCombo(combo = {}, stateItems = [], maskingConfig = {}, packingsConfig = []) {
   const displayName = generateFGDisplayName(combo, maskingConfig);
   const fgCount = (stateItems || []).filter(i => i.category === 'Finished Goods' || i.type === 'Finish Good').length;
   const sku = `FG-${String(fgCount + 1).padStart(3, '0')}`;
   const timestamp = Date.now();
+  const rollSize = parseRollSizeFromPacking(combo.packing, packingsConfig || DEFAULT_FG_CONFIG.packings);
 
   return {
     id: `ITM-FG-${timestamp}`,
@@ -223,6 +248,9 @@ export function createFinishedGoodFromCombo(combo = {}, stateItems = [], masking
     price: 0,
     stock: 0,
     rolls: 0,
+    rollSize: rollSize,
+    packingSize: rollSize,
+    packingName: combo.packing || '',
     specifications: `Synthetic Leather ${combo.baseItem || ''} - ${combo.layers || ''} on ${combo.fabricName || 'Standard Backing'}`,
     status: 'Active',
     isNewFromOrder: true,
