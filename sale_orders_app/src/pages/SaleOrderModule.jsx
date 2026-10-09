@@ -145,14 +145,101 @@ export default function SaleOrderModule() {
     return maxIdx;
   };
   
+  // --- Creation & Order States (Declared first to avoid TDZ errors) ---
+  const getNextOrderId = () => `SO-${String((state.saleOrders || []).length + 1).padStart(3, '0')}`;
+
+  const [orderMeta, setOrderMeta] = useState({
+    id: getNextOrderId(),
+    date: new Date().toISOString().split('T')[0],
+    status: 'Pending',
+    type: 'Standard',
+    customerId: '',
+    shippingAddress: '',
+    expectedDelivery: '',
+    notes: '',
+    paymentTerms: 'Net 30',
+    salesperson: ''
+  });
+
+  const [items, setItems] = useState(() => {
+    let maxIdx = getGlobalMaxItemIndex();
+    return [{
+      id: Date.now(),
+      itemCode: `ITM-${String(maxIdx + 1).padStart(3, '0')}`,
+      itemId: '',
+      qty: 1,
+      rolls: 1,
+      price: 0,
+      discount: 0,
+      remarks: ""
+    }];
+  });
+
+  // Re-sync ID on mount in case it shifted
+  useEffect(() => {
+    setOrderMeta(prev => ({ ...prev, id: getNextOrderId() }));
+  }, [state.saleOrders?.length]);
+
+  // Unsaved Changes Guard State
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingNavigationAction, setPendingNavigationAction] = useState(null);
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (activeTab !== 'create') return false;
+    const hasCustomer = Boolean(orderMeta.customerId);
+    const hasSalesperson = Boolean(orderMeta.salesperson);
+    const hasNotes = Boolean(orderMeta.notes?.trim());
+    const hasShipping = Boolean(orderMeta.shippingAddress?.trim());
+    const hasItems = (items || []).some(i => Boolean(i.itemId) || (i.qty && i.qty > 1) || (i.price && i.price > 0));
+    return hasCustomer || hasSalesperson || hasNotes || hasShipping || hasItems;
+  }, [activeTab, orderMeta, items]);
+
+  const resetCreateForm = () => {
+    setOrderMeta({
+      id: getNextOrderId(),
+      date: new Date().toISOString().split('T')[0],
+      status: 'Pending',
+      type: 'Standard',
+      customerId: '',
+      shippingAddress: '',
+      expectedDelivery: '',
+      notes: '',
+      paymentTerms: 'Net 30',
+      salesperson: ''
+    });
+    let maxIdx = getGlobalMaxItemIndex();
+    setItems([{
+      id: Date.now(),
+      itemCode: `ITM-${String(maxIdx + 1).padStart(3, '0')}`,
+      itemId: '',
+      qty: 1,
+      rolls: 1,
+      price: 0,
+      discount: 0,
+      remarks: ""
+    }]);
+  };
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes in this Sale Order. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
   const tabs = ['dashboard', 'create', 'history'];
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
-     const tab = searchParams.get('tab');
-     if (tab && tabs.includes(tab)) {
-         setActiveTab(tab);
-     }
+    const tab = searchParams.get('tab');
+    if (tab && tabs.includes(tab)) {
+      setActiveTab(tab);
+    }
   }, [searchParams]);
 
   const handleTabChange = (tabId) => {
@@ -170,14 +257,14 @@ export default function SaleOrderModule() {
   };
 
   const subNavConfig = {
-      title: 'Sale Orders',
-      items: [
-          { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-          { id: 'create', label: 'Create Sale Order', icon: 'add_shopping_cart' },
-          { id: 'history', label: 'Order History', icon: 'history' }
-      ],
-      activeId: activeTab,
-      onSelect: handleTabChange
+    title: 'Sale Orders',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+      { id: 'create', label: 'Create Sale Order', icon: 'add_shopping_cart' },
+      { id: 'history', label: 'Order History', icon: 'history' }
+    ],
+    activeId: activeTab,
+    onSelect: handleTabChange
   };
 
   const [histCust, setHistCust] = useState('');
@@ -473,91 +560,7 @@ export default function SaleOrderModule() {
     return data;
   };
 
-  // --- Creation Logic ---
-  const getNextOrderId = () => `SO-${String(state.saleOrders.length + 1).padStart(3, '0')}`;
-
-  const [orderMeta, setOrderMeta] = useState({
-    id: getNextOrderId(),
-    date: new Date().toISOString().split('T')[0],
-    status: 'Pending',
-    type: 'Standard',
-    customerId: '',
-    shippingAddress: '',
-    expectedDelivery: '',
-    notes: '',
-    paymentTerms: 'Net 30',
-    salesperson: ''
-  });
-
-  // Unsaved Changes Guard State
-  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
-  const [pendingNavigationAction, setPendingNavigationAction] = useState(null);
-
-  const hasUnsavedChanges = useMemo(() => {
-    if (activeTab !== 'create') return false;
-    const hasCustomer = Boolean(orderMeta.customerId);
-    const hasSalesperson = Boolean(orderMeta.salesperson);
-    const hasNotes = Boolean(orderMeta.notes?.trim());
-    const hasShipping = Boolean(orderMeta.shippingAddress?.trim());
-    const hasItems = (items || []).some(i => Boolean(i.itemId) || (i.qty && i.qty > 1) || (i.price && i.price > 0));
-    return hasCustomer || hasSalesperson || hasNotes || hasShipping || hasItems;
-  }, [activeTab, orderMeta, items]);
-
-  const resetCreateForm = () => {
-    setOrderMeta({
-      id: getNextOrderId(),
-      date: new Date().toISOString().split('T')[0],
-      status: 'Pending',
-      type: 'Standard',
-      customerId: '',
-      shippingAddress: '',
-      expectedDelivery: '',
-      notes: '',
-      paymentTerms: 'Net 30',
-      salesperson: ''
-    });
-    let maxIdx = getGlobalMaxItemIndex();
-    setItems([{
-      id: Date.now(),
-      itemCode: `ITM-${String(maxIdx + 1).padStart(3, '0')}`,
-      itemId: '',
-      qty: 1,
-      rolls: 1,
-      price: 0,
-      remarks: ""
-    }]);
-  };
-
-  useEffect(() => {
-    const handleBeforeUnload = (e) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes in this Sale Order. Are you sure you want to leave?';
-        return e.returnValue;
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
-
-  // Re-sync ID on mount in case it shifted
-  useEffect(() => {
-      setOrderMeta(prev => ({ ...prev, id: getNextOrderId() }));
-  }, [state.saleOrders.length]);
-
-  const [items, setItems] = useState(() => {
-    let maxIdx = getGlobalMaxItemIndex();
-    return [{
-      id: Date.now(),
-      itemCode: `ITM-${String(maxIdx + 1).padStart(3, '0')}`,
-      itemId: '',
-      qty: 1,
-      rolls: 1, // New field for rolls
-      price: 0,
-      discount: 0,
-      remarks: ""
-    }];
-  });
+  // (Creation logic states moved to top of component)
 
   const subtotal = useMemo(() => items.reduce((sum, item) => sum + ((item.qty * item.price) - (item.discount || 0)), 0), [items]);
 
