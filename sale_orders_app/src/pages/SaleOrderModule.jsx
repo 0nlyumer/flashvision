@@ -156,6 +156,15 @@ export default function SaleOrderModule() {
   }, [searchParams]);
 
   const handleTabChange = (tabId) => {
+    if (activeTab === 'create' && tabId !== 'create' && hasUnsavedChanges) {
+      setPendingNavigationAction(() => () => {
+        resetCreateForm();
+        setActiveTab(tabId);
+        setSearchParams({ tab: tabId }, { replace: true });
+      });
+      setShowUnsavedModal(true);
+      return;
+    }
     setActiveTab(tabId);
     setSearchParams({ tab: tabId }, { replace: true });
   };
@@ -195,13 +204,13 @@ export default function SaleOrderModule() {
   const handlePrevTab = () => {
     const currentIndex = tabs.indexOf(activeTab);
     const prevIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
-    setActiveTab(tabs[prevIndex]);
+    handleTabChange(tabs[prevIndex]);
   };
   
   const handleNextTab = () => {
     const currentIndex = tabs.indexOf(activeTab);
     const nextIndex = currentIndex === tabs.length - 1 ? 0 : currentIndex + 1;
-    setActiveTab(tabs[nextIndex]);
+    handleTabChange(tabs[nextIndex]);
   };
   
   // --- Dashboard Logic & Widgets ---
@@ -472,13 +481,64 @@ export default function SaleOrderModule() {
     date: new Date().toISOString().split('T')[0],
     status: 'Pending',
     type: 'Standard',
-    customerId: state.customers[0]?.id || '',
+    customerId: '',
     shippingAddress: '',
     expectedDelivery: '',
     notes: '',
     paymentTerms: 'Net 30',
-    salesperson: 'Alexander Pierce'
+    salesperson: ''
   });
+
+  // Unsaved Changes Guard State
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [pendingNavigationAction, setPendingNavigationAction] = useState(null);
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (activeTab !== 'create') return false;
+    const hasCustomer = Boolean(orderMeta.customerId);
+    const hasSalesperson = Boolean(orderMeta.salesperson);
+    const hasNotes = Boolean(orderMeta.notes?.trim());
+    const hasShipping = Boolean(orderMeta.shippingAddress?.trim());
+    const hasItems = (items || []).some(i => Boolean(i.itemId) || (i.qty && i.qty > 1) || (i.price && i.price > 0));
+    return hasCustomer || hasSalesperson || hasNotes || hasShipping || hasItems;
+  }, [activeTab, orderMeta, items]);
+
+  const resetCreateForm = () => {
+    setOrderMeta({
+      id: getNextOrderId(),
+      date: new Date().toISOString().split('T')[0],
+      status: 'Pending',
+      type: 'Standard',
+      customerId: '',
+      shippingAddress: '',
+      expectedDelivery: '',
+      notes: '',
+      paymentTerms: 'Net 30',
+      salesperson: ''
+    });
+    let maxIdx = getGlobalMaxItemIndex();
+    setItems([{
+      id: Date.now(),
+      itemCode: `ITM-${String(maxIdx + 1).padStart(3, '0')}`,
+      itemId: '',
+      qty: 1,
+      rolls: 1,
+      price: 0,
+      remarks: ""
+    }]);
+  };
+
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes in this Sale Order. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   // Re-sync ID on mount in case it shifted
   useEffect(() => {
@@ -594,6 +654,10 @@ export default function SaleOrderModule() {
         appAlert("Please select a customer.");
         return;
     }
+    if (!orderMeta.salesperson) {
+        appAlert("Please select a salesperson.");
+        return;
+    }
     const invalidItem = items.find(i => !i.itemId || i.qty <= 0);
     if(invalidItem) {
         appAlert("Please select valid items and quantities greater than zero.");
@@ -632,8 +696,16 @@ export default function SaleOrderModule() {
     // Reset form and switch tab
     const nextId = `SO-${String(state.saleOrders.length + 2).padStart(3, '0')}`;
     setOrderMeta({
-        ...orderMeta,
         id: nextId,
+        date: new Date().toISOString().split('T')[0],
+        status: 'Pending',
+        type: 'Standard',
+        customerId: '',
+        shippingAddress: '',
+        expectedDelivery: '',
+        notes: '',
+        paymentTerms: 'Net 30',
+        salesperson: ''
     });
     const nextMaxIdx = getGlobalMaxItemIndex(items); // Since we just submitted, those items are 'virtually' the latest max before state updates completely
     setItems([{
@@ -1712,7 +1784,7 @@ export default function SaleOrderModule() {
           <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex items-center gap-4">
                <div className="flex mr-2">
-                  <button type="button" onClick={() => setActiveTab('dashboard')} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm" title="Back to Dashboard"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
+                  <button type="button" onClick={() => handleTabChange('dashboard')} className="w-9 h-9 flex items-center justify-center bg-surface hover:bg-surface-container-low rounded-lg border border-outline-variant/30 text-slate-500 hover:text-primary transition-all shadow-sm cursor-pointer" title="Back to Dashboard"><span className="material-symbols-outlined text-[18px]">arrow_back</span></button>
                </div>
                <div className="space-y-1">
                  <h1 className="text-3xl font-extrabold tracking-tight text-on-surface font-headline">New Sale Order</h1>
@@ -1810,10 +1882,14 @@ export default function SaleOrderModule() {
               </div>
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Salesperson</label>
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Salesperson *</label>
                   <select value={orderMeta.salesperson} onChange={(e) => handleMetaChange('salesperson', e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-lg focus:ring-2 ring-primary/20 font-bold text-sm">
-                    <option>Alexander Pierce</option>
-                    <option>Elena Rodriguez</option>
+                    <option value="">Select Salesperson</option>
+                    <option value="Alexander Pierce">Alexander Pierce</option>
+                    <option value="Elena Rodriguez">Elena Rodriguez</option>
+                    {(state.users || []).map(u => (
+                      <option key={u.id} value={u.name}>{u.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="space-y-2">
@@ -2008,7 +2084,7 @@ export default function SaleOrderModule() {
           </div>
 
           <footer className="flex flex-col md:flex-row justify-between items-center gap-4 pt-10 pb-6">
-            <button type="button" onClick={() => setActiveTab('dashboard')} className="px-8 py-3.5 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors w-full md:w-auto">Cancel Workflow</button>
+            <button type="button" onClick={() => handleTabChange('dashboard')} className="px-8 py-3.5 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors w-full md:w-auto cursor-pointer">Cancel Workflow</button>
             <button type="submit" className="px-10 py-3.5 bg-primary text-white font-extrabold rounded-xl shadow-[0_10px_20px_rgba(0,113,227,0.2)] hover:shadow-[0_15px_30px_rgba(0,113,227,0.3)] transition-all w-full md:w-auto transform hover:-translate-y-0.5">Submit Sale Order</button>
           </footer>
         </form>
@@ -2152,6 +2228,54 @@ export default function SaleOrderModule() {
                 )}
               </div>
            </div>
+        </div>
+      )}
+
+      {/* Unsaved Changes Confirmation Modal */}
+      {showUnsavedModal && (
+        <div 
+          role="dialog" 
+          aria-modal="true" 
+          className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div className="bg-surface-container-lowest/95 dark:bg-[#14171f]/95 border border-white/10 dark:border-white/[0.08] rounded-3xl p-7 max-w-md w-full shadow-[0_25px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl text-center space-y-5 animate-in zoom-in-95 duration-200 text-on-surface">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-500 flex items-center justify-center mx-auto shadow-inner">
+              <span className="material-symbols-outlined text-[32px]">warning</span>
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-on-surface tracking-tight font-headline">
+                Unsaved Changes Warning
+              </h3>
+              <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">
+                You have unsaved changes in this Sale Order. If you leave this page without saving, all entered items, customer selections, and order specifications will be permanently lost.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUnsavedModal(false);
+                  if (pendingNavigationAction) {
+                    pendingNavigationAction();
+                    setPendingNavigationAction(null);
+                  }
+                }}
+                className="flex-1 py-2.5 px-4 rounded-xl border border-red-500/30 text-red-500 hover:bg-red-500/10 font-bold text-xs transition-colors cursor-pointer"
+              >
+                Discard & Leave
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUnsavedModal(false);
+                  setPendingNavigationAction(null);
+                }}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer"
+              >
+                Keep Editing
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </Layout>

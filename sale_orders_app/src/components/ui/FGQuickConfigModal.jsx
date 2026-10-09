@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
-import { DEFAULT_FG_CONFIG } from '../../utils/fgCombinationUtils';
+import { DEFAULT_FG_CONFIG, getInitialFGConfig, saveFGConfig } from '../../utils/fgCombinationUtils';
 
 export default function FGQuickConfigModal({ isOpen, onClose }) {
   const { state, setCollection } = useApp();
   const [activeTab, setActiveTab] = useState('paperCodes');
 
-  const config = state.fg_combinations_config || DEFAULT_FG_CONFIG;
+  // Load from state or persistent initial config
+  const config = state.fg_combinations_config || getInitialFGConfig();
 
   // Local form states for adding new entries
   const [newPaper, setNewPaper] = useState({ code: '', name: '', description: '' });
@@ -16,8 +18,47 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
   const [newFabric, setNewFabric] = useState({ name: '', colorsStr: 'White, Black, Grey' });
   const [newPacking, setNewPacking] = useState({ name: '', uom: 'Meters', size: 50 });
 
-  // Editing state
-  const [editingItem, setEditingItem] = useState(null);
+  // Draggable positioning state
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ mouseX: 0, mouseY: 0, posX: 0, posY: 0 });
+
+  // Reset drag position on open
+  useEffect(() => {
+    if (isOpen) {
+      setPosition({ x: 0, y: 0 });
+    }
+  }, [isOpen]);
+
+  const handlePointerDown = (e) => {
+    // Only primary click
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    setIsDragging(true);
+    dragStartRef.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      posX: position.x,
+      posY: position.y
+    };
+
+    const handlePointerMove = (moveEvt) => {
+      const deltaX = moveEvt.clientX - dragStartRef.current.mouseX;
+      const deltaY = moveEvt.clientY - dragStartRef.current.mouseY;
+      setPosition({
+        x: Math.round(dragStartRef.current.posX + deltaX),
+        y: Math.round(dragStartRef.current.posY + deltaY)
+      });
+    };
+
+    const handlePointerUp = () => {
+      setIsDragging(false);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+  };
 
   if (!isOpen) return null;
 
@@ -25,11 +66,16 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
     const current = config[key] || [];
     const updated = typeof updater === 'function' ? updater(current) : updater;
     const newConfig = { ...config, [key]: updated };
+    
+    // Save to persistent storage and dispatch broadcast
+    saveFGConfig(newConfig);
+    // Update global app state
     setCollection('fg_combinations_config', newConfig);
   };
 
   const handleAddPaper = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!newPaper.code.trim()) return;
     const item = {
       id: 'p_' + Date.now(),
@@ -42,7 +88,8 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
   };
 
   const handleAddGauge = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!newGauge.name.trim()) return;
     const item = {
       id: 'g_' + Date.now(),
@@ -54,7 +101,8 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
   };
 
   const handleAddColor = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!newColor.name.trim()) return;
     const item = {
       id: 'c_' + Date.now(),
@@ -66,7 +114,8 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
   };
 
   const handleAddLayer = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!newLayer.name.trim()) return;
     const item = {
       id: 'l_' + Date.now(),
@@ -77,7 +126,8 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
   };
 
   const handleAddFabric = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!newFabric.name.trim()) return;
     const colors = newFabric.colorsStr.split(',').map(s => s.trim()).filter(Boolean);
     const item = {
@@ -90,7 +140,8 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
   };
 
   const handleAddPacking = (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
     if (!newPacking.name.trim()) return;
     const item = {
       id: 'pk_' + Date.now(),
@@ -112,7 +163,9 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
       ...currentMasking,
       [fieldKey]: !currentMasking[fieldKey]
     };
-    setCollection('fg_combinations_config', { ...config, masking: updatedMasking });
+    const newConfig = { ...config, masking: updatedMasking };
+    saveFGConfig(newConfig);
+    setCollection('fg_combinations_config', newConfig);
   };
 
   const tabs = [
@@ -127,116 +180,156 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
 
   const masking = config.masking || DEFAULT_FG_CONFIG.masking;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.3)] w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-on-surface">
+  const modalContent = (
+    <div 
+      role="dialog" 
+      aria-modal="true" 
+      data-builder-modal="true"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={(e) => {
+        // Prevent background clicks from submitting forms
+        e.stopPropagation();
+      }}
+    >
+      <div 
+        style={{ transform: `translate3d(${position.x}px, ${position.y}px, 0)` }}
+        className="bg-surface-container-lowest/95 backdrop-blur-2xl border border-white/10 dark:border-white/[0.08] rounded-3xl shadow-[0_30px_70px_rgba(0,0,0,0.5)] w-full max-w-4xl max-h-[88vh] flex flex-col overflow-hidden text-on-surface transition-shadow duration-200"
+      >
         
-        {/* Header */}
-        <div className="px-6 py-5 border-b border-outline-variant/15 flex items-center justify-between bg-surface-container-low">
+        {/* Header - DRAGGABLE HANDLE */}
+        <div 
+          onPointerDown={handlePointerDown}
+          className={`px-6 py-4.5 border-b border-outline-variant/15 flex items-center justify-between bg-surface-container-low/80 select-none ${
+            isDragging ? 'cursor-grabbing' : 'cursor-grab'
+          }`}
+          title="Click and drag to move this window anywhere"
+        >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-inner">
               <span className="material-symbols-outlined text-[22px]">tune</span>
             </div>
             <div>
-              <h2 className="text-lg font-bold font-headline text-on-surface flex items-center gap-2">
-                FG Combination & Identity Configuration
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border border-cyan-500/30">
-                  Synthetic Leather
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-on-surface tracking-tight">
+                  Finished Goods Configuration & Masking
+                </h3>
+                <span className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-full border border-primary/20 flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[12px]">drag_indicator</span>
+                  Draggable
                 </span>
-              </h2>
-              <p className="text-xs text-on-surface-variant font-medium">
-                Manage discrete Finished Goods attribute options and dynamic naming patterns.
+              </div>
+              <p className="text-xs text-on-surface-variant">
+                Manage textures, gauges, colors, backings, and auto-naming format. Changes persist instantly.
               </p>
             </div>
           </div>
-          <button 
-            type="button" 
-            onClick={onClose}
-            className="w-9 h-9 rounded-lg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors"
-          >
-            <span className="material-symbols-outlined text-[20px]">close</span>
-          </button>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium hidden sm:inline">
+              Hold header to reposition
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-surface hover:bg-surface-container-high text-on-surface-variant hover:text-red-500 transition-colors cursor-pointer border border-outline-variant/20"
+              title="Close Configuration"
+            >
+              <span className="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-6 border-b border-outline-variant/15 bg-surface flex gap-2 overflow-x-auto no-scrollbar py-2">
+        <div className="flex border-b border-outline-variant/15 bg-surface-container-lowest overflow-x-auto px-4 gap-1.5 scrollbar-none py-2 shrink-0">
           {tabs.map(tab => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface'
+                  ? 'bg-primary text-white shadow-sm ring-1 ring-primary/40'
+                  : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60'
               }`}
             >
               <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
-              {tab.label}
+              <span>{tab.label}</span>
+              {tab.id !== 'masking' && (
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-surface-container text-on-surface-variant'}`}>
+                  {(config[tab.id] || []).length}
+                </span>
+              )}
             </button>
           ))}
         </div>
 
-        {/* Content Body */}
+        {/* Body Content */}
         <div className="p-6 overflow-y-auto flex-1 space-y-6">
 
           {/* TAB 1: Paper / Texture Codes */}
           {activeTab === 'paperCodes' && (
             <div className="space-y-5">
-              <form onSubmit={handleAddPaper} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 flex flex-wrap gap-3 items-end">
+              <div 
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddPaper(e); }}
+                className="bg-surface-container-low/60 backdrop-blur-md p-4.5 rounded-2xl border border-outline-variant/20 flex flex-wrap gap-3 items-end"
+              >
                 <div className="flex-1 min-w-[140px]">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Paper Code *</label>
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Paper Code *</label>
                   <input
                     type="text"
-                    placeholder="e.g. P-109, LAMB-88"
+                    placeholder="e.g. P-109"
                     value={newPaper.code}
-                    onChange={(e) => setNewPaper({ ...newPaper, code: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-bold uppercase focus:ring-2 focus:ring-primary/20 outline-none"
-                    required
+                    onChange={(e) => setNewPaper(prev => ({ ...prev, code: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs font-bold text-on-surface uppercase outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
-                <div className="flex-1 min-w-[180px]">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Texture Name</label>
+                <div className="flex-2 min-w-[180px]">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Texture Name</label>
                   <input
                     type="text"
-                    placeholder="e.g. Fine Calfskin Grain"
+                    placeholder="e.g. Suede Grain Emboss"
                     value={newPaper.name}
-                    onChange={(e) => setNewPaper({ ...newPaper, name: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary/20 outline-none"
+                    onChange={(e) => setNewPaper(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
-                <div className="flex-[2] min-w-[200px]">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Description / Spec</label>
+                <div className="flex-3 min-w-[200px]">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Description / Spec</label>
                   <input
                     type="text"
-                    placeholder="Optional embossed pattern notes"
+                    placeholder="e.g. Matte finish release paper"
                     value={newPaper.description}
-                    onChange={(e) => setNewPaper({ ...newPaper, description: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary/20 outline-none"
+                    onChange={(e) => setNewPaper(prev => ({ ...prev, description: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
                 <button
-                  type="submit"
-                  className="bg-primary text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm"
+                  type="button"
+                  onClick={handleAddPaper}
+                  className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px]">add</span> Add Texture
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  <span>+ Add Paper</span>
                 </button>
-              </form>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {(config.paperCodes || []).map(p => (
-                  <div key={p.id} className="p-3.5 bg-surface border border-outline-variant/20 rounded-xl flex items-center justify-between hover:border-primary/40 transition-colors">
+                  <div key={p.id} className="p-3.5 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest/80 backdrop-blur-md flex items-start justify-between gap-3 group hover:border-primary/40 transition-all shadow-xs">
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-extrabold bg-primary/10 text-primary px-2 py-0.5 rounded border border-primary/20">{p.code}</span>
-                        <span className="text-xs font-bold text-on-surface">{p.name}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono font-bold text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">{p.code}</span>
+                        <span className="font-bold text-xs text-on-surface truncate">{p.name}</span>
                       </div>
-                      {p.description && <p className="text-[11px] text-on-surface-variant mt-1">{p.description}</p>}
+                      {p.description && <p className="text-[11px] text-on-surface-variant mt-1 line-clamp-1">{p.description}</p>}
                     </div>
                     <button
                       type="button"
                       onClick={() => handleDelete('paperCodes', p.id)}
-                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 p-1.5 rounded-lg transition-colors"
+                      className="text-on-surface-variant/40 hover:text-red-500 p-1 rounded-lg hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                       title="Delete"
                     >
                       <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -247,53 +340,54 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* TAB 2: Item Gauges */}
+          {/* TAB 2: Gauges / Item Thickness */}
           {activeTab === 'gauges' && (
             <div className="space-y-5">
-              <form onSubmit={handleAddGauge} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 flex flex-wrap gap-3 items-end">
+              <div 
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddGauge(e); }}
+                className="bg-surface-container-low/60 backdrop-blur-md p-4.5 rounded-2xl border border-outline-variant/20 flex flex-wrap gap-3 items-end"
+              >
                 <div className="flex-1 min-w-[200px]">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Base Name *</label>
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Base Item / Gauge Name *</label>
                   <input
                     type="text"
-                    placeholder="e.g. 0.85mm Premium PU"
+                    placeholder="e.g. 0.95mm Automotive Rexine"
                     value={newGauge.name}
-                    onChange={(e) => setNewGauge({ ...newGauge, name: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
-                    required
+                    onChange={(e) => setNewGauge(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
-                <div className="w-36">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Gauge (mm)</label>
+                <div className="w-[160px]">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Thickness Value</label>
                   <input
                     type="text"
-                    placeholder="e.g. 0.85mm"
+                    placeholder="e.g. 0.95mm"
                     value={newGauge.gauge}
-                    onChange={(e) => setNewGauge({ ...newGauge, gauge: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-mono font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                    onChange={(e) => setNewGauge(prev => ({ ...prev, gauge: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
                 <button
-                  type="submit"
-                  className="bg-primary text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm"
+                  type="button"
+                  onClick={handleAddGauge}
+                  className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px]">add</span> Add Gauge
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  <span>+ Add Item Gauge</span>
                 </button>
-              </form>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {(config.gauges || []).map(g => (
-                  <div key={g.id} className="p-3.5 bg-surface border border-outline-variant/20 rounded-xl flex items-center justify-between hover:border-primary/40 transition-colors">
+                  <div key={g.id} className="p-3.5 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-between gap-3 group hover:border-primary/40 transition-all shadow-xs">
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-cyan-600 text-[18px]">straighten</span>
-                      <div>
-                        <div className="text-xs font-bold text-on-surface">{g.name}</div>
-                        {g.gauge && <span className="text-[10px] font-mono text-on-surface-variant">Thickness: {g.gauge}</span>}
-                      </div>
+                      <span className="material-symbols-outlined text-primary text-[18px]">straighten</span>
+                      <span className="font-bold text-xs text-on-surface">{g.name}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleDelete('gauges', g.id)}
-                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 p-1.5 rounded-lg transition-colors"
+                      className="text-on-surface-variant/40 hover:text-red-500 p-1 rounded-lg hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                       title="Delete"
                     >
                       <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -304,55 +398,59 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* TAB 3: Top Layer Colors */}
+          {/* TAB 3: Top Colors */}
           {activeTab === 'colors' && (
             <div className="space-y-5">
-              <form onSubmit={handleAddColor} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 flex flex-wrap gap-3 items-end">
+              <div 
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddColor(e); }}
+                className="bg-surface-container-low/60 backdrop-blur-md p-4.5 rounded-2xl border border-outline-variant/20 flex flex-wrap gap-3 items-end"
+              >
                 <div className="flex-1 min-w-[180px]">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Color Name *</label>
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Color Name *</label>
                   <input
                     type="text"
-                    placeholder="e.g. Havana Cognac"
+                    placeholder="e.g. Royal Maroon"
                     value={newColor.name}
-                    onChange={(e) => setNewColor({ ...newColor, name: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
-                    required
+                    onChange={(e) => setNewColor(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
-                <div className="w-24">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Color Swatch</label>
-                  <div className="flex items-center gap-2">
+                <div className="w-[120px]">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Hex Code</label>
+                  <div className="flex items-center gap-2 bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-2 py-1.5">
                     <input
                       type="color"
                       value={newColor.hex}
-                      onChange={(e) => setNewColor({ ...newColor, hex: e.target.value })}
-                      className="w-10 h-8 rounded border border-outline-variant/30 cursor-pointer"
+                      onChange={(e) => setNewColor(prev => ({ ...prev, hex: e.target.value }))}
+                      className="w-6 h-6 rounded cursor-pointer border-none bg-transparent"
                     />
-                    <span className="text-[10px] font-mono">{newColor.hex}</span>
+                    <span className="text-[11px] font-mono font-bold text-on-surface-variant">{newColor.hex}</span>
                   </div>
                 </div>
                 <button
-                  type="submit"
-                  className="bg-primary text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm"
+                  type="button"
+                  onClick={handleAddColor}
+                  className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px]">add</span> Add Color
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  <span>+ Add Color</span>
                 </button>
-              </form>
+              </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {(config.colors || []).map(c => (
-                  <div key={c.id} className="p-3 bg-surface border border-outline-variant/20 rounded-xl flex items-center justify-between hover:border-primary/40 transition-colors">
+                  <div key={c.id} className="p-3 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-between gap-2 group hover:border-primary/40 transition-all shadow-xs">
                     <div className="flex items-center gap-2.5">
-                      <span className="w-5 h-5 rounded-full border border-black/20 shadow-inner shrink-0" style={{ backgroundColor: c.hex || '#ddd' }} />
-                      <span className="text-xs font-bold text-on-surface">{c.name}</span>
+                      <span className="w-5 h-5 rounded-full border border-black/20 dark:border-white/20 shrink-0 shadow-xs" style={{ backgroundColor: c.hex || '#111111' }}></span>
+                      <span className="font-bold text-xs text-on-surface truncate">{c.name}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleDelete('colors', c.id)}
-                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 p-1 rounded transition-colors"
+                      className="text-on-surface-variant/40 hover:text-red-500 p-1 rounded-lg hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                       title="Delete"
                     >
-                      <span className="material-symbols-outlined text-[15px]">delete</span>
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
                     </button>
                   </div>
                 ))}
@@ -363,40 +461,41 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
           {/* TAB 4: Layers */}
           {activeTab === 'layers' && (
             <div className="space-y-5">
-              <form onSubmit={handleAddLayer} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 flex gap-3 items-end">
-                <div className="flex-1">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Layer Specification *</label>
+              <div 
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddLayer(e); }}
+                className="bg-surface-container-low/60 backdrop-blur-md p-4.5 rounded-2xl border border-outline-variant/20 flex gap-3 items-end"
+              >
+                <div className="flex-1 max-w-sm">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Layer Specification *</label>
                   <input
                     type="text"
-                    placeholder="e.g. 5 Layer, Tri-Laminate"
+                    placeholder="e.g. 5 Layer Heavy"
                     value={newLayer.name}
-                    onChange={(e) => setNewLayer({ ...newLayer, name: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
-                    required
+                    onChange={(e) => setNewLayer({ name: e.target.value })}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
                 <button
-                  type="submit"
-                  className="bg-primary text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm"
+                  type="button"
+                  onClick={handleAddLayer}
+                  className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px]">add</span> Add Layer
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  <span>+ Add Layer</span>
                 </button>
-              </form>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {(config.layers || []).map(l => (
-                  <div key={l.id} className="p-3 bg-surface border border-outline-variant/20 rounded-xl flex items-center justify-between hover:border-primary/40 transition-colors">
-                    <span className="text-xs font-extrabold text-on-surface flex items-center gap-2">
-                      <span className="material-symbols-outlined text-[16px] text-primary">layers</span>
-                      {l.name}
-                    </span>
+                  <div key={l.id} className="p-3.5 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-between gap-2 group hover:border-primary/40 transition-all shadow-xs">
+                    <span className="font-bold text-xs text-on-surface">{l.name}</span>
                     <button
                       type="button"
                       onClick={() => handleDelete('layers', l.id)}
-                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 p-1 rounded transition-colors"
+                      className="text-on-surface-variant/40 hover:text-red-500 p-1 rounded-lg hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                       title="Delete"
                     >
-                      <span className="material-symbols-outlined text-[15px]">delete</span>
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
                     </button>
                   </div>
                 ))}
@@ -404,51 +503,51 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* TAB 5: Backing Fabrics & Colors */}
+          {/* TAB 5: Backing Fabrics */}
           {activeTab === 'fabrics' && (
             <div className="space-y-5">
-              <form onSubmit={handleAddFabric} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 flex flex-wrap gap-3 items-end">
+              <div 
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddFabric(e); }}
+                className="bg-surface-container-low/60 backdrop-blur-md p-4.5 rounded-2xl border border-outline-variant/20 flex flex-wrap gap-3 items-end"
+              >
                 <div className="flex-1 min-w-[180px]">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Fabric Name *</label>
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Fabric Material Name *</label>
                   <input
                     type="text"
-                    placeholder="e.g. Circular Knit Polyester"
+                    placeholder="e.g. Polar Fleece Backing"
                     value={newFabric.name}
-                    onChange={(e) => setNewFabric({ ...newFabric, name: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
-                    required
+                    onChange={(e) => setNewFabric(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
-                <div className="flex-[2] min-w-[220px]">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Available Colors (Comma separated)</label>
+                <div className="flex-2 min-w-[240px]">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Available Colors (Comma Separated)</label>
                   <input
                     type="text"
-                    placeholder="White, Black, Natural Ecru, Grey"
+                    placeholder="e.g. White, Black, Charcoal, Raw Ecru"
                     value={newFabric.colorsStr}
-                    onChange={(e) => setNewFabric({ ...newFabric, colorsStr: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-medium focus:ring-2 focus:ring-primary/20 outline-none"
+                    onChange={(e) => setNewFabric(prev => ({ ...prev, colorsStr: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
                 <button
-                  type="submit"
-                  className="bg-primary text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm"
+                  type="button"
+                  onClick={handleAddFabric}
+                  className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px]">add</span> Add Fabric
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  <span>+ Add Fabric</span>
                 </button>
-              </form>
+              </div>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {(config.fabrics || []).map(f => (
-                  <div key={f.id} className="p-3.5 bg-surface border border-outline-variant/20 rounded-xl flex items-center justify-between hover:border-primary/40 transition-colors">
+                  <div key={f.id} className="p-3.5 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest/80 backdrop-blur-md flex items-start justify-between gap-3 group hover:border-primary/40 transition-all shadow-xs">
                     <div>
-                      <div className="text-xs font-extrabold text-on-surface flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[16px] text-tertiary">dry_cleaning</span>
-                        {f.name}
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                        <span className="text-[10px] font-bold uppercase text-on-surface-variant">Fabric Colors:</span>
+                      <span className="font-bold text-xs text-on-surface block">{f.name}</span>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
                         {(f.colors || []).map((col, idx) => (
-                          <span key={idx} className="text-[10px] font-semibold bg-surface-container-high px-2 py-0.5 rounded-full border border-outline-variant/30">
+                          <span key={idx} className="text-[10px] bg-surface-container px-2 py-0.5 rounded-md font-medium text-on-surface-variant">
                             {col}
                           </span>
                         ))}
@@ -457,7 +556,7 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
                     <button
                       type="button"
                       onClick={() => handleDelete('fabrics', f.id)}
-                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 p-1.5 rounded-lg transition-colors"
+                      className="text-on-surface-variant/40 hover:text-red-500 p-1 rounded-lg hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                       title="Delete"
                     >
                       <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -471,62 +570,65 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
           {/* TAB 6: Packing Types */}
           {activeTab === 'packings' && (
             <div className="space-y-5">
-              <form onSubmit={handleAddPacking} className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/20 flex flex-wrap gap-3 items-end">
-                <div className="flex-1 min-w-[180px]">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Packing Specification *</label>
+              <div 
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddPacking(e); }}
+                className="bg-surface-container-low/60 backdrop-blur-md p-4.5 rounded-2xl border border-outline-variant/20 flex flex-wrap gap-3 items-end"
+              >
+                <div className="flex-2 min-w-[180px]">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Packing Name *</label>
                   <input
                     type="text"
-                    placeholder="e.g. 75M Shrink Wrapped"
+                    placeholder="e.g. 75M Custom Roll"
                     value={newPacking.name}
-                    onChange={(e) => setNewPacking({ ...newPacking, name: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
-                    required
+                    onChange={(e) => setNewPacking(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
                   />
                 </div>
-                <div className="w-28">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">UOM</label>
+                <div className="w-[110px]">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Size Value</label>
+                  <input
+                    type="number"
+                    placeholder="75"
+                    value={newPacking.size}
+                    onChange={(e) => setNewPacking(prev => ({ ...prev, size: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
+                  />
+                </div>
+                <div className="w-[120px]">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">UOM</label>
                   <select
                     value={newPacking.uom}
-                    onChange={(e) => setNewPacking({ ...newPacking, uom: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-2.5 py-2 text-xs font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                    onChange={(e) => setNewPacking(prev => ({ ...prev, uom: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-2 py-2 text-xs font-bold text-on-surface outline-none"
                   >
                     <option value="Meters">Meters</option>
+                    <option value="Yards">Yards</option>
                     <option value="Rolls">Rolls</option>
                     <option value="Carton">Carton</option>
                     <option value="Crate">Crate</option>
                   </select>
                 </div>
-                <div className="w-24">
-                  <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1">Std Size</label>
-                  <input
-                    type="number"
-                    value={newPacking.size}
-                    onChange={(e) => setNewPacking({ ...newPacking, size: e.target.value })}
-                    className="w-full bg-surface border border-outline-variant/30 rounded-lg px-2 py-2 text-xs font-mono font-bold focus:ring-2 focus:ring-primary/20 outline-none text-right"
-                  />
-                </div>
                 <button
-                  type="submit"
-                  className="bg-primary text-white text-xs font-bold px-4 py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5 shadow-sm"
+                  type="button"
+                  onClick={handleAddPacking}
+                  className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[16px]">add</span> Add Packing
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  <span>+ Add Packing</span>
                 </button>
-              </form>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {(config.packings || []).map(pk => (
-                  <div key={pk.id} className="p-3.5 bg-surface border border-outline-variant/20 rounded-xl flex items-center justify-between hover:border-primary/40 transition-colors">
-                    <div className="flex items-center gap-2.5">
-                      <span className="material-symbols-outlined text-amber-600 text-[18px]">inventory_2</span>
-                      <div>
-                        <div className="text-xs font-bold text-on-surface">{pk.name}</div>
-                        <span className="text-[10px] font-mono text-on-surface-variant">{pk.size} {pk.uom} per unit</span>
-                      </div>
+                  <div key={pk.id} className="p-3.5 rounded-2xl border border-outline-variant/15 bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-between gap-3 group hover:border-primary/40 transition-all shadow-xs">
+                    <div>
+                      <span className="font-bold text-xs text-on-surface block">{pk.name}</span>
+                      <span className="text-[11px] text-on-surface-variant font-mono">{pk.size} {pk.uom}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => handleDelete('packings', pk.id)}
-                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 p-1.5 rounded-lg transition-colors"
+                      className="text-on-surface-variant/40 hover:text-red-500 p-1 rounded-lg hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
                       title="Delete"
                     >
                       <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -537,40 +639,38 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* TAB 7: Name Masking Settings */}
+          {/* TAB 7: Name Masking Rules */}
           {activeTab === 'masking' && (
             <div className="space-y-4">
-              <div className="p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-xs text-on-surface">
-                <span className="font-bold flex items-center gap-1.5 text-cyan-700 dark:text-cyan-400 mb-1">
-                  <span className="material-symbols-outlined text-[16px]">info</span>
-                  Attribute Masking Rules
-                </span>
-                Masked attributes will be omitted from the final generated display name ({'{Paper Code} {Item Name} {Color} {Layers} ({Fabric Name} {Fabric Color})'}), but their combination identity remains <strong>100% intact and distinguishable</strong> in the database and search dropdowns.
+              <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 text-xs text-on-surface leading-relaxed">
+                <p className="font-bold text-primary mb-1">Masking Architecture Rule</p>
+                Masking hides selected attributes from the generated item title while preserving them as discrete configuration attributes in your database and order ledger.
               </div>
 
-              <div className="divide-y divide-outline-variant/15 border border-outline-variant/20 rounded-xl overflow-hidden bg-surface">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { key: 'maskPacking', label: 'Mask Packing from Item Display Name', desc: 'Packing (e.g. 50M Roll) remains in combination data but is hidden from the main title string.', default: true },
-                  { key: 'maskLayers', label: 'Mask Layers Specification', desc: 'Hide layer count (e.g. 2 Layer) from generated name string.', default: false },
-                  { key: 'maskColor', label: 'Mask Top Color', desc: 'Hide surface color from generated name string.', default: false },
-                  { key: 'maskFabric', label: 'Mask Backing Fabric & Fabric Color', desc: 'Hide ([Fabric Name] [Fabric Color]) from generated name string.', default: false },
-                  { key: 'maskPaperCode', label: 'Mask Paper / Texture Code', desc: 'Hide embossed release paper code from generated name string.', default: false }
+                  { key: 'maskPacking', label: 'Mask Packing from Item Title', desc: 'Packing remains tracked in orders, but is omitted from title' },
+                  { key: 'maskPaperCode', label: 'Mask Paper Code', desc: 'Hide texture release code from generated title' },
+                  { key: 'maskItemName', label: 'Mask Base Item Name / Gauge', desc: 'Omit gauge baseline from generated title' },
+                  { key: 'maskColor', label: 'Mask Top Color', desc: 'Omit primary surface color from generated title' },
+                  { key: 'maskLayers', label: 'Mask Layers', desc: 'Omit specification layers (e.g. 2 Layer)' },
+                  { key: 'maskFabric', label: 'Mask Backing Fabric', desc: 'Omit backing fabric and color parenthesis' }
                 ].map(item => (
-                  <div key={item.key} className="p-4 flex items-center justify-between hover:bg-surface-container-low transition-colors">
+                  <div key={item.key} className="p-4 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-between gap-4">
                     <div>
-                      <h4 className="text-xs font-bold text-on-surface">{item.label}</h4>
-                      <p className="text-[11px] text-on-surface-variant mt-0.5">{item.desc}</p>
+                      <span className="text-xs font-bold text-on-surface block">{item.label}</span>
+                      <span className="text-[11px] text-on-surface-variant leading-tight block mt-0.5">{item.desc}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => toggleMasking(item.key)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                         masking[item.key] ? 'bg-primary' : 'bg-surface-container-highest'
                       }`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow ${
-                          masking[item.key] ? 'translate-x-6' : 'translate-x-1'
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform shadow ${
+                          masking[item.key] ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />
                     </button>
@@ -583,14 +683,21 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-outline-variant/15 bg-surface-container-low flex justify-between items-center">
-          <span className="text-[11px] text-on-surface-variant font-medium">
-            Changes auto-save directly to enterprise Supabase cloud memory.
-          </span>
+        <div className="px-6 py-3.5 border-t border-outline-variant/15 flex items-center justify-between bg-surface-container-low/70 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-[11px] text-on-surface-variant font-semibold">
+              Live Auto-Sync Active — All entries persist in local & cloud memory
+            </span>
+          </div>
+
           <button
             type="button"
-            onClick={onClose}
-            className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:opacity-90 shadow-sm transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="px-5 py-2 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary/90 transition-all shadow-sm active:scale-95 cursor-pointer"
           >
             Done
           </button>
@@ -599,4 +706,6 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import {
   DEFAULT_FG_CONFIG,
+  getInitialFGConfig,
   generateFGDisplayName,
   matchItemToCombination,
   createFinishedGoodFromCombo
@@ -24,9 +25,29 @@ export default function FGCombinationBuilder({
   const triggerRef = useRef(null);
   const panelRef = useRef(null);
   const [panelCoords, setPanelCoords] = useState({ top: 0, left: 0, width: 1040 });
+  const [hasBeenDragged, setHasBeenDragged] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragOffsetRef = useRef({ mouseX: 0, mouseY: 0, initialTop: 0, initialLeft: 0 });
 
-  // Configuration options from global state or defaults
-  const config = state.fg_combinations_config || DEFAULT_FG_CONFIG;
+  // Dynamic configuration with live local sync
+  const [config, setConfig] = useState(() => state.fg_combinations_config || getInitialFGConfig());
+
+  useEffect(() => {
+    if (state.fg_combinations_config) {
+      setConfig(state.fg_combinations_config);
+    }
+  }, [state.fg_combinations_config]);
+
+  useEffect(() => {
+    const handleUpdate = (e) => {
+      if (e.detail) {
+        setConfig(e.detail);
+      }
+    };
+    window.addEventListener('fg-config-updated', handleUpdate);
+    return () => window.removeEventListener('fg-config-updated', handleUpdate);
+  }, []);
+
   const masking = config.masking || DEFAULT_FG_CONFIG.masking;
 
   // Combination selection state
@@ -104,16 +125,58 @@ export default function FGCombinationBuilder({
 
   const handleCreateNew = () => {
     if (!allowCreation || !generatedName) return;
-    const newItem = createFinishedGoodFromCombo(combo, config, finishedGoods.length + 1);
+    const newItem = createFinishedGoodFromCombo(combo, state.items || [], masking);
     if (onSelectItem) {
       onSelectItem(newItem);
     }
     setIsOpen(false);
   };
 
+  // Draggable handle
+  const handlePanelPointerDown = (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    if (e.target.closest('select') || e.target.closest('button')) return;
+
+    setIsDragging(true);
+    setHasBeenDragged(true);
+    dragOffsetRef.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      initialTop: panelCoords.top,
+      initialLeft: panelCoords.left
+    };
+
+    const handlePointerMove = (moveEvt) => {
+      const deltaX = moveEvt.clientX - dragOffsetRef.current.mouseX;
+      const deltaY = moveEvt.clientY - dragOffsetRef.current.mouseY;
+
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      const width = panelCoords.width;
+
+      let newLeft = Math.max(10, Math.min(screenWidth - width - 10, dragOffsetRef.current.initialLeft + deltaX));
+      let newTop = Math.max(10, Math.min(screenHeight - 80, dragOffsetRef.current.initialTop + deltaY));
+
+      setPanelCoords(prev => ({
+        ...prev,
+        left: Math.round(newLeft),
+        top: Math.round(newTop)
+      }));
+    };
+
+    const handlePointerUp = () => {
+      setIsDragging(false);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+  };
+
   // Auto-adjust positioning according to table position and screen boundaries
   const updateCoordinates = () => {
-    if (!triggerRef.current) return;
+    if (!triggerRef.current || hasBeenDragged) return;
     const rect = triggerRef.current.getBoundingClientRect();
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
@@ -129,7 +192,7 @@ export default function FGCombinationBuilder({
       left = screenWidth - 16 - targetWidth;
     }
 
-    // CRITICAL: Guarantee it NEVER goes off-screen to the left (prevents clipping into sidebar)
+    // Guarantee it NEVER goes off-screen to the left
     if (left < 16) {
       left = 16;
     }
@@ -152,10 +215,14 @@ export default function FGCombinationBuilder({
 
   useEffect(() => {
     if (!isOpen) return;
-    updateCoordinates();
+    if (!hasBeenDragged) {
+      updateCoordinates();
+    }
 
     const handleScrollOrResize = () => {
-      updateCoordinates();
+      if (!hasBeenDragged) {
+        updateCoordinates();
+      }
     };
 
     window.addEventListener('resize', handleScrollOrResize);
@@ -163,9 +230,11 @@ export default function FGCombinationBuilder({
 
     const handleClickOutside = (e) => {
       if (
+        isQuickConfigOpen ||
         (triggerRef.current && triggerRef.current.contains(e.target)) ||
         (panelRef.current && panelRef.current.contains(e.target)) ||
-        e.target.closest('[role="dialog"]')
+        e.target.closest('[role="dialog"]') ||
+        e.target.closest('[data-builder-modal]')
       ) {
         return;
       }
@@ -173,7 +242,7 @@ export default function FGCombinationBuilder({
     };
 
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && !isQuickConfigOpen) {
         setIsOpen(false);
       }
     };
@@ -187,7 +256,7 @@ export default function FGCombinationBuilder({
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]);
+  }, [isOpen, hasBeenDragged, isQuickConfigOpen]);
 
   return (
     <div className="relative inline-flex items-center shrink-0" ref={triggerRef}>
@@ -196,12 +265,12 @@ export default function FGCombinationBuilder({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         title={isOpen ? "Hide Combination Builder" : "Open Finished Goods Combination Builder"}
-        className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all border shrink-0 shadow-sm ${
+        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 shadow-sm cursor-pointer ${
           isOpen
-            ? 'bg-primary/10 border-primary text-primary ring-2 ring-primary/20'
+            ? 'bg-primary text-white border-primary shadow-md ring-2 ring-primary/30'
             : activeAttributeCount > 0
             ? 'bg-primary/10 border-primary/50 text-primary hover:bg-primary/20'
-            : 'bg-surface hover:bg-surface-container-low border-outline-variant/50 text-on-surface'
+            : 'bg-surface hover:bg-surface-container-low border-outline-variant/30 text-on-surface'
         } ${buttonClassName}`}
       >
         <span className="material-symbols-outlined text-[17px]">
@@ -215,7 +284,7 @@ export default function FGCombinationBuilder({
         )}
       </button>
 
-      {/* 2. Auto-Adjusting Single Horizontal Row Combination Builder Panel (Portal) */}
+      {/* 2. Draggable Single Horizontal Row Combination Builder Panel (Portal) */}
       {isOpen && typeof document !== 'undefined' && createPortal(
         <div
           ref={panelRef}
@@ -226,47 +295,53 @@ export default function FGCombinationBuilder({
             width: `${panelCoords.width}px`,
             zIndex: 9999
           }}
-          className="bg-surface/98 dark:bg-[#131722]/98 backdrop-blur-xl border border-outline-variant/60 rounded-2xl p-2.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 text-on-surface ring-1 ring-outline-variant/40"
+          className="bg-surface-container-lowest/95 dark:bg-[#14171f]/95 backdrop-blur-2xl border border-white/10 dark:border-white/[0.08] rounded-2xl p-2.5 shadow-[0_25px_60px_rgba(0,0,0,0.45)] animate-in fade-in zoom-in-95 duration-150 text-on-surface"
         >
           {/* ROW 1: Single Horizontal Row of 7 Dropdowns + Action Controls */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200/60 dark:border-slate-800 scrollbar-thin">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-outline-variant/15 scrollbar-thin">
             
-            {/* Header Mini Badge */}
-            <div className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-on-surface-variant font-bold shrink-0 px-1">
-              <span className="material-symbols-outlined text-[16px]">view_in_ar</span>
+            {/* Header Drag Handle */}
+            <div 
+              onPointerDown={handlePanelPointerDown}
+              className={`flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-on-surface-variant shrink-0 px-2 py-1 rounded-lg bg-surface-container-low/70 select-none border border-outline-variant/20 ${
+                isDragging ? 'cursor-grabbing ring-1 ring-primary' : 'cursor-grab'
+              }`}
+              title="Click and drag to move builder anywhere on screen"
+            >
+              <span className="material-symbols-outlined text-[16px] text-primary">drag_indicator</span>
               <span className="hidden sm:inline">FG Combo:</span>
             </div>
 
             {/* 1. Paper / Texture */}
-            <div className="shrink-0 w-[120px]">
+            <div className="shrink-0 w-[130px]">
               <select
                 value={combo.paperCode}
                 onChange={(e) => handleSelectField('paperCode', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
-                  combo.paperCode ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
+                className={`w-full bg-surface-container-lowest border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.paperCode ? 'border-primary text-primary bg-primary/5' : 'border-outline-variant/30 text-on-surface'
                 }`}
-                title="Paper / Texture Pattern"
+                title={masking.maskPaperCode ? "Paper Code (Masked in title)" : "Texture / Release Paper Code"}
               >
-                <option value="">Texture ▾</option>
+                <option value="">Paper {masking.maskPaperCode ? '🔒' : ''} ▾</option>
                 {(config.paperCodes || []).map(p => (
                   <option key={p.id} value={p.code}>
-                    {p.code} - {p.name}
+                    {p.code} — {p.name}
                   </option>
                 ))}
               </select>
             </div>
 
             {/* 2. Base Item / Gauge */}
-            <div className="shrink-0 w-[125px]">
+            <div className="shrink-0 w-[145px]">
               <select
                 value={combo.baseItem}
                 onChange={(e) => handleSelectField('baseItem', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
-                  combo.baseItem ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
+                className={`w-full bg-surface-container-lowest border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.baseItem ? 'border-primary text-primary bg-primary/5' : 'border-outline-variant/30 text-on-surface'
                 }`}
-                title="Gauge / Base Item"
+                title={masking.maskItemName ? "Item / Gauge (Masked in title)" : "Base Synthetic Leather Item & Thickness"}
               >
-                <option value="">Gauge / Item ▾</option>
+                <option value="">Gauge / Item {masking.maskItemName ? '🔒' : ''} ▾</option>
                 {(config.gauges || []).map(g => (
                   <option key={g.id} value={g.name}>
                     {g.name}
@@ -275,17 +350,17 @@ export default function FGCombinationBuilder({
               </select>
             </div>
 
-            {/* 3. Top Color */}
-            <div className="shrink-0 w-[110px]">
+            {/* 3. Color */}
+            <div className="shrink-0 w-[125px]">
               <select
                 value={combo.color}
                 onChange={(e) => handleSelectField('color', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
-                  combo.color ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
+                className={`w-full bg-surface-container-lowest border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.color ? 'border-primary text-primary bg-primary/5' : 'border-outline-variant/30 text-on-surface'
                 }`}
-                title="Top Surface Color"
+                title={masking.maskColor ? "Color (Masked in title)" : "Top Layer Color"}
               >
-                <option value="">Top Color ▾</option>
+                <option value="">Color {masking.maskColor ? '🔒' : ''} ▾</option>
                 {(config.colors || []).map(c => (
                   <option key={c.id} value={c.name}>
                     {c.name}
@@ -295,33 +370,35 @@ export default function FGCombinationBuilder({
             </div>
 
             {/* 4. Layers */}
-            <div className="shrink-0 w-[100px]">
+            <div className="shrink-0 w-[105px]">
               <select
                 value={combo.layers}
                 onChange={(e) => handleSelectField('layers', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
-                  combo.layers ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
+                className={`w-full bg-surface-container-lowest border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.layers ? 'border-primary text-primary bg-primary/5' : 'border-outline-variant/30 text-on-surface'
                 }`}
-                title="Layers Specification"
+                title={masking.maskLayers ? "Layers (Masked in title)" : "Specification Layers"}
               >
-                <option value="">Layers ▾</option>
-                {['1 Layer', '2 Layer', '3 Layer', '4 Layer'].map(l => (
-                  <option key={l} value={l}>{l}</option>
+                <option value="">Layers {masking.maskLayers ? '🔒' : ''} ▾</option>
+                {(config.layers || []).map(l => (
+                  <option key={l.id} value={l.name}>
+                    {l.name}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* 5. Backing Fabric */}
-            <div className="shrink-0 w-[115px]">
+            <div className="shrink-0 w-[140px]">
               <select
                 value={combo.fabricName}
                 onChange={(e) => handleSelectField('fabricName', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
-                  combo.fabricName ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
+                className={`w-full bg-surface-container-lowest border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.fabricName ? 'border-primary text-primary bg-primary/5' : 'border-outline-variant/30 text-on-surface'
                 }`}
-                title="Backing Fabric"
+                title={masking.maskFabric ? "Backing Fabric (Masked in title)" : "Backing Substrate Fabric"}
               >
-                <option value="">Fabric ▾</option>
+                <option value="">Fabric {masking.maskFabric ? '🔒' : ''} ▾</option>
                 {(config.fabrics || []).map(f => (
                   <option key={f.id} value={f.name}>
                     {f.name}
@@ -331,30 +408,32 @@ export default function FGCombinationBuilder({
             </div>
 
             {/* 6. Fabric Color */}
-            <div className="shrink-0 w-[105px]">
+            <div className="shrink-0 w-[125px]">
               <select
                 value={combo.fabricColor}
                 onChange={(e) => handleSelectField('fabricColor', e.target.value)}
                 disabled={!combo.fabricName || availableFabricColors.length === 0}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none disabled:opacity-40 disabled:cursor-not-allowed ${
-                  combo.fabricColor ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
+                className={`w-full bg-surface-container-lowest border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none disabled:opacity-40 disabled:cursor-not-allowed ${
+                  combo.fabricColor ? 'border-primary text-primary bg-primary/5' : 'border-outline-variant/30 text-on-surface'
                 }`}
                 title="Backing Fabric Color"
               >
                 <option value="">Fabric Col ▾</option>
                 {availableFabricColors.map((col, idx) => (
-                  <option key={idx} value={col}>{col}</option>
+                  <option key={idx} value={col}>
+                    {col}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* 7. Packing */}
-            <div className="shrink-0 w-[115px]">
+            <div className="shrink-0 w-[120px]">
               <select
                 value={combo.packing}
                 onChange={(e) => handleSelectField('packing', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
-                  combo.packing ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
+                className={`w-full bg-surface-container-lowest border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.packing ? 'border-primary text-primary bg-primary/5' : 'border-outline-variant/30 text-on-surface'
                 }`}
                 title={masking.maskPacking ? "Packing attribute (Masked from title, preserved in DB)" : "Packing Specification"}
               >
@@ -367,13 +446,13 @@ export default function FGCombinationBuilder({
               </select>
             </div>
 
-            {/* Action Controls: Reset, Settings Gear (Configuration), and Close */}
+            {/* Action Controls: Reset, Settings Gear, and Close */}
             <div className="flex items-center gap-1 shrink-0 ml-auto pl-1">
               {activeAttributeCount > 0 && (
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-red-500 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-red-500 transition-colors cursor-pointer"
                   title="Reset All Selections"
                 >
                   <span className="material-symbols-outlined text-[17px]">restart_alt</span>
@@ -383,8 +462,11 @@ export default function FGCombinationBuilder({
               {allowQuickConfig && (
                 <button
                   type="button"
-                  onClick={() => setIsQuickConfigOpen(true)}
-                  className="p-1.5 rounded-lg hover:bg-cyan-500/15 text-on-surface-variant hover:text-primary transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsQuickConfigOpen(true);
+                  }}
+                  className="p-1.5 rounded-lg hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
                   title="FG Combination Configuration (Attributes, Lookups, Masking)"
                 >
                   <span className="material-symbols-outlined text-[17px]">settings</span>
@@ -394,7 +476,7 @@ export default function FGCombinationBuilder({
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
                 title="Close Builder"
               >
                 <span className="material-symbols-outlined text-[17px]">close</span>
@@ -409,18 +491,18 @@ export default function FGCombinationBuilder({
             {/* Generated Name Preview Badge */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
               {generatedName ? (
-                <div className="flex items-center gap-1.5 bg-surface-container-high text-on-surface px-2.5 py-1 rounded-lg border border-outline-variant/60 font-bold text-xs truncate max-w-xl shadow-xs">
+                <div className="flex items-center gap-1.5 bg-surface-container-high/70 text-on-surface px-2.5 py-1 rounded-lg border border-outline-variant/30 font-bold text-xs truncate max-w-xl shadow-xs">
                   <span className="material-symbols-outlined text-[15px] text-primary shrink-0">verified</span>
                   <span className="truncate">{generatedName}</span>
                 </div>
               ) : (
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 italic">
+                <span className="text-[11px] text-on-surface-variant italic">
                   Select attributes in the row above to build Finished Good combination
                 </span>
               )}
 
               {combo.packing && masking.maskPacking && (
-                <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 shrink-0">
+                <span className="text-[10px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 shrink-0">
                   Packing: {combo.packing} (in DB)
                 </span>
               )}
@@ -432,7 +514,7 @@ export default function FGCombinationBuilder({
               {/* If matching items exist: List clickable quick-select pills */}
               {matchingItems.length > 0 && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-extrabold uppercase text-slate-500 dark:text-slate-400">
+                  <span className="text-[10px] font-extrabold uppercase text-on-surface-variant">
                     Found ({matchingItems.length}):
                   </span>
                   {matchingItems.slice(0, 3).map(item => (
@@ -440,17 +522,17 @@ export default function FGCombinationBuilder({
                       key={item.id}
                       type="button"
                       onClick={() => handleChooseItem(item)}
-                      className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-cyan-500/20 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 hover:border-cyan-500 text-[11px] font-bold transition-all flex items-center gap-1.5 shadow-xs active:scale-95"
+                      className="px-2.5 py-1 rounded-lg bg-surface-container-low hover:bg-primary/10 text-on-surface border border-outline-variant/20 hover:border-primary text-[11px] font-bold transition-all flex items-center gap-1.5 shadow-xs active:scale-95 cursor-pointer"
                       title={`Select ${item.name}`}
                     >
                       <span>{item.name}</span>
-                      <span className="font-mono text-[9px] bg-slate-200 dark:bg-slate-700 px-1 py-0.2 rounded text-slate-600 dark:text-slate-300">
+                      <span className="font-mono text-[9px] bg-surface-container-highest px-1 py-0.2 rounded text-on-surface-variant">
                         {item.sku}
                       </span>
                     </button>
                   ))}
                   {matchingItems.length > 3 && (
-                    <span className="text-[10px] font-bold text-slate-400">
+                    <span className="text-[10px] font-bold text-on-surface-variant">
                       +{matchingItems.length - 3} more
                     </span>
                   )}
@@ -459,7 +541,7 @@ export default function FGCombinationBuilder({
 
               {/* No match indicator */}
               {activeAttributeCount > 0 && matchingItems.length === 0 && (
-                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                <span className="text-[11px] font-semibold text-amber-500 flex items-center gap-1">
                   <span className="material-symbols-outlined text-[14px]">info</span>
                   {allowCreation ? 'Not registered in warehouse' : 'No matching items'}
                 </span>
@@ -470,7 +552,7 @@ export default function FGCombinationBuilder({
                 <button
                   type="button"
                   onClick={handleCreateNew}
-                  className="bg-primary hover:bg-primary/90 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-md transition-all active:scale-95 shrink-0"
+                  className="bg-primary hover:bg-primary/90 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-md transition-all active:scale-95 shrink-0 cursor-pointer"
                   title="Register this new Finished Good and add to Sales Order"
                 >
                   <span className="material-symbols-outlined text-[15px]">add_circle</span>

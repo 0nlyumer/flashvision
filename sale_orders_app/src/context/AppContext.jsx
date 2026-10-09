@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { applyTheme } from '../utils/theme';
 import { supabase } from '../utils/supabaseClient';
+import { getInitialFGConfig, saveFGConfig } from '../utils/fgCombinationUtils';
 
 const AppContext = createContext();
 const BUILD_VERSION = '20260715_v5';
@@ -13,6 +14,7 @@ const initialMockState = {
     { id: 1783884870423, name: 'UMER ALI', role: 'Super Admin', email: 'umerali@gmail.com', phone: '923079418134', status: 'Active', initials: 'UM', jobTitle: 'Super Admin', password: '123456', username: 'only.umer', department: 'ADMIN', permissions: ['salesOrders','oms','productionPlanning','inventory','delivery','userManagement','settings','hr','chat','finance'], granularPermissions: {}, requirePasswordChange: false }
   ],
   currentUser: null,
+  fg_combinations_config: getInitialFGConfig(),
   customers: [],
   suppliers: [],
   items: [],
@@ -4098,6 +4100,9 @@ export const AppProvider = ({ children }) => {
         }
       }
 
+      if (collection === 'fg_combinations_config') {
+        saveFGConfig(nextData);
+      }
       if (collection === 'hr_loan_requests' && Array.isArray(nextData)) {
         let ledgerList = [...(prev.hr_loan_ledger || [])];
         let ledgerChanged = false;

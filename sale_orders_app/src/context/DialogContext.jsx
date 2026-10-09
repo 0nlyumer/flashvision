@@ -1,63 +1,93 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 
 const DialogContext = createContext();
 
 export const DialogProvider = ({ children }) => {
+  // Confirm Modal State
   const [confirmState, setConfirmState] = useState({
     isOpen: false,
+    title: '',
     message: '',
+    confirmText: 'Confirm',
+    cancelText: 'Cancel',
     resolve: null
   });
 
+  // Prompt Modal State
   const [promptState, setPromptState] = useState({
     isOpen: false,
     message: '',
-    resolve: null,
-    inputValue: ''
+    defaultValue: '',
+    inputValue: '',
+    resolve: null
   });
 
+  // Alert Modal State
   const [alertState, setAlertState] = useState({
     isOpen: false,
     message: '',
     resolve: null
   });
 
-  // Dynamic Top-Pill Notification State (Samsung / Dynamic Island style)
+  // Top-Pill Notification State
   const [pillState, setPillState] = useState({
     isOpen: false,
-    isExiting: false,
     message: '',
-    type: 'info', // 'warning', 'success', 'info', 'error'
+    type: 'info',
     icon: null,
-    duration: 3500
+    duration: 3500,
+    isExiting: false
   });
-
   const pillTimerRef = useRef(null);
-  const isHoveredRef = useRef(false);
-  const remainingTimeRef = useRef(3500);
-  const startTimeRef = useRef(null);
 
-  // Professional Loading Overlay State
+  // Global Loading Modal State
   const [loadingState, setLoadingState] = useState({
     isOpen: false,
-    title: 'Processing Request...',
-    subtext: 'Please wait while we process your request'
+    title: 'Loading...',
+    subtext: 'Please wait while we process your request...'
   });
 
-  const appConfirm = useCallback((message, title = "Confirm Action", confirmText = "Confirm", cancelText = "Cancel") => {
+  const showLoading = (title = 'Loading...', subtext = 'Please wait while we process your request...') => {
+    setLoadingState({
+      isOpen: true,
+      title,
+      subtext
+    });
+  };
+
+  const hideLoading = () => {
+    setLoadingState(prev => ({
+      ...prev,
+      isOpen: false
+    }));
+  };
+
+  const appConfirm = (message, title = 'Confirm Action', options = {}) => {
     return new Promise((resolve) => {
       setConfirmState({
         isOpen: true,
-        message,
         title,
-        confirmText,
-        cancelText,
+        message,
+        confirmText: options.confirmText || 'Confirm',
+        cancelText: options.cancelText || 'Cancel',
         resolve
       });
     });
-  }, []);
+  };
 
-  const appAlert = useCallback((message) => {
+  const appPrompt = (message, defaultValue = '') => {
+    return new Promise((resolve) => {
+      setPromptState({
+        isOpen: true,
+        message,
+        defaultValue,
+        inputValue: defaultValue,
+        resolve
+      });
+    });
+  };
+
+  const appAlert = (message) => {
     return new Promise((resolve) => {
       setAlertState({
         isOpen: true,
@@ -65,111 +95,101 @@ export const DialogProvider = ({ children }) => {
         resolve
       });
     });
-  }, []);
+  };
 
-  const appPrompt = useCallback((message) => {
-    return new Promise((resolve) => {
-      setPromptState({
-        isOpen: true,
-        message,
-        resolve,
-        inputValue: ''
-      });
+  const showTopPill = (message, options = {}) => {
+    if (pillTimerRef.current) {
+      clearTimeout(pillTimerRef.current);
+    }
+
+    const duration = options.duration !== undefined ? options.duration : 4000;
+
+    setPillState({
+      isOpen: true,
+      message,
+      type: options.type || 'info',
+      icon: options.icon || null,
+      duration,
+      isExiting: false
     });
-  }, []);
+
+    if (duration > 0) {
+      pillTimerRef.current = setTimeout(() => {
+        dismissTopPill();
+      }, duration);
+    }
+  };
+
+  const dismissTopPill = () => {
+    setPillState(prev => {
+      if (!prev.isOpen || prev.isExiting) return prev;
+      return { ...prev, isExiting: true };
+    });
+
+    setTimeout(() => {
+      setPillState({
+        isOpen: false,
+        message: '',
+        type: 'info',
+        icon: null,
+        duration: 3500,
+        isExiting: false
+      });
+    }, 400);
+  };
+
+  const handlePillMouseEnter = () => {
+    if (pillTimerRef.current) {
+      clearTimeout(pillTimerRef.current);
+    }
+  };
+
+  const handlePillMouseLeave = () => {
+    if (pillState.isOpen && pillState.duration > 0) {
+      pillTimerRef.current = setTimeout(() => {
+        dismissTopPill();
+      }, 2000);
+    }
+  };
 
   const handleConfirmClose = (result) => {
     if (confirmState.resolve) {
       confirmState.resolve(result);
     }
-    setConfirmState({ isOpen: false, message: '', resolve: null });
+    setConfirmState({
+      isOpen: false,
+      title: '',
+      message: '',
+      confirmText: 'Confirm',
+      cancelText: 'Cancel',
+      resolve: null
+    });
   };
 
   const handlePromptClose = (result) => {
     if (promptState.resolve) {
       promptState.resolve(result);
     }
-    setPromptState({ isOpen: false, message: '', resolve: null, inputValue: '' });
+    setPromptState({
+      isOpen: false,
+      message: '',
+      defaultValue: '',
+      inputValue: '',
+      resolve: null
+    });
   };
 
   const handleAlertClose = () => {
     if (alertState.resolve) {
-      alertState.resolve(true);
+      alertState.resolve();
     }
-    setAlertState({ isOpen: false, message: '', resolve: null });
-  };
-
-  // Top Pill Handlers
-  const dismissTopPill = useCallback(() => {
-    if (pillTimerRef.current) {
-      clearTimeout(pillTimerRef.current);
-      pillTimerRef.current = null;
-    }
-    setPillState(prev => ({ ...prev, isExiting: true }));
-    setTimeout(() => {
-      setPillState({ isOpen: false, isExiting: false, message: '', type: 'info', icon: null, duration: 3500 });
-    }, 400); // match animation duration
-  }, []);
-
-  const showTopPill = useCallback((message, type = 'info', duration = 3500, customIcon = null) => {
-    if (pillTimerRef.current) {
-      clearTimeout(pillTimerRef.current);
-    }
-    
-    remainingTimeRef.current = duration;
-    startTimeRef.current = Date.now();
-    isHoveredRef.current = false;
-
-    setPillState({
-      isOpen: true,
-      isExiting: false,
-      message,
-      type,
-      icon: customIcon,
-      duration
-    });
-
-    pillTimerRef.current = setTimeout(() => {
-      dismissTopPill();
-    }, duration);
-  }, [dismissTopPill]);
-
-  const handlePillMouseEnter = () => {
-    isHoveredRef.current = true;
-    if (pillTimerRef.current) {
-      clearTimeout(pillTimerRef.current);
-      pillTimerRef.current = null;
-      const elapsed = Date.now() - (startTimeRef.current || Date.now());
-      remainingTimeRef.current = Math.max(500, remainingTimeRef.current - elapsed);
-    }
-  };
-
-  const handlePillMouseLeave = () => {
-    isHoveredRef.current = false;
-    startTimeRef.current = Date.now();
-    pillTimerRef.current = setTimeout(() => {
-      dismissTopPill();
-    }, remainingTimeRef.current);
-  };
-
-  // Loading Overlay Handlers
-  const showLoading = useCallback((title = 'Processing Request...', subtext = 'Fetching latest data • Please wait') => {
-    setLoadingState({
-      isOpen: true,
-      title,
-      subtext
-    });
-  }, []);
-
-  const hideLoading = useCallback(() => {
-    setLoadingState({
+    setAlertState({
       isOpen: false,
-      title: '',
-      subtext: ''
+      message: '',
+      resolve: null
     });
-  }, []);
+  };
 
-  // Configure Pill Theme Variants
   const getPillTheme = (type) => {
     switch (type) {
       case 'warning':
@@ -179,7 +199,7 @@ export const DialogProvider = ({ children }) => {
           text: 'text-[#fef3c7]',
           iconColor: 'text-[#fbbf24]',
           accent: 'bg-[#f59e0b]',
-          defaultIcon: 'signal_cellular_connected_no_internet_4_bar'
+          defaultIcon: 'warning'
         };
       case 'success':
         return {
@@ -225,7 +245,7 @@ export const DialogProvider = ({ children }) => {
     }}>
       {children}
 
-      {/* Samsung / Dynamic Island Style Top-Pill Notification Component */}
+      {/* Top-Pill Notification Component */}
       {pillState.isOpen && (
         <div 
           className="fixed top-4 left-1/2 -translate-x-1/2 z-[10000] pointer-events-auto select-none"
@@ -240,7 +260,7 @@ export const DialogProvider = ({ children }) => {
               <div 
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-full backdrop-blur-xl border ${theme.bg} ${theme.border} ${theme.text} ${
                   pillState.isExiting ? 'animate-pill-out' : 'animate-pill-in'
-                } cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group`}
+                } cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group shadow-xl`}
               >
                 <div className="flex items-center gap-2 shrink-0">
                   <span className={`w-2 h-2 rounded-full ${theme.accent} animate-pulse`}></span>
@@ -254,11 +274,12 @@ export const DialogProvider = ({ children }) => {
                 </span>
 
                 <button 
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     dismissTopPill();
                   }}
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors ml-1"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors ml-1 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[14px]">close</span>
                 </button>
@@ -268,70 +289,80 @@ export const DialogProvider = ({ children }) => {
         </div>
       )}
 
-      {/* Professional Frosted Glass Loading Overlay */}
+      {/* Professional Pure Glassmorphic Loading Overlay */}
       {loadingState.isOpen && (
-        <div className="fixed inset-0 z-[10005] flex items-center justify-center font-body p-4 animate-in fade-in duration-300">
-          {/* Frosted Backdrop */}
-          <div className="absolute inset-0 bg-[#0b141a]/75 backdrop-blur-md"></div>
-          
-          {/* Modal Container */}
-          <div className="relative z-20 w-full max-w-sm bg-[#111c24]/90 border border-white/15 rounded-3xl p-8 shadow-2xl backdrop-blur-xl flex flex-col items-center text-center animate-in zoom-in-95 duration-200">
-            {/* 60fps Hardware Accelerated Rotating Stroke Spinner */}
-            <div className="relative w-16 h-16 mb-5 flex items-center justify-center">
+        <div 
+          role="dialog" 
+          aria-modal="true" 
+          className="fixed inset-0 z-[10005] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-in fade-in duration-200"
+        >
+          <div className="relative z-20 w-full max-w-sm bg-surface-container-lowest/95 dark:bg-[#14171f]/95 border border-white/10 dark:border-white/[0.08] rounded-3xl p-8 shadow-[0_25px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-200 text-on-surface">
+            {/* Glowing Dual Orbital Spinner */}
+            <div className="relative w-18 h-18 mb-5 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping opacity-25"></div>
               <svg className="w-16 h-16 animate-spinner-rotate" viewBox="0 0 50 50">
                 <circle
-                  className="animate-spinner-dash stroke-[#00a884]"
+                  className="animate-spinner-dash stroke-primary"
                   cx="25"
                   cy="25"
                   r="20"
                   fill="none"
                   strokeWidth="3.5"
+                  strokeLinecap="round"
                 />
               </svg>
-              <span className="material-symbols-outlined absolute text-[20px] text-[#00a884] animate-pulse">
-                autorenew
-              </span>
+              <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center shadow-inner">
+                <span className="material-symbols-outlined text-[20px] text-primary animate-pulse">
+                  sync
+                </span>
+              </div>
             </div>
 
-            {/* Contextual Typography */}
-            <h3 className="font-headline font-bold text-base text-white tracking-wide mb-1">
+            {/* Typography */}
+            <h3 className="font-headline font-bold text-base text-on-surface tracking-tight mb-1.5">
               {loadingState.title}
             </h3>
-            <p className="font-body text-xs text-slate-400 leading-relaxed font-medium">
+            <p className="font-body text-xs text-on-surface-variant leading-relaxed font-medium max-w-[260px]">
               {loadingState.subtext}
             </p>
           </div>
         </div>
       )}
 
-      {/* Confirmation Modal Overlay */}
+      {/* Professional Pure Glassmorphic Confirmation Modal */}
       {confirmState.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center font-body">
-          <div className="absolute inset-0 bg-on-background/20 backdrop-blur-[2px]" onClick={() => handleConfirmClose(false)}></div>
-          
-          <div aria-labelledby="modal-title" aria-modal="true" role="dialog" 
-            className="relative z-20 w-full max-w-md bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)] ring-1 ring-outline-variant/15 flex flex-col items-center p-8 text-center animate-in fade-in zoom-in duration-200">
-            
-            <div className="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mb-6 ring-1 ring-outline-variant/20">
-              <span className="material-symbols-outlined text-4xl text-primary">error_outline</span>
+        <div 
+          role="dialog" 
+          aria-modal="true" 
+          className="fixed inset-0 z-[10002] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div 
+            className="relative z-20 w-full max-w-md bg-surface-container-lowest/95 dark:bg-[#14171f]/95 border border-white/10 dark:border-white/[0.08] rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl flex flex-col items-center p-7 text-center animate-in zoom-in-95 duration-200 text-on-surface"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mb-5 text-amber-500 shadow-inner">
+              <span className="material-symbols-outlined text-[30px]">warning</span>
             </div>
             
-            <h2 className="font-headline font-bold text-2xl text-on-surface mb-2 tracking-wide" id="modal-title">{confirmState.title || "Confirm Action"}</h2>
-            <p className="font-body text-sm text-on-surface-variant mb-8 leading-relaxed max-w-[280px]">
+            <h2 className="font-headline font-black text-xl text-on-surface mb-2 tracking-tight">
+              {confirmState.title || "Confirm Action"}
+            </h2>
+            <p className="font-body text-xs text-on-surface-variant mb-6 leading-relaxed max-w-[320px]">
               {confirmState.message || "Are you sure you want to apply these changes?"}
             </p>
             
-            <div className="flex flex-col w-full gap-3 sm:flex-row sm:justify-center">
+            <div className="flex items-center gap-3 w-full">
               <button 
                 onClick={() => handleConfirmClose(false)}
-                className="font-body text-sm font-semibold text-on-surface-variant bg-surface-container-low hover:bg-surface-container transition-colors duration-200 px-6 py-3 rounded-lg ring-1 ring-outline-variant/15 w-full sm:w-auto" 
-                type="button">
+                className="flex-1 py-2.5 px-4 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container font-bold text-xs transition-colors cursor-pointer" 
+                type="button"
+              >
                 {confirmState.cancelText || "Cancel"}
               </button>
               <button 
                 onClick={() => handleConfirmClose(true)}
-                className="font-body text-sm font-semibold text-on-primary bg-gradient-to-br from-primary to-primary-container hover:opacity-90 transition-opacity duration-200 px-6 py-3 rounded-lg shadow-sm w-full sm:w-auto" 
-                type="button">
+                className="flex-1 py-2.5 px-4 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer" 
+                type="button"
+              >
                 {confirmState.confirmText || "Confirm"}
               </button>
             </div>
@@ -339,23 +370,29 @@ export const DialogProvider = ({ children }) => {
         </div>
       )}
 
-      {/* Prompt Modal Overlay */}
+      {/* Professional Pure Glassmorphic Prompt Modal */}
       {promptState.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center font-body">
-          <div className="absolute inset-0 bg-on-background/20 backdrop-blur-[2px]" onClick={() => handlePromptClose(null)}></div>
-          
-          <div aria-labelledby="modal-prompt-title" aria-modal="true" role="dialog" 
-            className="relative z-20 w-full max-w-md bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)] ring-1 ring-outline-variant/15 flex flex-col items-center p-8 text-center animate-in fade-in zoom-in duration-200">
-            
-            <h2 className="font-headline font-bold text-2xl text-on-surface mb-2 tracking-wide" id="modal-prompt-title">Input Required</h2>
-            <p className="font-body text-sm text-on-surface-variant mb-6 leading-relaxed max-w-[280px]">
+        <div 
+          role="dialog" 
+          aria-modal="true" 
+          className="fixed inset-0 z-[10002] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div 
+            className="relative z-20 w-full max-w-md bg-surface-container-lowest/95 dark:bg-[#14171f]/95 border border-white/10 dark:border-white/[0.08] rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl flex flex-col items-center p-7 text-center animate-in zoom-in-95 duration-200 text-on-surface"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center mb-5 text-primary shadow-inner">
+              <span className="material-symbols-outlined text-[30px]">edit_note</span>
+            </div>
+
+            <h2 className="font-headline font-black text-xl text-on-surface mb-2 tracking-tight">Input Required</h2>
+            <p className="font-body text-xs text-on-surface-variant mb-5 leading-relaxed max-w-[320px]">
               {promptState.message}
             </p>
 
             <input 
               type="text" 
               autoFocus
-              className="w-full bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container mb-6"
+              className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-2.5 text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/25 mb-6"
               value={promptState.inputValue}
               onChange={(e) => setPromptState(prev => ({ ...prev, inputValue: e.target.value }))}
               onKeyDown={(e) => {
@@ -364,17 +401,19 @@ export const DialogProvider = ({ children }) => {
               }}
             />
             
-            <div className="flex flex-col w-full gap-3 sm:flex-row sm:justify-center">
+            <div className="flex items-center gap-3 w-full">
               <button 
                 onClick={() => handlePromptClose(null)}
-                className="font-body text-sm font-semibold text-on-surface-variant bg-surface-container-low hover:bg-surface-container transition-colors duration-200 px-6 py-3 rounded-lg ring-1 ring-outline-variant/15 w-full sm:w-auto" 
-                type="button">
+                className="flex-1 py-2.5 px-4 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container font-bold text-xs transition-colors cursor-pointer" 
+                type="button"
+              >
                 Cancel
               </button>
               <button 
                 onClick={() => handlePromptClose(promptState.inputValue)}
-                className="font-body text-sm font-semibold text-on-primary bg-gradient-to-br from-primary to-primary-container hover:opacity-90 transition-opacity duration-200 px-6 py-3 rounded-lg shadow-sm w-full sm:w-auto" 
-                type="button">
+                className="flex-1 py-2.5 px-4 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer" 
+                type="button"
+              >
                 Submit
               </button>
             </div>
@@ -382,27 +421,31 @@ export const DialogProvider = ({ children }) => {
         </div>
       )}
 
-      {/* Alert Modal Overlay */}
+      {/* Professional Pure Glassmorphic Alert Modal */}
       {alertState.isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center font-body">
-          <div className="absolute inset-0 bg-on-background/20 backdrop-blur-[2px]" onClick={handleAlertClose}></div>
-          <div aria-modal="true" role="dialog" 
-            className="relative z-20 w-full max-w-sm bg-surface-container-lowest rounded-xl shadow-[0_20px_40px_rgba(0,28,56,0.06)] ring-1 ring-outline-variant/15 flex flex-col items-center p-8 text-center animate-in fade-in zoom-in duration-200">
-            
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 ring-1 ring-primary/20">
-              <span className="material-symbols-outlined text-4xl text-primary">info</span>
+        <div 
+          role="dialog" 
+          aria-modal="true" 
+          className="fixed inset-0 z-[10003] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+        >
+          <div 
+            className="relative z-20 w-full max-w-sm bg-surface-container-lowest/95 dark:bg-[#14171f]/95 border border-white/10 dark:border-white/[0.08] rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl flex flex-col items-center p-7 text-center animate-in zoom-in-95 duration-200 text-on-surface"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-center mb-5 text-primary shadow-inner">
+              <span className="material-symbols-outlined text-[30px]">info</span>
             </div>
             
-            <h2 className="font-headline font-bold text-xl text-on-surface mb-2 tracking-wide">Notice</h2>
-            <p className="font-body text-sm text-on-surface-variant mb-8 leading-relaxed max-w-[280px] whitespace-pre-line">
+            <h2 className="font-headline font-black text-lg text-on-surface mb-2 tracking-tight">Notice</h2>
+            <p className="font-body text-xs text-on-surface-variant mb-6 leading-relaxed max-w-[280px] whitespace-pre-line">
               {alertState.message}
             </p>
             
             <button 
               onClick={handleAlertClose}
-              className="font-body text-sm font-semibold text-white bg-primary hover:bg-primary/90 transition-colors duration-200 px-8 py-3 rounded-lg shadow-sm w-full sm:w-auto" 
-              type="button">
-              OK
+              className="w-full py-2.5 px-6 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer" 
+              type="button"
+            >
+              Acknowledge
             </button>
           </div>
         </div>

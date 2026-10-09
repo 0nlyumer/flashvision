@@ -238,3 +238,41 @@ export function createFinishedGoodFromCombo(combo = {}, stateItems = [], masking
     }
   };
 }
+
+
+/**
+ * Loads persisted FG Configuration from localStorage, or falls back to DEFAULT_FG_CONFIG.
+ */
+export function getInitialFGConfig() {
+  try {
+    const saved = localStorage.getItem('fg_combinations_config');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          ...DEFAULT_FG_CONFIG,
+          ...parsed,
+          masking: { ...DEFAULT_FG_CONFIG.masking, ...(parsed.masking || {}) }
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to parse fg_combinations_config from localStorage:', e);
+  }
+  return DEFAULT_FG_CONFIG;
+}
+
+/**
+ * Persists updated FG Configuration to localStorage and dispatches a live broadcast event.
+ */
+export function saveFGConfig(newConfig) {
+  try {
+    localStorage.setItem('fg_combinations_config', JSON.stringify(newConfig));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('fg-config-updated', { detail: newConfig }));
+    }
+  } catch (e) {
+    console.warn('Failed to save fg_combinations_config to localStorage:', e);
+  }
+  return newConfig;
+}
