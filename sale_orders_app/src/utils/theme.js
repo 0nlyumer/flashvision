@@ -1,37 +1,37 @@
 export const applyTheme = (settings = {}) => {
   const root = document.documentElement;
 
-  // 1. Color Mode (Light / TradingView Pure Black OLED Dark Architecture)
+  // 1. Color Mode (Obsidian Ultra Glass Dark / Pure Frosted Pearl Light)
   if (settings.colorMode === 'dark') {
     root.classList.add('dark');
-    // TradingView Pure Black OLED Dark Mode Palette
-    root.style.setProperty('--color-background', '#0b0e14'); // Pure dark canvas
-    root.style.setProperty('--color-surface', '#131722');    // TradingView primary widget surface
-    root.style.setProperty('--color-surface-container-lowest', '#080a0f');
-    root.style.setProperty('--color-surface-container-low', '#0f121a');
-    root.style.setProperty('--color-surface-container', '#161a25'); // Elevated surface
-    root.style.setProperty('--color-surface-container-high', '#1c202d');
-    root.style.setProperty('--color-surface-container-highest', '#242836');
+    // Exact Neutral Obsidian Dark Canvas (#0f0f0f) sampled from user screenshot
+    root.style.setProperty('--color-background', '#0f0f0f'); // Exact neutral dark canvas
+    root.style.setProperty('--color-surface', '#14171f');    // Frosted glass widget surface
+    root.style.setProperty('--color-surface-container-lowest', '#0a0a0c');
+    root.style.setProperty('--color-surface-container-low', '#101217');
+    root.style.setProperty('--color-surface-container', '#161922'); // Elevated glass surface
+    root.style.setProperty('--color-surface-container-high', '#1c202a');
+    root.style.setProperty('--color-surface-container-highest', '#232734');
     root.style.setProperty('--color-on-background', '#f0f3fa');
     root.style.setProperty('--color-on-surface', '#f0f3fa'); // Crisp white text
-    root.style.setProperty('--color-on-surface-variant', '#868993'); // Muted label text
-    root.style.setProperty('--color-outline-variant', '#242832'); // Clean 1px micro-border
-    root.style.setProperty('--color-outline', '#2f3442');
+    root.style.setProperty('--color-on-surface-variant', '#94a3b8'); // Muted label text
+    root.style.setProperty('--color-outline-variant', 'rgba(255, 255, 255, 0.06)'); // Soft glass micro-border
+    root.style.setProperty('--color-outline', 'rgba(255, 255, 255, 0.1)');
   } else {
     root.classList.remove('dark');
-    // Crisp Modern Light Mode Palette
-    root.style.setProperty('--color-background', '#f8fafc');
-    root.style.setProperty('--color-surface', '#ffffff');
+    // Crisp Modern Frosted Pearl Light Mode Palette
+    root.style.setProperty('--color-background', '#f6f8fb');
+    root.style.setProperty('--color-surface', 'rgba(255, 255, 255, 0.85)');
     root.style.setProperty('--color-surface-container-lowest', '#ffffff');
-    root.style.setProperty('--color-surface-container-low', '#f1f5f9');
-    root.style.setProperty('--color-surface-container', '#e2e8f0');
-    root.style.setProperty('--color-surface-container-high', '#cbd5e1');
-    root.style.setProperty('--color-surface-container-highest', '#94a3b8');
+    root.style.setProperty('--color-surface-container-low', '#f8fafc');
+    root.style.setProperty('--color-surface-container', '#edf2f7');
+    root.style.setProperty('--color-surface-container-high', '#e2e8f0');
+    root.style.setProperty('--color-surface-container-highest', '#cbd5e1');
     root.style.setProperty('--color-on-background', '#0f172a');
     root.style.setProperty('--color-on-surface', '#0f172a');
-    root.style.setProperty('--color-on-surface-variant', '#475569');
-    root.style.setProperty('--color-outline-variant', '#e2e8f0');
-    root.style.setProperty('--color-outline', '#cbd5e1');
+    root.style.setProperty('--color-on-surface-variant', '#64748b');
+    root.style.setProperty('--color-outline-variant', 'rgba(0, 0, 0, 0.05)');
+    root.style.setProperty('--color-outline', 'rgba(0, 0, 0, 0.09)');
   }
 
   // 2. Primary & Action Color (With Adaptive Dark Mode Vibrancy)
@@ -51,7 +51,7 @@ export const applyTheme = (settings = {}) => {
     },
     sky: {
       light: { primary: '#0284c7', container: '#e0f2fe', onPrimary: '#ffffff', onPrimaryContainer: '#075985' },
-      dark: { primary: '#06b6d4', container: 'rgba(6, 182, 212, 0.25)', onPrimary: '#ffffff', onPrimaryContainer: '#bae6fd' }
+      dark: { primary: '#0ea5e9', container: 'rgba(14, 165, 233, 0.25)', onPrimary: '#ffffff', onPrimaryContainer: '#bae6fd' }
     },
     rose: {
       light: { primary: '#e11d48', container: '#ffe4e6', onPrimary: '#ffffff', onPrimaryContainer: '#9f1239' },
@@ -78,7 +78,7 @@ export const applyTheme = (settings = {}) => {
     outfit: '"Outfit", sans-serif',
     manrope: '"Manrope", sans-serif',
   };
-  const selectedFont = fonts[settings.fontStyle] || fonts.manrope;
+  const selectedFont = fonts[settings.fontStyle] || fonts.inter;
   root.style.setProperty('--font-body', selectedFont);
   root.style.setProperty('--font-headline', selectedFont);
 

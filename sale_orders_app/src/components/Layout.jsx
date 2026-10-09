@@ -11,9 +11,11 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
   const [isHovered, setIsHovered] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [isAICopilotOpen, setIsAICopilotOpen] = useState(false);
+  const [isThemeSwitching, setIsThemeSwitching] = useState(false);
   const { 
       state, 
       setState, 
+      updateThemeSettings, 
       markAllNotificationsAsRead, 
       addWidget, 
       hasPermission, 
@@ -25,6 +27,7 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
   } = useApp() || { 
       state: { notifications: [] }, 
       setState: () => {}, 
+      updateThemeSettings: () => {}, 
       addWidget: () => {}, 
       hasPermission: () => true, 
       addNotification: () => {}, 
@@ -36,11 +39,50 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
   
   const isDarkMode = state?.themeSettings?.colorMode === 'dark';
   const toggleThemeMode = () => {
+    setIsThemeSwitching(true);
     const nextMode = isDarkMode ? 'light' : 'dark';
-    updateThemeSettings({
+    const nextSettings = {
       ...(state?.themeSettings || { primaryColor: 'tradingview', fontStyle: 'inter', borderRadius: 'rounded' }),
       colorMode: nextMode
-    });
+    };
+
+    // 1. Instant 0ms DOM mutation + transition trigger
+    const root = document.documentElement;
+    root.classList.add('theme-morphing');
+    if (nextMode === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    
+    // 2. Synchronous theme application
+    try {
+      applyTheme(nextSettings);
+    } catch (e) {
+      console.warn('applyTheme error:', e);
+    }
+
+    // 3. Update application state
+    if (typeof updateThemeSettings === 'function') {
+      updateThemeSettings(nextSettings);
+    } else if (typeof setState === 'function') {
+      setState(prev => ({ ...prev, themeSettings: nextSettings }));
+    }
+
+    // 4. Direct localStorage synchronization for all user cache keys
+    try {
+      const username = state?.currentUser?.username || 'admin';
+      localStorage.setItem(`themeSettings_${username}_web`, JSON.stringify(nextSettings));
+      localStorage.setItem('themeSettings', JSON.stringify(nextSettings));
+    } catch (e) {
+      console.warn('LocalStorage theme sync error:', e);
+    }
+
+    // 5. Complete morphing animation after 450ms
+    setTimeout(() => {
+      root.classList.remove('theme-morphing');
+      setIsThemeSwitching(false);
+    }, 450);
   };
   const notifications = state?.notifications || [];
   const unreadCount = notifications.filter(n => !n.read).length;
@@ -205,9 +247,9 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
             type="button"
             onClick={toggleThemeMode} 
             className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high cursor-pointer transition-colors"
-            title={isDarkMode ? "Switch to Light Mode" : "Switch to TradingView Pure Black"}
+            title={isDarkMode ? "Switch to Light Mode" : "Switch to Obsidian Dark"}
           >
-            <span className="material-symbols-outlined text-[20px] text-primary">
+            <span className={`material-symbols-outlined text-[20px] text-primary transition-transform duration-500 ${isThemeSwitching ? "rotate-180 scale-125" : ""}`}>
               {isDarkMode ? "light_mode" : "dark_mode"}
             </span>
           </button>
@@ -869,7 +911,17 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
               </nav>
             </div>
             
-            <div className={`${isSidebarHorizontal ? 'w-[72px]' : 'h-[72px]'} shrink-0 bg-surface-container-high/90 backdrop-blur-xl rounded-[36px] shadow-sm border border-outline-variant/30 flex items-center justify-center`}>
+            <div className={`${isSidebarHorizontal ? 'h-[72px] px-2' : 'w-[72px] py-2 min-h-[110px]'} shrink-0 bg-surface-container-high/90 backdrop-blur-xl rounded-[36px] shadow-sm border border-outline-variant/30 flex ${isSidebarHorizontal ? 'flex-row' : 'flex-col'} items-center justify-center gap-1.5`}>
+              <button 
+                type="button"
+                onClick={toggleThemeMode} 
+                className="w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 text-on-surface-variant hover:bg-surface-container-highest hover:text-primary cursor-pointer group active:scale-90"
+                title={isDarkMode ? 'Switch to Frosted Light Mode' : 'Switch to Obsidian Dark Mode'}
+              >
+                <span className={`material-symbols-outlined text-[20px] transition-transform duration-500 ${isThemeSwitching ? 'rotate-180 scale-125' : 'group-hover:rotate-45'}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+                  {isDarkMode ? 'light_mode' : 'dark_mode'}
+                </span>
+              </button>
               {hasPermission('settings') && (
                   <NavLink 
                     to={state.currentUser?.requirePasswordChange ? '#' : "/settings"} 
@@ -1029,9 +1081,9 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
                      type="button"
                      onClick={toggleThemeMode}
                      className="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors cursor-pointer"
-                     title={isDarkMode ? "Switch to Light Mode" : "Switch to TradingView Pure Black"}
+                     title={isDarkMode ? "Switch to Light Mode" : "Switch to Obsidian Dark"}
                  >
-                     <span className="material-symbols-outlined text-[18px]">
+                     <span className={`material-symbols-outlined text-[18px] transition-transform duration-500 ${isThemeSwitching ? "rotate-180 scale-125" : ""}`}>
                        {isDarkMode ? "light_mode" : "dark_mode"}
                      </span>
                  </button>
@@ -1174,9 +1226,9 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
                      type="button"
                      onClick={toggleThemeMode}
                      className="flex-1 flex flex-col items-center justify-center gap-1 py-2 rounded-xl transition-colors text-[10px] font-bold uppercase tracking-wider text-on-surface-variant hover:text-primary hover:bg-primary/5 cursor-pointer"
-                     title={isDarkMode ? "Switch to Light Mode" : "Switch to TradingView Pure Black"}
+                     title={isDarkMode ? "Switch to Light Mode" : "Switch to Obsidian Dark"}
                  >
-                     <span className="material-symbols-outlined text-[18px]">
+                     <span className={`material-symbols-outlined text-[18px] transition-transform duration-500 ${isThemeSwitching ? "rotate-180 scale-125" : ""}`}>
                        {isDarkMode ? "light_mode" : "dark_mode"}
                      </span>
                      {isDarkMode ? "Light" : "Dark"}

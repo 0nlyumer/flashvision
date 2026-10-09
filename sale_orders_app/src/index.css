@@ -1039,52 +1039,87 @@ label.text-on-surface-variant {
 
 
 /* ========================================================
-   TradingView Pure Black OLED Dark Architecture & Theme Enforcements
+   Obsidian Ultra Glass & Pure Glassmorphism Architecture
    ======================================================== */
 
+/* Fluid Theme Morphing Smooth Switch Animation */
+.theme-morphing,
+.theme-morphing *,
+.theme-morphing *:before,
+.theme-morphing *:after {
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.3s ease,
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Glassmorphism Surface Core Utilities (Light & Dark) */
+.glass-surface,
+.glass-card,
+.glass-panel {
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.dark .glass-surface,
+.dark .glass-card,
+.dark .glass-panel {
+  background: rgba(20, 23, 31, 0.65) !important;
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+:not(.dark) .glass-surface,
+:not(.dark) .glass-card,
+:not(.dark) .glass-panel {
+  background: rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 28, 56, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
 @media screen {
-  /* Dark Mode Pure Black OLED Canvas & Color Scheme */
+  /* Exact Neutral Obsidian Dark Canvas (#0f0f0f) */
   .dark {
     color-scheme: dark;
   }
 
   .dark body, 
   .dark #root {
-    background-color: #0b0e14 !important;
+    background-color: #0f0f0f !important;
     color: #f0f3fa;
   }
 
-  /* TradingView Surfaces & Widget Containers */
+  /* Frosted Glass Dark Surfaces */
   .dark .bg-surface {
-    background-color: #131722 !important;
+    background-color: #14171f !important;
   }
 
-  /* Convert hardcoded light backgrounds to TradingView Dark Surfaces */
+  /* Convert hardcoded light backgrounds to Frosted Glass Surfaces */
   .dark .bg-white:not([data-keep-light]):not(.print-only) {
-    background-color: #131722 !important;
+    background-color: #14171f !important;
   }
 
   .dark .bg-slate-50:not([data-keep-light]),
   .dark .bg-gray-50:not([data-keep-light]) {
-    background-color: #0f121a !important;
+    background-color: #101217 !important;
   }
 
   .dark .bg-slate-100:not([data-keep-light]),
   .dark .bg-gray-100:not([data-keep-light]) {
-    background-color: #161a25 !important;
+    background-color: #161922 !important;
   }
 
   .dark .bg-slate-200:not([data-keep-light]),
   .dark .bg-gray-200:not([data-keep-light]) {
-    background-color: #1e222d !important;
+    background-color: #1c202a !important;
   }
 
   .dark .bg-slate-300:not([data-keep-light]),
   .dark .bg-gray-300:not([data-keep-light]) {
-    background-color: #242836 !important;
+    background-color: #232734 !important;
   }
 
-  /* TradingView High-Contrast Text Adaptations */
+  /* High-Contrast Crisp Typography */
   .dark .text-slate-900,
   .dark .text-slate-850,
   .dark .text-slate-800,
@@ -1097,76 +1132,184 @@ label.text-on-surface-variant {
   .dark .text-slate-600,
   .dark .text-gray-700,
   .dark .text-gray-600 {
-    color: #b2b5be !important;
+    color: #cbd5e1 !important;
   }
 
   .dark .text-slate-500,
   .dark .text-gray-500,
   .dark .text-slate-400,
   .dark .text-gray-400 {
-    color: #868993 !important;
+    color: #94a3b8 !important;
   }
 
-  /* TradingView Precision 1px Micro-Borders */
+  /* Eliminate Harsh Wireframe Border Lines (Pure Glassmorphic Micro-Borders) */
+  .dark .border,
+  .dark .border-t,
+  .dark .border-b,
+  .dark .border-l,
+  .dark .border-r,
   .dark .border-slate-100,
   .dark .border-slate-200,
+  .dark .border-slate-300,
   .dark .border-gray-100,
   .dark .border-gray-200,
-  .dark .border-outline-variant {
-    border-color: #242832 !important;
+  .dark .border-gray-300,
+  .dark .border-outline-variant,
+  .dark .border-outline {
+    border-color: rgba(255, 255, 255, 0.06) !important;
   }
 
-  .dark .border-slate-300,
-  .dark .border-gray-300,
-  .dark .border-outline {
-    border-color: #2a2e39 !important;
+  .dark .border-2 {
+    border-width: 1px !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
   }
 
   .dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
   .dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+  .dark .divide-slate-300 > :not([hidden]) ~ :not([hidden]),
+  .dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+  .dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
   .dark .divide-outline-variant > :not([hidden]) ~ :not([hidden]) {
-    border-color: #242832 !important;
+    border-color: rgba(255, 255, 255, 0.04) !important;
   }
 
-  /* Form Controls Adaptation (Inputs, Selects, Textareas) */
+  /* Light Mode Clean Micro-Borders */
+  :not(.dark) .border-outline-variant,
+  :not(.dark) .border-slate-200,
+  :not(.dark) .border-slate-100 {
+    border-color: rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* Pure Glassmorphic Tables (Airy, Sleek, No Harsh Grid Lines) */
+  .dark table {
+    color: #e2e8f0 !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+  }
+
+  .dark thead {
+    background-color: rgba(20, 23, 31, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+  }
+
+  .dark th {
+    color: #94a3b8 !important;
+    font-weight: 600 !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  .dark td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.035) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  .dark tbody tr {
+    transition: background-color 0.15s ease !important;
+  }
+
+  .dark tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.035) !important;
+  }
+
+  /* Light Mode Clean Tables */
+  :not(.dark) table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+  }
+
+  :not(.dark) thead {
+    background-color: rgba(248, 250, 252, 0.9) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  :not(.dark) th {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  :not(.dark) td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  :not(.dark) tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.015) !important;
+  }
+
+  /* Glass Flags, Badges & Pills (No Heavy Outlines) */
+  .dark .badge,
+  .dark .status-pill,
+  .dark span[class*="rounded-full"][class*="border"],
+  .dark span[class*="rounded-md"][class*="border"],
+  .dark span[class*="rounded-lg"][class*="border"],
+  .dark span[class*="rounded-xl"][class*="border"] {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  :not(.dark) span[class*="rounded-full"][class*="border"],
+  :not(.dark) span[class*="rounded-md"][class*="border"] {
+    border-color: rgba(0, 0, 0, 0.05) !important;
+  }
+
+  /* Frosted Glass Form Controls */
   .dark input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]),
   .dark select,
   .dark textarea {
-    background-color: #131722 !important;
+    background-color: rgba(20, 23, 31, 0.7) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
     color: #f0f3fa !important;
-    border-color: #2a2e39 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3) !important;
   }
 
   .dark input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"])::placeholder,
   .dark textarea::placeholder {
-    color: #5d606b !important;
+    color: #64748b !important;
   }
 
   .dark input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="range"]):not([type="color"]):focus,
   .dark select:focus,
   .dark textarea:focus {
-    border-color: #2962ff !important;
-    box-shadow: 0 0 0 2px rgba(41, 98, 255, 0.25) !important;
+    border-color: var(--color-primary, #2962ff) !important;
+    box-shadow: 0 0 0 3px rgba(41, 98, 255, 0.22), inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
     outline: none !important;
   }
 
-  /* Buttons & Interactive Elements Adaptation in Dark Theme */
+  /* Buttons & Interactive Elements in Dark Theme */
   .dark .bg-primary {
-    background-color: #2962ff !important;
+    background-color: var(--color-primary, #2962ff) !important;
     color: #ffffff !important;
   }
 
   .dark .bg-primary:hover {
-    background-color: #1e53e5 !important;
-    box-shadow: 0 0 16px rgba(41, 98, 255, 0.4) !important;
+    filter: brightness(1.1) !important;
+    box-shadow: 0 0 16px rgba(41, 98, 255, 0.35) !important;
   }
 
   .dark .text-primary {
-    color: #2962ff !important;
+    color: var(--color-primary, #2962ff) !important;
   }
 
   .dark .border-primary {
-    border-color: #2962ff !important;
+    border-color: var(--color-primary, #2962ff) !important;
   }
 
   .dark .bg-primary\/10 {
@@ -1181,47 +1324,31 @@ label.text-on-surface-variant {
     background-color: rgba(41, 98, 255, 0.18) !important;
   }
 
-  /* TradingView Custom Thin Scrollbar */
+  /* Sleek Minimal Scrollbar */
   .dark ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   .dark ::-webkit-scrollbar-track {
-    background: #0b0e14;
+    background: #0f0f0f;
   }
   .dark ::-webkit-scrollbar-thumb {
-    background: #242832;
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 9999px;
   }
   .dark ::-webkit-scrollbar-thumb:hover {
-    background: #363a45;
+    background: rgba(255, 255, 255, 0.22);
   }
 
-  /* TradingView Tables */
-  .dark table {
-    color: #d1d4dc !important;
-  }
-  .dark thead {
-    background-color: #131722 !important;
-  }
-  .dark th {
-    color: #868993 !important;
-    border-color: #242832 !important;
-  }
-  .dark td {
-    border-color: #1e222d !important;
-  }
-  .dark tbody tr:hover {
-    background-color: #1c202d !important;
-  }
-
-  /* TradingView Dropdowns & Modals */
+  /* Frosted Glass Dropdowns & Modals */
   .dark [role="dialog"],
   .dark .modal-content,
   .dark .dropdown-menu {
-    background-color: #131722 !important;
-    border-color: #2a2e39 !important;
-    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8) !important;
+    background-color: rgba(18, 21, 28, 0.9) !important;
+    backdrop-filter: blur(28px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
   }
 }
 
