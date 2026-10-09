@@ -1465,3 +1465,111 @@ h5:not([data-keep-color]),
 h6:not([data-keep-color]) {
   color: var(--color-on-surface) !important;
 }
+
+/* ========================================================
+   FG Combination Builder & Config Modal Dynamic Light / Dark Theming
+   ======================================================== */
+.fg-builder-panel {
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+:not(.dark) .fg-builder-panel {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 16px 45px -8px rgba(0, 28, 56, 0.12), 0 0 20px rgba(41, 98, 255, 0.05) !important;
+}
+
+.dark .fg-builder-panel {
+  background-color: rgba(20, 23, 31, 0.95) !important;
+  color: #f0f3fa !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 22px rgba(41, 98, 255, 0.06) !important;
+}
+
+:not(.dark) .fg-builder-panel select,
+:not(.dark) .fg-builder-panel input {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+:not(.dark) .fg-builder-panel select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.dark .fg-builder-panel select,
+.dark .fg-builder-panel input {
+  background-color: rgba(18, 21, 28, 0.85) !important;
+  color: #f0f3fa !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .fg-builder-panel select option {
+  background-color: #14171f !important;
+  color: #f0f3fa !important;
+}
+
+/* Modal Internal Sections */
+:not(.dark) .fg-modal-card {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 25px 65px -10px rgba(0, 28, 56, 0.18), 0 0 24px rgba(41, 98, 255, 0.05) !important;
+}
+
+.dark .fg-modal-card {
+  background-color: rgba(20, 23, 31, 0.96) !important;
+  color: #f0f3fa !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 30px 75px rgba(0, 0, 0, 0.75), 0 0 24px rgba(41, 98, 255, 0.08) !important;
+}
+
+:not(.dark) .fg-modal-header {
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+}
+
+.dark .fg-modal-header {
+  background-color: rgba(16, 18, 23, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+:not(.dark) .fg-item-card {
+  background-color: #fbfcfe !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+}
+
+.dark .fg-item-card {
+  background-color: rgba(18, 21, 28, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #f0f3fa !important;
+}
+
+:not(.dark) .fg-modal-card input,
+:not(.dark) .fg-modal-card select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+:not(.dark) .fg-modal-card select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.dark .fg-modal-card input,
+.dark .fg-modal-card select {
+  background-color: rgba(18, 21, 28, 0.85) !important;
+  color: #f0f3fa !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .fg-modal-card select option {
+  background-color: #14171f !important;
+  color: #f0f3fa !important;
+}

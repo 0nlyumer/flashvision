@@ -25,7 +25,7 @@ export default function FGCombinationBuilder({
 
   const triggerRef = useRef(null);
   const panelRef = useRef(null);
-  const [panelCoords, setPanelCoords] = useState({ top: 0, left: 0, width: 1040 });
+  const [panelCoords, setPanelCoords] = useState({ top: 0, left: 0, width: 1200 });
   const [hasBeenDragged, setHasBeenDragged] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const dragOffsetRef = useRef({ mouseX: 0, mouseY: 0, initialTop: 0, initialLeft: 0 });
@@ -59,7 +59,8 @@ export default function FGCombinationBuilder({
     layers: '',
     fabricName: '',
     fabricColor: '',
-    packing: ''
+    packing: '',
+    department: ''
   });
 
   // Available fabric colors based on selected fabric
@@ -113,7 +114,8 @@ export default function FGCombinationBuilder({
       layers: '',
       fabricName: '',
       fabricColor: '',
-      packing: ''
+      packing: '',
+      department: ''
     });
   };
 
@@ -126,7 +128,14 @@ export default function FGCombinationBuilder({
 
   const handleCreateNew = () => {
     if (!allowCreation || !generatedName) return;
-    const newItem = createFinishedGoodFromCombo(combo, state.items || [], masking);
+    const assignedDept = combo.department || config.defaultDepartment || 'Finished Goods';
+    const newItem = createFinishedGoodFromCombo(
+      { ...combo, department: assignedDept },
+      state.items || [],
+      masking,
+      config.packings,
+      assignedDept
+    );
     if (onSelectItem) {
       onSelectItem(newItem);
     }
@@ -183,7 +192,7 @@ export default function FGCombinationBuilder({
     const screenHeight = window.innerHeight;
 
     // Desired width for single horizontal row
-    const targetWidth = Math.min(1080, screenWidth - 32);
+    const targetWidth = Math.min(1240, screenWidth - 32);
 
     // Default left aligns with trigger
     let left = rect.left;
@@ -296,7 +305,7 @@ export default function FGCombinationBuilder({
             width: `${panelCoords.width}px`,
             zIndex: 9999
           }}
-          className="bg-surface-container-lowest/95 dark:bg-[#14171f]/95 backdrop-blur-2xl border border-white/10 dark:border-white/[0.08] rounded-2xl p-2.5 shadow-[0_25px_60px_rgba(0,0,0,0.45)] animate-in fade-in zoom-in-95 duration-150 text-on-surface"
+          className="fg-builder-panel rounded-2xl p-2.5 animate-in fade-in zoom-in-95 duration-150 text-on-surface"
         >
           {/* ROW 1: Single Horizontal Row of 7 Dropdowns + Action Controls */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-outline-variant/15 scrollbar-thin">
@@ -447,6 +456,24 @@ export default function FGCombinationBuilder({
               </select>
             </div>
 
+            {/* 8. Target Department */}
+            <div className="shrink-0 w-[135px]">
+              <select
+                value={combo.department || config.defaultDepartment || ''}
+                onChange={(e) => handleSelectField('department', e.target.value)}
+                className={`w-full bg-surface-container-lowest border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.department ? 'border-primary text-primary bg-primary/5' : 'border-outline-variant/30 text-on-surface'
+                }`}
+                title="Target Department for this Finished Good (Defaults to active Default Department)"
+              >
+                {(config.departments || DEFAULT_FG_CONFIG.departments || []).map(d => (
+                  <option key={d.id || d.name} value={d.name}>
+                    {d.name} {d.name === (config.defaultDepartment || 'Finished Goods') ? '★ (Def)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Action Controls: Reset, Settings Gear, and Close */}
             <div className="flex items-center gap-1 shrink-0 ml-auto pl-1">
               {activeAttributeCount > 0 && (
@@ -501,6 +528,15 @@ export default function FGCombinationBuilder({
                   Select attributes in the row above to build Finished Good combination
                 </span>
               )}
+
+              {/* Department Target Badge */}
+              <span 
+                className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20 shrink-0 flex items-center gap-1"
+                title="Department where this item will be registered and tracked in inventory"
+              >
+                <span className="material-symbols-outlined text-[13px]">business</span>
+                <span>Dept: {combo.department || config.defaultDepartment || 'Finished Goods'}</span>
+              </span>
 
               {combo.packing && masking.maskPacking && (
                 <span className="text-[10px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 shrink-0">

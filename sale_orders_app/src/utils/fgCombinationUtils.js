@@ -47,6 +47,13 @@ export const DEFAULT_FG_CONFIG = {
     { id: 'f4', name: 'Woven Twill', colors: ['White', 'Natural Ecru'] },
     { id: 'f5', name: 'Non-Woven Spunlace', colors: ['White', 'Black'] }
   ],
+  defaultDepartment: 'Finished Goods',
+  departments: [
+    { id: 'dept_fg', name: 'Finished Goods', isDefault: true },
+    { id: 'dept_prod', name: 'Production Department', isDefault: false },
+    { id: 'dept_wh', name: 'Warehouse', isDefault: false },
+    { id: 'dept_insp', name: 'Inspection & Grading', isDefault: false }
+  ],
   packings: [
     { id: 'pk1', name: '50M Standard Roll', uom: 'Meters', size: 50 },
     { id: 'pk2', name: '100M Jumbo Roll', uom: 'Meters', size: 100 },
@@ -230,12 +237,13 @@ export function parseRollSizeFromPacking(packing, packingsList = []) {
   return 50;
 }
 
-export function createFinishedGoodFromCombo(combo = {}, stateItems = [], maskingConfig = {}, packingsConfig = []) {
+export function createFinishedGoodFromCombo(combo = {}, stateItems = [], maskingConfig = {}, packingsConfig = [], defaultDept = '') {
   const displayName = generateFGDisplayName(combo, maskingConfig);
   const fgCount = (stateItems || []).filter(i => i.category === 'Finished Goods' || i.type === 'Finish Good').length;
   const sku = `FG-${String(fgCount + 1).padStart(3, '0')}`;
   const timestamp = Date.now();
   const rollSize = parseRollSizeFromPacking(combo.packing, packingsConfig || DEFAULT_FG_CONFIG.packings);
+  const assignedDept = combo.department || defaultDept || DEFAULT_FG_CONFIG.defaultDepartment || 'Finished Goods';
 
   return {
     id: `ITM-FG-${timestamp}`,
@@ -243,6 +251,10 @@ export function createFinishedGoodFromCombo(combo = {}, stateItems = [], masking
     name: displayName,
     category: 'Finished Goods',
     type: 'Finish Good',
+    department: assignedDept,
+    stockByDepartment: {
+      [assignedDept]: 0
+    },
     uom: 'Meters',
     unit: 'Meters',
     price: 0,
@@ -262,6 +274,7 @@ export function createFinishedGoodFromCombo(combo = {}, stateItems = [], masking
       fabricName: combo.fabricName || '',
       fabricColor: combo.fabricColor || '',
       packing: combo.packing || '',
+      department: assignedDept,
       createdAt: new Date().toISOString()
     }
   };
@@ -280,6 +293,8 @@ export function getInitialFGConfig() {
         return {
           ...DEFAULT_FG_CONFIG,
           ...parsed,
+          defaultDepartment: parsed.defaultDepartment || DEFAULT_FG_CONFIG.defaultDepartment,
+          departments: (parsed.departments && parsed.departments.length > 0) ? parsed.departments : DEFAULT_FG_CONFIG.departments,
           masking: { ...DEFAULT_FG_CONFIG.masking, ...(parsed.masking || {}) }
         };
       }

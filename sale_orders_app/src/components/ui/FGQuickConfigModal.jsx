@@ -17,6 +17,65 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
   const [newLayer, setNewLayer] = useState({ name: '' });
   const [newFabric, setNewFabric] = useState({ name: '', colorsStr: 'White, Black, Grey' });
   const [newPacking, setNewPacking] = useState({ name: '', uom: 'Meters', size: 50 });
+  const [newDept, setNewDept] = useState({ name: '', isDefault: false });
+
+  const handleAddDepartment = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (!newDept.name.trim()) return;
+    const deptName = newDept.name.trim();
+    const existingList = config.departments || DEFAULT_FG_CONFIG.departments || [];
+    const item = {
+      id: 'dept_' + Date.now(),
+      name: deptName,
+      isDefault: newDept.isDefault
+    };
+    const updatedList = [...existingList, item];
+    const updatedDefault = newDept.isDefault ? deptName : (config.defaultDepartment || deptName);
+    const newConfig = {
+      ...config,
+      departments: updatedList,
+      defaultDepartment: updatedDefault
+    };
+    saveFGConfig(newConfig);
+    setCollection('fg_combinations_config', newConfig);
+    setNewDept({ name: '', isDefault: false });
+  };
+
+  const handleSetDefaultDepartment = (deptName) => {
+    const existingList = config.departments || DEFAULT_FG_CONFIG.departments || [];
+    const updatedList = existingList.map(d => ({
+      ...d,
+      isDefault: d.name === deptName
+    }));
+    const newConfig = {
+      ...config,
+      departments: updatedList,
+      defaultDepartment: deptName
+    };
+    saveFGConfig(newConfig);
+    setCollection('fg_combinations_config', newConfig);
+  };
+
+  const handleDeleteDepartment = (id, deptName) => {
+    const existingList = config.departments || DEFAULT_FG_CONFIG.departments || [];
+    if (existingList.length <= 1) {
+      alert('At least one department must remain configured.');
+      return;
+    }
+    const updatedList = existingList.filter(d => d.id !== id);
+    let nextDefault = config.defaultDepartment;
+    if (nextDefault === deptName) {
+      nextDefault = updatedList[0]?.name || 'Finished Goods';
+    }
+    const newConfig = {
+      ...config,
+      departments: updatedList,
+      defaultDepartment: nextDefault
+    };
+    saveFGConfig(newConfig);
+    setCollection('fg_combinations_config', newConfig);
+  };
 
   // Draggable positioning state
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -169,6 +228,7 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
   };
 
   const tabs = [
+    { id: 'departments', label: 'Departments', icon: 'business' },
     { id: 'paperCodes', label: 'Paper / Texture', icon: 'texture' },
     { id: 'gauges', label: 'Item / Gauge', icon: 'straighten' },
     { id: 'colors', label: 'Top Colors', icon: 'palette' },
@@ -185,7 +245,7 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
       role="dialog" 
       aria-modal="true" 
       data-builder-modal="true"
-      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-900/40 dark:bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
       onClick={(e) => {
         // Prevent background clicks from submitting forms
         e.stopPropagation();
@@ -193,13 +253,13 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
     >
       <div 
         style={{ transform: `translate3d(${position.x}px, ${position.y}px, 0)` }}
-        className="bg-surface-container-lowest/95 backdrop-blur-2xl border border-white/10 dark:border-white/[0.08] rounded-3xl shadow-[0_30px_70px_rgba(0,0,0,0.5)] w-full max-w-4xl max-h-[88vh] flex flex-col overflow-hidden text-on-surface transition-shadow duration-200"
+        className="fg-modal-card rounded-3xl w-full max-w-4xl max-h-[88vh] flex flex-col overflow-hidden text-on-surface transition-shadow duration-200"
       >
         
         {/* Header - DRAGGABLE HANDLE */}
         <div 
           onPointerDown={handlePointerDown}
-          className={`px-6 py-4.5 border-b border-outline-variant/15 flex items-center justify-between bg-surface-container-low/80 select-none ${
+          className={`px-6 py-4.5 fg-modal-header flex items-center justify-between select-none ${
             isDragging ? 'cursor-grabbing' : 'cursor-grab'
           }`}
           title="Click and drag to move this window anywhere"
@@ -259,7 +319,9 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
               <span>{tab.label}</span>
               {tab.id !== 'masking' && (
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-surface-container text-on-surface-variant'}`}>
-                  {(config[tab.id] || []).length}
+                  {tab.id === 'departments' 
+                    ? (config.departments || DEFAULT_FG_CONFIG.departments || []).length 
+                    : (config[tab.id] || []).length}
                 </span>
               )}
             </button>
@@ -268,6 +330,114 @@ export default function FGQuickConfigModal({ isOpen, onClose }) {
 
         {/* Body Content */}
         <div className="p-6 overflow-y-auto flex-1 space-y-6">
+
+          {/* TAB 0: Departments & Default Assignment */}
+          {activeTab === 'departments' && (
+            <div className="space-y-5">
+              {/* Default Department Status Banner */}
+              <div className="p-4 rounded-2xl bg-primary/10 border border-primary/25 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-md">
+                    <span className="material-symbols-outlined text-[22px]">verified</span>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-wider text-primary">Active Default Department</h4>
+                    <p className="text-sm font-extrabold text-on-surface">
+                      {config.defaultDepartment || 'Finished Goods'}
+                    </p>
+                    <span className="text-[11px] text-on-surface-variant font-medium">
+                      All new finished goods created from the Builder will be automatically entered into this department.
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Add New Department Form */}
+              <div 
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddDepartment(e); }}
+                className="bg-surface-container-low/60 backdrop-blur-md p-4.5 rounded-2xl border border-outline-variant/20 flex flex-wrap gap-3 items-end"
+              >
+                <div className="flex-1 min-w-[220px]">
+                  <label className="text-[11px] font-bold text-on-surface-variant block mb-1">Department Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Finished Goods, Export Floor, Coating Plant"
+                    value={newDept.name}
+                    onChange={(e) => setNewDept(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-2 text-xs font-bold text-on-surface outline-none focus:ring-2 focus:ring-primary/25"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pb-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-on-surface select-none">
+                    <input
+                      type="checkbox"
+                      checked={newDept.isDefault}
+                      onChange={(e) => setNewDept(prev => ({ ...prev, isDefault: e.target.checked }))}
+                      className="w-4 h-4 rounded text-primary border-outline-variant/40 focus:ring-primary"
+                    />
+                    <span>Set as Default Department</span>
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleAddDepartment}
+                  className="bg-primary hover:bg-primary/90 text-white font-bold text-xs px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95 cursor-pointer ml-auto"
+                >
+                  <span className="material-symbols-outlined text-[16px]">add</span>
+                  <span>+ Add Department</span>
+                </button>
+              </div>
+
+              {/* Departments Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {(config.departments || DEFAULT_FG_CONFIG.departments || []).map(dept => {
+                  const isCurrentDefault = (config.defaultDepartment || 'Finished Goods') === dept.name;
+                  return (
+                    <div 
+                      key={dept.id} 
+                      className={`p-3.5 rounded-2xl border transition-all shadow-xs flex items-center justify-between gap-3 fg-item-card ${
+                        isCurrentDefault 
+                          ? 'border-primary ring-2 ring-primary/25 bg-primary/5' 
+                          : 'border-outline-variant/15 hover:border-outline-variant/40'
+                      }`}
+                    >
+                      <div className="flex flex-col gap-1 min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[18px] text-primary">business</span>
+                          <span className="font-extrabold text-xs text-on-surface truncate">{dept.name}</span>
+                        </div>
+                        {isCurrentDefault ? (
+                          <span className="text-[10px] font-black text-primary bg-primary/15 px-2 py-0.5 rounded-md w-fit flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[12px]">star</span>
+                            Default Department
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleSetDefaultDepartment(dept.name)}
+                            className="text-[10px] font-bold text-on-surface-variant hover:text-primary hover:underline text-left w-fit flex items-center gap-1 cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[12px]">radio_button_unchecked</span>
+                            Set as Default
+                          </button>
+                        )}
+                      </div>
+                      {!isCurrentDefault && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDepartment(dept.id, dept.name)}
+                          className="text-on-surface-variant/40 hover:text-red-500 p-1 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
+                          title="Delete Department"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* TAB 1: Paper / Texture Codes */}
           {activeTab === 'paperCodes' && (
