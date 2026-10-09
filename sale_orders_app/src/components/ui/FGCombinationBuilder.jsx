@@ -198,10 +198,10 @@ export default function FGCombinationBuilder({
         title={isOpen ? "Hide Combination Builder" : "Open Finished Goods Combination Builder"}
         className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all border shrink-0 shadow-sm ${
           isOpen
-            ? 'bg-cyan-500/20 border-cyan-500 text-cyan-700 dark:text-cyan-300 ring-2 ring-cyan-500/30'
+            ? 'bg-primary/10 border-primary text-primary ring-2 ring-primary/20'
             : activeAttributeCount > 0
-            ? 'bg-cyan-500/15 border-cyan-500/60 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/25'
-            : 'bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+            ? 'bg-primary/10 border-primary/50 text-primary hover:bg-primary/20'
+            : 'bg-surface hover:bg-surface-container-low border-outline-variant/50 text-on-surface'
         } ${buttonClassName}`}
       >
         <span className="material-symbols-outlined text-[17px]">
@@ -209,7 +209,7 @@ export default function FGCombinationBuilder({
         </span>
         <span>{isOpen ? 'Hide Builder' : placeholder}</span>
         {activeAttributeCount > 0 && !isOpen && (
-          <span className="w-4 h-4 rounded-full bg-cyan-600 text-white text-[9px] font-black flex items-center justify-center shrink-0">
+          <span className="w-4 h-4 rounded-full bg-primary text-white text-[9px] font-black flex items-center justify-center shrink-0">
             {activeAttributeCount}
           </span>
         )}
@@ -226,13 +226,13 @@ export default function FGCombinationBuilder({
             width: `${panelCoords.width}px`,
             zIndex: 9999
           }}
-          className="bg-white/95 dark:bg-[#0c1322]/95 backdrop-blur-xl border border-cyan-500/40 rounded-2xl p-2.5 shadow-[0_15px_45px_rgba(0,0,0,0.18)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-150 text-slate-800 dark:text-slate-100 ring-1 ring-cyan-500/20"
+          className="bg-surface/98 dark:bg-[#131722]/98 backdrop-blur-xl border border-outline-variant/60 rounded-2xl p-2.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150 text-on-surface ring-1 ring-outline-variant/40"
         >
           {/* ROW 1: Single Horizontal Row of 7 Dropdowns + Action Controls */}
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-slate-200/60 dark:border-slate-800 scrollbar-thin">
             
             {/* Header Mini Badge */}
-            <div className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-cyan-600 dark:text-cyan-400 shrink-0 px-1">
+            <div className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-on-surface-variant font-bold shrink-0 px-1">
               <span className="material-symbols-outlined text-[16px]">view_in_ar</span>
               <span className="hidden sm:inline">FG Combo:</span>
             </div>
@@ -242,8 +242,8 @@ export default function FGCombinationBuilder({
               <select
                 value={combo.paperCode}
                 onChange={(e) => handleSelectField('paperCode', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
-                  combo.paperCode ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.paperCode ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
                 }`}
                 title="Paper / Texture Pattern"
               >
@@ -261,8 +261,8 @@ export default function FGCombinationBuilder({
               <select
                 value={combo.baseItem}
                 onChange={(e) => handleSelectField('baseItem', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
-                  combo.baseItem ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.baseItem ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
                 }`}
                 title="Gauge / Base Item"
               >
@@ -280,8 +280,8 @@ export default function FGCombinationBuilder({
               <select
                 value={combo.color}
                 onChange={(e) => handleSelectField('color', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
-                  combo.color ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.color ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
                 }`}
                 title="Top Surface Color"
               >
@@ -299,8 +299,8 @@ export default function FGCombinationBuilder({
               <select
                 value={combo.layers}
                 onChange={(e) => handleSelectField('layers', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
-                  combo.layers ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.layers ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
                 }`}
                 title="Layers Specification"
               >
@@ -316,8 +316,8 @@ export default function FGCombinationBuilder({
               <select
                 value={combo.fabricName}
                 onChange={(e) => handleSelectField('fabricName', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
-                  combo.fabricName ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.fabricName ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
                 }`}
                 title="Backing Fabric"
               >
@@ -336,8 +336,8 @@ export default function FGCombinationBuilder({
                 value={combo.fabricColor}
                 onChange={(e) => handleSelectField('fabricColor', e.target.value)}
                 disabled={!combo.fabricName || availableFabricColors.length === 0}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none disabled:opacity-40 disabled:cursor-not-allowed ${
-                  combo.fabricColor ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none disabled:opacity-40 disabled:cursor-not-allowed ${
+                  combo.fabricColor ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
                 }`}
                 title="Backing Fabric Color"
               >
@@ -353,8 +353,8 @@ export default function FGCombinationBuilder({
               <select
                 value={combo.packing}
                 onChange={(e) => handleSelectField('packing', e.target.value)}
-                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-cyan-500/30 outline-none ${
-                  combo.packing ? 'border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/5' : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+                className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-lg px-2 py-1.5 text-xs font-bold transition-all focus:ring-2 focus:ring-primary/25 outline-none ${
+                  combo.packing ? 'border-primary text-primary bg-primary/5 font-bold' : 'border-outline-variant/60 text-on-surface bg-surface-container-lowest'
                 }`}
                 title={masking.maskPacking ? "Packing attribute (Masked from title, preserved in DB)" : "Packing Specification"}
               >
@@ -384,7 +384,7 @@ export default function FGCombinationBuilder({
                 <button
                   type="button"
                   onClick={() => setIsQuickConfigOpen(true)}
-                  className="p-1.5 rounded-lg hover:bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-cyan-500/15 text-on-surface-variant hover:text-primary transition-colors"
                   title="FG Combination Configuration (Attributes, Lookups, Masking)"
                 >
                   <span className="material-symbols-outlined text-[17px]">settings</span>
@@ -409,8 +409,8 @@ export default function FGCombinationBuilder({
             {/* Generated Name Preview Badge */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
               {generatedName ? (
-                <div className="flex items-center gap-1.5 bg-gradient-to-r from-cyan-500/15 via-blue-500/10 to-indigo-500/15 text-cyan-800 dark:text-cyan-200 px-2.5 py-1 rounded-lg border border-cyan-500/30 font-bold text-xs truncate max-w-xl shadow-xs">
-                  <span className="material-symbols-outlined text-[15px] text-cyan-600 dark:text-cyan-400 shrink-0">verified</span>
+                <div className="flex items-center gap-1.5 bg-surface-container-high text-on-surface px-2.5 py-1 rounded-lg border border-outline-variant/60 font-bold text-xs truncate max-w-xl shadow-xs">
+                  <span className="material-symbols-outlined text-[15px] text-primary shrink-0">verified</span>
                   <span className="truncate">{generatedName}</span>
                 </div>
               ) : (

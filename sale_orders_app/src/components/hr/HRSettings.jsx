@@ -361,7 +361,7 @@ export default function HRSettings({ isMobile }) {
                 </div>
                 
                 <div className="mt-6 relative z-10">
-                  <h3 className="font-headline text-md font-black text-on-surface leading-tight group-hover:text-blue-600 transition-colors">Salary & Allowance Configuration</h3>
+                  <h3 className="font-headline text-md font-black text-on-surface leading-tight group-hover:text-primary transition-colors">Salary & Allowance Configuration</h3>
                   <p className="font-body text-[11px] text-on-surface-variant mt-1.5 font-medium leading-relaxed">
                     Configure core compensation rules, overtime factors, and attendance allowance triggers.
                   </p>

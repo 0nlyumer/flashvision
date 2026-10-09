@@ -828,7 +828,7 @@ export default function SaleOrderModule() {
               return (
                 <div className="flex justify-between items-start pb-4 mb-4 border-b border-slate-250 w-full">
                   <div className="max-w-[50%]">
-                    <h2 className="text-2xl font-black uppercase text-[#004277] tracking-tight leading-none mb-1">{docTitle}</h2>
+                    <h2 className="text-2xl font-black uppercase text-slate-900 tracking-tight leading-none mb-1">{docTitle}</h2>
                     <span className="text-[8px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-mono">Ref: {order.id}</span>
                   </div>
                   <div className="flex flex-col items-end text-right gap-1.5">
@@ -845,7 +845,7 @@ export default function SaleOrderModule() {
                     {infoElement}
                   </div>
                   <div className="text-right">
-                    <h2 className="text-2xl font-black uppercase text-[#004277] tracking-tight leading-none mb-1">{docTitle}</h2>
+                    <h2 className="text-2xl font-black uppercase text-slate-900 tracking-tight leading-none mb-1">{docTitle}</h2>
                     <p className="text-[9px] text-slate-400">System Generated Document</p>
                   </div>
                 </div>
@@ -853,7 +853,7 @@ export default function SaleOrderModule() {
             case 'modern_strip':
               return (
                 <div className="flex flex-col gap-3 pb-4 mb-4 border-b border-slate-250 w-full">
-                  <div className="bg-[#004277] text-white py-1.5 px-3 rounded-lg flex justify-between items-center">
+                  <div className="bg-slate-800 text-white py-1.5 px-3 rounded-lg flex justify-between items-center">
                     <span className="text-xs font-black uppercase tracking-widest">{docTitle}</span>
                     <span className="text-[8px] font-mono tracking-widest uppercase">Verified Outbound Copy</span>
                   </div>
@@ -881,7 +881,7 @@ export default function SaleOrderModule() {
                     <h2 className="text-xl font-bold uppercase tracking-wide text-slate-850">{docTitle}</h2>
                     {logoElement}
                   </div>
-                  <div className="h-0.5 bg-[#004277]/20 w-full mb-1"></div>
+                  <div className="h-0.5 bg-slate-300 w-full mb-1"></div>
                   <div className="text-left">{infoElement}</div>
                 </div>
               );
@@ -893,7 +893,7 @@ export default function SaleOrderModule() {
                     {infoElement}
                   </div>
                   <div className="flex flex-col justify-between text-right p-1 shrink-0">
-                    <h2 className="text-lg font-black uppercase tracking-wider text-[#004277]">{docTitle}</h2>
+                    <h2 className="text-lg font-black uppercase tracking-wider text-slate-900">{docTitle}</h2>
                     <span className="text-[8px] text-slate-400 font-mono">Date: {new Date(order.date).toLocaleDateString()}</span>
                   </div>
                 </div>
@@ -902,7 +902,7 @@ export default function SaleOrderModule() {
               return (
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-slate-250 w-full">
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-10 bg-[#004277] rounded-full"></div>
+                    <div className="w-1.5 h-10 bg-slate-800 rounded-full"></div>
                     <div>
                       <h2 className="text-md font-black uppercase text-slate-850 tracking-wide leading-tight">{docTitle}</h2>
                       <span className="text-[9px] text-slate-400">{companyName}</span>
@@ -1365,7 +1365,7 @@ export default function SaleOrderModule() {
               title="Double click for 6-month history"
             >
               <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Total Sale Orders</p>
-              <p className="text-3xl font-extrabold text-primary">{totalOrders}</p>
+              <p className="text-3xl font-extrabold text-on-surface">{totalOrders}</p>
               <div className={`mt-4 flex items-center text-xs font-semibold ${momPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 <span className="material-symbols-outlined text-sm mr-1">{momPercentage >= 0 ? 'trending_up' : 'trending_down'}</span> 
                 {momPercentage >= 0 ? '+' : ''}{momPercentage}% from last month
@@ -1402,7 +1402,7 @@ export default function SaleOrderModule() {
             )}
             <div className="bg-primary/5 p-6 rounded-xl border border-primary/10 flex items-center justify-between group hover:-translate-y-1 transition-transform relative">
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-primary font-bold mb-1">Quick Report</p>
+                <p className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold mb-1">Quick Report</p>
                 <p className="text-sm font-medium text-primary-container leading-tight">Generate full export for {dashboardView === 'order-wise' ? 'Orders' : 'Items'}.</p>
               </div>
               <div className="relative">
@@ -1490,7 +1490,7 @@ export default function SaleOrderModule() {
                       
                       return (
                       <tr key={order.id} className="hover:bg-surface-container-low/30 transition-colors group">
-                        <td className="px-6 py-5 font-bold text-primary">{order.id}</td>
+                        <td className="px-6 py-5 font-bold text-on-surface">{order.id}</td>
                         <td className="px-6 py-5 text-on-surface-variant font-medium">{new Date(order.date).toLocaleDateString()}</td>
                         <td className="px-6 py-5">
                           <div className="flex items-center space-x-2">
@@ -1562,7 +1562,7 @@ export default function SaleOrderModule() {
                       <tr key={`${item.orderId}-${idx}`} className="hover:bg-surface-container-low/30 transition-colors group">
                         <td className="px-6 py-5 text-on-surface-variant font-bold">{new Date(item.orderDate).toLocaleDateString()}</td>
                         <td className="px-6 py-5">
-                          <div className="font-extrabold text-primary">{item.orderId}</div>
+                          <div className="font-extrabold text-on-surface">{item.orderId}</div>
                           <div className="text-[10px] text-on-surface-variant mt-1 uppercase tracking-wider font-bold truncate max-w-[150px]">{item.customerName}</div>
                         </td>
                         <td className="px-6 py-5">
@@ -1724,7 +1724,7 @@ export default function SaleOrderModule() {
           <section className="grid grid-cols-1 md:grid-cols-4 gap-6 bg-surface-container-low p-8 rounded-xl border border-outline-variant/10 shadow-sm">
             <div className="space-y-2">
               <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Sale Order #</label>
-              <input readOnly type="text" className="w-full bg-surface-container-highest/50 border-none rounded-lg text-primary font-extrabold focus:ring-0 cursor-not-allowed" value={orderMeta.id} />
+              <input readOnly type="text" className="w-full bg-surface-container-highest/50 border-none rounded-lg text-on-surface font-extrabold focus:ring-0 cursor-not-allowed" value={orderMeta.id} />
             </div>
             <div className="space-y-2">
               <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Order Date</label>
@@ -1748,7 +1748,7 @@ export default function SaleOrderModule() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <section className="lg:col-span-8 space-y-6 bg-surface-container-low p-8 rounded-xl border border-outline-variant/10 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <span className="material-symbols-outlined text-primary">person_search</span>
+                <span className="material-symbols-outlined text-on-surface-variant">person_search</span>
                 <h2 className="text-lg font-bold text-on-surface font-headline">Customer Information</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1805,7 +1805,7 @@ export default function SaleOrderModule() {
 
             <section className="lg:col-span-4 space-y-6 bg-surface-container-low p-8 rounded-xl border border-outline-variant/10 shadow-sm">
               <div className="flex items-center gap-2 mb-2">
-                <span className="material-symbols-outlined text-primary">assignment_turned_in</span>
+                <span className="material-symbols-outlined text-on-surface-variant">assignment_turned_in</span>
                 <h2 className="text-lg font-bold text-on-surface font-headline">Sales & Terms</h2>
               </div>
               <div className="space-y-5">
@@ -1838,7 +1838,7 @@ export default function SaleOrderModule() {
             <div className="px-8 py-6 border-b border-outline-variant/10 flex justify-between items-center bg-surface-container-low">
               <h2 className="text-lg font-bold text-on-surface font-headline">Order Line Items</h2>
               <div className="flex items-center gap-3">
-                <button type="button" onClick={() => navigate('/settings?tab=finish-good')} className="flex items-center gap-2 text-primary text-sm font-bold hover:bg-primary/5 transition-colors px-4 py-2.5 rounded-lg border border-primary/40 border-dashed shadow-sm">
+                <button type="button" onClick={() => navigate('/settings?tab=finish-good')} className="flex items-center gap-2 text-on-surface text-sm font-bold hover:bg-surface-container-high transition-colors px-4 py-2.5 rounded-lg border border-outline-variant/50 shadow-sm">
                   <span className="material-symbols-outlined text-[18px]">category</span> Add Finish Good
                 </button>
                 <button type="button" onClick={addNewItem} className="flex items-center gap-2 text-white text-sm font-bold hover:opacity-90 transition-opacity bg-primary px-5 py-2.5 rounded-lg shadow-md">
@@ -1964,7 +1964,7 @@ export default function SaleOrderModule() {
                         <td className="px-4 py-4 text-right align-top pt-11">
                           <input type="number" value={item.discount} onChange={(e) => handleItemChange(item.id, 'discount', parseFloat(e.target.value) || 0)} className="w-20 text-right bg-white border border-outline-variant/30 rounded-lg p-2.5 text-sm font-bold focus:ring-2 focus:ring-primary/20 shadow-sm" />
                         </td>
-                        <td className="px-4 py-4 text-right align-top pt-[54px] text-sm font-extrabold text-primary">{itemSubtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                        <td className="px-4 py-4 text-right align-top pt-[54px] text-sm font-extrabold text-on-surface">{itemSubtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                         <td className="px-4 py-4 align-top pt-12">
                           <input type="text" value={item.remarks} onChange={(e) => handleItemChange(item.id, 'remarks', e.target.value)} className="w-full bg-transparent border-b border-dashed border-outline-variant/50 pb-1 text-xs focus:outline-none focus:border-primary italic text-slate-600 font-medium" placeholder="Add specific requirements..." />
                         </td>
@@ -1985,17 +1985,17 @@ export default function SaleOrderModule() {
               <textarea value={orderMeta.notes} onChange={(e) => handleMetaChange('notes', e.target.value)} className="w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl focus:ring-2 ring-primary/20 p-4 text-sm resize-y font-medium text-slate-700 shadow-inner" placeholder="Specify any logistical constraints, laboratory requirements, or compliance codes here..." rows="5"></textarea>
             </section>
             
-            <section className="md:col-span-5 bg-gradient-to-br from-[#004277] to-[#005a9e] text-white p-8 rounded-xl shadow-[0_20px_40px_rgba(0,66,119,0.15)] relative overflow-hidden flex flex-col justify-between">
+            <section className="md:col-span-5 bg-surface-container-high border border-outline-variant/30 text-on-surface p-8 rounded-xl shadow-lg relative overflow-hidden flex flex-col justify-between">
               <div className="absolute -right-8 -bottom-8 opacity-10">
                 <span className="material-symbols-outlined text-[180px]" style={{ fontVariationSettings: "'FILL' 1" }}>request_quote</span>
               </div>
               <h3 className="text-xs font-bold uppercase tracking-widest opacity-80 mb-6 flex items-center gap-2"><span className="material-symbols-outlined text-[16px]">point_of_sale</span> Financial Summary</h3>
               <div className="space-y-4 relative z-10 w-full mb-4">
-                <div className="flex justify-between items-center text-blue-100">
+                <div className="flex justify-between items-center text-on-surface-variant">
                   <span className="text-sm font-semibold">Net Subtotal</span>
                   <span className="text-sm font-bold">{subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                 </div>
-                <div className="flex justify-between items-center text-blue-100/60">
+                <div className="flex justify-between items-center text-on-surface-variant/80">
                   <span className="text-sm font-semibold">Estimated Freight (0%)</span>
                   <span className="text-sm font-bold">0.00</span>
                 </div>
@@ -2058,7 +2058,7 @@ export default function SaleOrderModule() {
                          return (
                             <tr key={order.id} className="hover:bg-surface-container-low/40 transition-colors">
                                 <td className="px-8 py-6">
-                                   <div className="font-extrabold text-primary text-base">{order.id}</div>
+                                   <div className="font-extrabold text-on-surface text-base">{order.id}</div>
                                    <div className="text-[11px] text-slate-500 font-bold mt-1.5">{new Date(order.date).toLocaleDateString()}</div>
                                 </td>
                                 <td className="px-6 py-6 font-extrabold text-slate-700">{customer?.name || 'Unknown'}</td>
@@ -2077,7 +2077,7 @@ export default function SaleOrderModule() {
                                      <button onClick={() => setPrintOrder(order)} className="text-primary hover:bg-primary/10 p-2 rounded-lg transition-colors flex items-center justify-center" title="Print Record">
                                         <span className="material-symbols-outlined text-[20px]">print</span>
                                      </button>
-                                     <button onClick={() => handleEditOrder(order)} title="Edit Order" className="text-blue-400 hover:text-blue-700 hover:bg-blue-50 p-2 rounded-lg transition-colors flex items-center justify-center">
+                                     <button onClick={() => handleEditOrder(order)} title="Edit Order" className="text-on-surface-variant hover:text-primary hover:bg-surface-container-high p-2 rounded-lg transition-colors flex items-center justify-center">
                                        <span className="material-symbols-outlined text-[20px]">edit</span>
                                      </button>
                                      <button onClick={() => updateSaleOrderItemStatus(order.id, null, 'Deleted')} title="Delete Order" className="text-red-400 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors flex items-center justify-center">

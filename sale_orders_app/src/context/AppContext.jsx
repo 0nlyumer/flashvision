@@ -3612,6 +3612,9 @@ export const AppProvider = ({ children }) => {
   };
 
   const updateThemeSettings = (data) => {
+      if (data) {
+        applyTheme(data);
+      }
       setState(prev => ({ ...prev, themeSettings: data }));
   };
 

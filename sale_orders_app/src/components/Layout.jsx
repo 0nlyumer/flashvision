@@ -2,6 +2,7 @@ import AICopilot from './ui/AICopilot';
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import { applyTheme } from '../utils/theme';
 
 export default function Layout({ children, hideSidebar = false, subNavigation = null, subNavConfig = null, hasDashboardBackground = false }) {
   const navigate = useNavigate();
@@ -185,7 +186,7 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
             <span className="material-symbols-outlined text-[24px]">menu</span>
           </button>
           <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary leading-none">Flashvision</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-on-surface-variant leading-none">Flashvision</span>
             <span className="text-sm font-bold text-on-surface leading-tight truncate max-w-[155px]">{getScreenTitle()}</span>
           </div>
         </div>
@@ -1214,7 +1215,7 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
             <p>© 2024 {state?.adminSetup?.companyName?.toUpperCase() || 'FLASHVISION LOGISTICS'}</p>
             <div className="flex gap-6">
               <a className="hover:text-primary transition-colors" href="#">Legal & Compliance</a>
-              <span className="text-primary/70">Powered by Flashvision</span>
+              <span className="text-on-surface-variant/70">Powered by Flashvision</span>
             </div>
           </footer>
         )}

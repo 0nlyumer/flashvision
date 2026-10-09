@@ -5,7 +5,7 @@
 
 @layer base {
   h1, h2, h3, h4, h5, h6 {
-    color: var(--color-on-surface);
+    color: var(--color-on-surface) !important;
     font-family: var(--font-headline);
   }
   html, body, #root {
@@ -1223,4 +1223,14 @@ label.text-on-surface-variant {
     border-color: #2a2e39 !important;
     box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8) !important;
   }
+}
+
+/* Force default heading colors everywhere */
+h1:not([data-keep-color]),
+h2:not([data-keep-color]),
+h3:not([data-keep-color]),
+h4:not([data-keep-color]),
+h5:not([data-keep-color]),
+h6:not([data-keep-color]) {
+  color: var(--color-on-surface) !important;
 }
