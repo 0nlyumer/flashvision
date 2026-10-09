@@ -767,10 +767,43 @@ export default function SaleOrderModule() {
     setActiveTab('dashboard');
   };
 
-  // Item Search State Handlers (for Inline Searchable Dropdown)
+  // Item Search State Handlers (for Floating Portal Dropdown - Never Clipped)
   const [activeSearchId, setActiveSearchId] = useState(null);
   const [searchQueries, setSearchQueries] = useState({});
+  const [searchDropdownCoords, setSearchDropdownCoords] = useState({ top: 0, left: 0, width: 480 });
   const searchDropdownRef = useRef(null);
+  const activeInputRef = useRef(null);
+
+  const updateSearchDropdownPosition = () => {
+    if (activeInputRef.current) {
+      const rect = activeInputRef.current.getBoundingClientRect();
+      const screenHeight = window.innerHeight;
+      const spaceBelow = screenHeight - rect.bottom;
+      const dropdownHeight = 320;
+      let top = rect.bottom + 6;
+      if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+        top = rect.top - dropdownHeight - 6;
+      }
+      setSearchDropdownCoords({
+        top: Math.round(top),
+        left: Math.round(rect.left),
+        width: Math.max(480, Math.round(rect.width))
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (activeSearchId) {
+      updateSearchDropdownPosition();
+      const handleScrollOrResize = () => updateSearchDropdownPosition();
+      window.addEventListener('resize', handleScrollOrResize);
+      window.addEventListener('scroll', handleScrollOrResize, true);
+      return () => {
+        window.removeEventListener('resize', handleScrollOrResize);
+        window.removeEventListener('scroll', handleScrollOrResize, true);
+      };
+    }
+  }, [activeSearchId]);
 
   const [customerSearchQuery, setCustomerSearchQuery] = useState('');
   const [showCustSearch, setShowCustSearch] = useState(false);
@@ -778,7 +811,11 @@ export default function SaleOrderModule() {
 
   useEffect(() => {
     const handleClickOutsideItem = (event) => {
-      if (searchDropdownRef.current && !searchDropdownRef.current.contains(event.target)) {
+      if (
+        searchDropdownRef.current && 
+        !searchDropdownRef.current.contains(event.target) &&
+        (!activeInputRef.current || !activeInputRef.current.contains(event.target))
+      ) {
         setActiveSearchId(null);
       }
       if (custSearchRef.current && !custSearchRef.current.contains(event.target)) {
@@ -1975,7 +2012,7 @@ export default function SaleOrderModule() {
                 <thead>
                   <tr className="bg-surface border-b border-outline-variant/10">
                     <ResizableHeader className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant w-1">Sr.</ResizableHeader>
-                    <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant min-w-[350px]">Item Code / Selective Search</ResizableHeader>
+                    <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant min-w-[460px]">Item Code / Selective Search</ResizableHeader>
                     <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-28">Order Qty</ResizableHeader>
                     <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-24">Rolls</ResizableHeader>
                     <ResizableHeader className="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant text-right w-24">Rate ({currencyCode})</ResizableHeader>
@@ -2008,41 +2045,107 @@ export default function SaleOrderModule() {
                                <div className="font-mono text-xs font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded tracking-wide w-fit mb-2 border border-slate-200">
                                   {item.itemCode}
                                </div>
-                               <div className="flex items-center gap-2">
-                               <div className="relative" ref={activeSearchId === item.id ? searchDropdownRef : null}>
-                                   <input 
-                                     type="text" 
-                                     placeholder="Search FG Name or SKU..."
-                                     onClick={() => setActiveSearchId(item.id)}
-                                     onChange={(e) => {
-                                        setSearchQueries({...searchQueries, [item.id]: e.target.value});
-                                        if (item.itemId) handleItemChange(item.id, 'itemId', '');
-                                     }}
-                                     value={item.itemId && activeSearchId !== item.id ? prodObj?.name : (searchQueries[item.id] || '')}
-                                     className="w-full bg-white border border-outline-variant/30 rounded-lg px-4 py-2.5 text-sm font-bold focus:ring-2 focus:ring-primary/20 shadow-sm"
-                                   />
-                                   {activeSearchId === item.id && (
-                                       <ul className="absolute z-30 left-0 top-[calc(100%+4px)] w-[450px] bg-white border border-outline-variant/20 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.12)] max-h-80 overflow-y-auto print:hidden animate-in fade-in zoom-in-95 duration-200">
+                               <div className="flex items-center gap-2 flex-1">
+                               <div className="relative flex-1 min-w-[340px] max-w-[580px]">
+                                   <div className="relative flex items-center">
+                                     <input 
+                                       ref={(el) => {
+                                         if (activeSearchId === item.id) activeInputRef.current = el;
+                                       }}
+                                       type="text" 
+                                       placeholder="Search FG Name or SKU..."
+                                       onFocus={(e) => {
+                                          activeInputRef.current = e.target;
+                                          setActiveSearchId(item.id);
+                                       }}
+                                       onClick={(e) => {
+                                          activeInputRef.current = e.target;
+                                          setActiveSearchId(item.id);
+                                       }}
+                                       onChange={(e) => {
+                                          setSearchQueries({...searchQueries, [item.id]: e.target.value});
+                                          if (item.itemId) handleItemChange(item.id, 'itemId', '');
+                                       }}
+                                       value={item.itemId && activeSearchId !== item.id ? (prodObj?.name || '') : (searchQueries[item.id] || '')}
+                                       title={item.itemId ? (prodObj?.name || '') : ''}
+                                       className={`w-full bg-white dark:bg-[#14171f] border rounded-xl pl-3.5 pr-8 py-2 text-xs font-bold transition-all outline-none focus:ring-2 focus:ring-primary/20 shadow-xs ${
+                                          item.itemId ? 'border-primary/60 text-primary bg-primary/[0.03]' : 'border-outline-variant/30 text-on-surface'
+                                       }`}
+                                     />
+                                     {item.itemId && (
+                                       <button
+                                         type="button"
+                                         onClick={() => {
+                                           handleItemChange(item.id, 'itemId', '');
+                                           setSearchQueries({ ...searchQueries, [item.id]: '' });
+                                           setActiveSearchId(item.id);
+                                         }}
+                                         className="absolute right-2 text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                                         title="Clear and search another item"
+                                       >
+                                         <span className="material-symbols-outlined text-[15px]">close</span>
+                                       </button>
+                                     )}
+                                   </div>
+
+                                   {/* Portal-based Floating Dropdown: Renders directly in document.body - NEVER CLIPPED BY TABLE */}
+                                   {activeSearchId === item.id && typeof document !== 'undefined' && createPortal(
+                                       <div 
+                                         ref={searchDropdownRef}
+                                         style={{
+                                           position: 'fixed',
+                                           top: `${searchDropdownCoords.top}px`,
+                                           left: `${searchDropdownCoords.left}px`,
+                                           width: `${searchDropdownCoords.width}px`,
+                                           zIndex: 99999
+                                         }}
+                                         className="bg-white/98 dark:bg-[#14171f]/98 backdrop-blur-2xl border border-slate-200 dark:border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,28,56,0.18)] max-h-80 overflow-y-auto print:hidden animate-in fade-in zoom-in-95 duration-150 p-1.5 space-y-1"
+                                       >
+                                           <div className="px-3 py-1.5 text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
+                                             <span>Finished Goods ({filteredItemsList.length})</span>
+                                             <span className="text-primary font-bold">Press ESC or click outside to close</span>
+                                           </div>
                                            {filteredItemsList.map(p => (
-                                               <li 
+                                               <button 
                                                  key={p.id} 
+                                                 type="button"
                                                  onClick={() => {
                                                      handleItemChange(item.id, 'itemId', p.id);
                                                      setSearchQueries({...searchQueries, [item.id]: ''});
                                                      setActiveSearchId(null);
                                                  }}
-                                                 className="px-5 py-3 hover:bg-primary/5 cursor-pointer border-b border-outline-variant/10 last:border-0 transition-colors"
+                                                 className="w-full text-left p-2.5 hover:bg-primary/5 dark:hover:bg-primary/15 rounded-xl cursor-pointer border border-transparent hover:border-primary/20 transition-all flex flex-col gap-1 group"
                                                >
-                                                   <div className="font-extrabold text-sm text-slate-800">{p.name}</div>
-                                                   <div className="flex items-center gap-x-4 mt-1.5 flex-wrap">
-                                                       <span className="text-[10px] font-bold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{p.sku}</span>
-                                                       <span className="text-[11px] font-bold text-tertiary flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">inventory_2</span> {p.stock} {p.unit}</span>
-                                                       <span className="text-[11px] font-bold text-primary flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">payments</span> {p.price}</span>
+                                                   <div className="font-extrabold text-xs text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors flex items-center gap-1.5">
+                                                       <span className="material-symbols-outlined text-[15px] text-primary shrink-0">category</span>
+                                                       <span>{p.name}</span>
                                                    </div>
-                                               </li>
+                                                   <div className="flex items-center gap-x-3 mt-0.5 flex-wrap text-[10px]">
+                                                       <span className="font-mono font-bold bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20">{p.sku}</span>
+                                                       <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                                         <span className="material-symbols-outlined text-[13px]">inventory_2</span> 
+                                                         {p.stock ?? 0} {p.unit || 'm'}
+                                                       </span>
+                                                       <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                                         <span className="material-symbols-outlined text-[13px]">straighten</span> 
+                                                         Roll: {p.rollSize || 50}m
+                                                       </span>
+                                                       {p.department && (
+                                                         <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                                           <span className="material-symbols-outlined text-[13px]">business</span> 
+                                                           {p.department}
+                                                         </span>
+                                                       )}
+                                                   </div>
+                                               </button>
                                            ))}
-                                           {filteredItemsList.length === 0 && <li className="p-4 text-sm font-bold text-slate-400 text-center italic">No finish goods found.</li>}
-                                       </ul>
+                                           {filteredItemsList.length === 0 && (
+                                             <div className="p-4 text-xs font-bold text-slate-400 text-center italic">
+                                               No matching finished goods found.
+                                             </div>
+                                           )}
+                                       </div>,
+                                       document.body
                                    )}
                                </div>
                                <FGCombinationBuilder

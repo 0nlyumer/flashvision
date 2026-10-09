@@ -22,7 +22,7 @@ export default function FGCombinationBuilder({
   const { state } = useApp();
   const [isOpen, setIsOpen] = useState(false);
   const [isQuickConfigOpen, setIsQuickConfigOpen] = useState(false);
-  const [isMatchDropdownOpen, setIsMatchDropdownOpen] = useState(false);
+  const [isMatchDropdownOpen, setIsMatchDropdownOpen] = useState(true);
 
   const triggerRef = useRef(null);
   const panelRef = useRef(null);
@@ -106,6 +106,7 @@ export default function FGCombinationBuilder({
       }
       return next;
     });
+    setIsMatchDropdownOpen(true);
   };
 
   const handleReset = () => {
@@ -538,60 +539,23 @@ export default function FGCombinationBuilder({
             {/* Actions / Results */}
             <div className="flex items-center gap-2 shrink-0">
               
-              {/* If matching items exist: Modern Sleek Dropdown */}
+              {/* Matching items toggle pill */}
               {matchingItems.length > 0 && (
-                <div className="relative" ref={matchDropdownRef}>
-                  <button
-                    type="button"
-                    onClick={() => setIsMatchDropdownOpen(prev => !prev)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-extrabold transition-all shadow-xs active:scale-95 cursor-pointer"
-                    title="View matching warehouse items"
+                <button
+                  type="button"
+                  onClick={() => setIsMatchDropdownOpen(prev => !prev)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-extrabold transition-all shadow-xs active:scale-95 cursor-pointer"
+                  title="Toggle live matching items panel below"
+                >
+                  <span className="material-symbols-outlined text-[16px]">inventory_2</span>
+                  <span>{matchingItems.length} {matchingItems.length === 1 ? 'Match' : 'Matches'} Found</span>
+                  <span 
+                    className="material-symbols-outlined text-[15px] transition-transform duration-200"
+                    style={{ transform: isMatchDropdownOpen ? 'rotate(180deg)' : 'none' }}
                   >
-                    <span className="material-symbols-outlined text-[16px]">inventory_2</span>
-                    <span>{matchingItems.length} {matchingItems.length === 1 ? 'Match' : 'Matches'} Found</span>
-                    <span 
-                      className="material-symbols-outlined text-[15px] transition-transform duration-200"
-                      style={{ transform: isMatchDropdownOpen ? 'rotate(180deg)' : 'none' }}
-                    >
-                      expand_more
-                    </span>
-                  </button>
-
-                  {isMatchDropdownOpen && (
-                    <div className="absolute right-0 bottom-full mb-2 w-84 max-h-64 overflow-y-auto bg-surface-container-lowest/98 dark:bg-[#14171f] backdrop-blur-2xl rounded-2xl border border-outline-variant/30 dark:border-white/10 shadow-2xl z-50 p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150">
-                      <div className="px-2.5 py-1 text-[10px] font-black uppercase text-on-surface-variant/70 border-b border-outline-variant/15 flex items-center justify-between">
-                        <span>Matching Warehouse Items</span>
-                        <span className="text-primary font-bold">{matchingItems.length} found</span>
-                      </div>
-                      {matchingItems.map(item => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => {
-                            handleChooseItem(item);
-                            setIsMatchDropdownOpen(false);
-                          }}
-                          className="w-full text-left p-2 rounded-xl hover:bg-primary/10 dark:hover:bg-primary/20 text-on-surface hover:text-primary transition-all flex items-start gap-2.5 group cursor-pointer border border-transparent hover:border-primary/20"
-                        >
-                          <span className="font-mono text-[10px] font-black bg-primary/15 text-primary px-1.5 py-0.5 rounded-md shrink-0 mt-0.5">
-                            {item.sku || 'ITM'}
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-xs font-extrabold truncate text-on-surface group-hover:text-primary">{item.name}</p>
-                            <p className="text-[10px] text-on-surface-variant mt-0.5">
-                              {item.department ? `Dept: ${item.department}` : ''}
-                              {item.rollSize ? ` • ${item.rollSize}m roll` : ''}
-                              {typeof item.stock === 'number' ? ` • Stock: ${item.stock}m` : ''}
-                            </p>
-                          </div>
-                          <span className="material-symbols-outlined text-[16px] text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1">
-                            check_circle
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                    expand_more
+                  </span>
+                </button>
               )}
 
               {/* No match indicator */}
@@ -618,6 +582,86 @@ export default function FGCombinationBuilder({
             </div>
 
           </div>
+
+          {/* ROW 3: INSTANT LIVE MATCHING FINISHED GOODS (Auto-opens right below builder on any selection) */}
+          {activeAttributeCount > 0 && matchingItems.length > 0 && isMatchDropdownOpen && (
+            <div className="mt-2.5 pt-2.5 border-t border-outline-variant/15 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="flex items-center justify-between pb-2 px-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-xs font-black uppercase tracking-wider text-primary">
+                    Live Matching Finished Goods in Warehouse ({matchingItems.length})
+                  </span>
+                  <span className="text-[11px] text-on-surface-variant font-medium hidden sm:inline">
+                    — Click any item to instantly select into order
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMatchDropdownOpen(false)}
+                  className="text-[10px] font-bold text-on-surface-variant hover:text-on-surface px-2 py-0.5 rounded hover:bg-surface-container-high transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <span>Hide</span>
+                  <span className="material-symbols-outlined text-[13px]">expand_less</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1 scrollbar-thin">
+                {matchingItems.map(item => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleChooseItem(item)}
+                    className="text-left p-2.5 rounded-xl bg-surface-container-low/90 hover:bg-primary/10 border border-outline-variant/20 hover:border-primary/50 text-on-surface hover:text-primary transition-all flex items-start gap-2.5 group cursor-pointer shadow-xs active:scale-[0.98]"
+                    title={`Select ${item.name}`}
+                  >
+                    <span className="font-mono text-[10px] font-black bg-primary/15 text-primary px-1.5 py-0.5 rounded-md shrink-0 mt-0.5">
+                      {item.sku || 'ITM'}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-extrabold truncate text-on-surface group-hover:text-primary">
+                        {item.name}
+                      </p>
+                      <div className="flex items-center gap-2 text-[10px] text-on-surface-variant mt-0.5 flex-wrap">
+                        {item.department && <span>Dept: {item.department}</span>}
+                        {item.rollSize && <span>• {item.rollSize}m Roll</span>}
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                          • Stock: {item.stock ?? 0}m
+                        </span>
+                      </div>
+                    </div>
+                    <span className="material-symbols-outlined text-[18px] text-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1">
+                      add_circle
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ROW 3 (No match found): Prominent Registration Banner */}
+          {activeAttributeCount >= 2 && matchingItems.length === 0 && allowCreation && generatedName && (
+            <div className="mt-2.5 pt-2.5 border-t border-outline-variant/15 flex items-center justify-between gap-3 animate-in fade-in duration-200 bg-primary/5 p-3 rounded-xl border border-primary/20">
+              <div className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-[22px] text-amber-500 shrink-0">info</span>
+                <div>
+                  <p className="text-xs font-extrabold text-on-surface">No matching finished good registered in warehouse.</p>
+                  <p className="text-[11px] text-on-surface-variant">
+                    You can register <strong className="text-primary">{generatedName}</strong> into the default department (<span className="font-bold">{config.defaultDepartment || 'Finished Goods'}</span>) right now.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleCreateNew}
+                className="bg-primary hover:bg-primary/90 text-white text-xs font-extrabold px-4 py-2 rounded-xl flex items-center gap-2 shadow-md transition-all active:scale-95 shrink-0 cursor-pointer"
+                title="Register this new Finished Good and add to Sales Order"
+              >
+                <span className="material-symbols-outlined text-[16px]">add_circle</span>
+                <span>+ Register As New FG</span>
+              </button>
+            </div>
+          )}
 
         </div>,
         document.body
