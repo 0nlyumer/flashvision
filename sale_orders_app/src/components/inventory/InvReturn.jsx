@@ -136,7 +136,7 @@ export default function InvReturn({ selectedDepartments = [] }) {
 
   return (
     <>
-    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-24 print:hidden">
+    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-4 print:hidden">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight text-on-surface mb-2 font-headline">Process Stock Return</h1>

@@ -1273,13 +1273,13 @@ export default function Layout({ children, hideSidebar = false, subNavigation = 
           hasDashboardBackground ? 'bg-transparent' : 'bg-background'
         }`}
       >
-        <div className={`w-full relative z-10 print:p-0 print:pr-0 transition-all duration-300 ${(location.pathname === '/document-warehouse' || (location.pathname === '/dashboard' && location.search.includes('tab=e-files'))) ? 'p-0 space-y-0 max-w-full h-full flex flex-col' : isSidebarHorizontal ? 'p-0 space-y-0 max-w-full' : (location.pathname === '/production-flow' || location.pathname.startsWith('/hr')) ? 'p-2 md:p-4 pr-4 space-y-4 max-w-full' : 'p-8 lg:p-12 pr-16 space-y-10 max-w-full'}`}>
+        <div className={`w-full relative z-10 print:p-0 print:pr-0 transition-all duration-300 ${(location.pathname === '/document-warehouse' || (location.pathname === '/dashboard' && location.search.includes('tab=e-files')) || location.pathname.startsWith('/inventory') || location.pathname.startsWith('/production')) ? 'p-1.5 md:p-3 pr-3 space-y-2 max-w-full flex-1 flex flex-col min-h-0' : isSidebarHorizontal ? 'p-0 space-y-0 max-w-full' : (location.pathname === '/production-flow' || location.pathname.startsWith('/hr')) ? 'p-2 md:p-4 pr-4 space-y-4 max-w-full' : 'p-6 lg:p-8 pr-10 space-y-6 max-w-full'}`}>
           {children}
         </div>
 
         {/* Footer Attribution/Meta */}
         {!hideSidebar && location.pathname !== '/document-warehouse' && !location.search.includes('tab=e-files') && (
-          <footer className="mt-auto px-12 pt-8 pb-10 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest relative z-10 print:hidden">
+          <footer className={`mt-auto px-6 ${location.pathname.startsWith('/inventory') || location.pathname.startsWith('/production') ? 'pt-2 pb-3' : 'pt-6 pb-8'} flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest relative z-10 print:hidden`}>
             <p>© 2024 {state?.adminSetup?.companyName?.toUpperCase() || 'FLASHVISION LOGISTICS'}</p>
             <div className="flex gap-6">
               <a className="hover:text-primary transition-colors" href="#">Legal & Compliance</a>

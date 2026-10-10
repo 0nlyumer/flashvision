@@ -104,7 +104,7 @@ export default function InvDashboard({ selectedDepartments = [] }) {
   }, [state?.saleOrders, state?.customers, state?.items, saleOrderViewType, selectedDepartments]);
 
   return (
-    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-24">
+    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-4">
       {/* Header / Top Bar */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
         <div>

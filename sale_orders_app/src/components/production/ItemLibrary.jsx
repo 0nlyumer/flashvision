@@ -157,6 +157,41 @@ export default function ItemLibrary() {
   const [selectedOutputTypes, setSelectedOutputTypes] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showColSettings, setShowColSettings] = useState(false);
+
+  // Check if selected department contains finished goods items
+  const hasFinishedGoodsInDept = useMemo(() => {
+    const depts = selectedDepartments || [];
+    const allItems = state.items || [];
+
+    const isFG = (item) => {
+      if (!item) return false;
+      const cat = (item.category || '').toLowerCase().trim();
+      const rmType = (item.rawMaterialType || '').toLowerCase().trim();
+      const type = (item.type || '').toLowerCase().trim();
+      return (
+        cat.includes('finish') ||
+        rmType.includes('finish') ||
+        type.includes('finish')
+      );
+    };
+
+    if (depts.length > 0) {
+      return allItems.some(item => {
+        const itemDept = item.department || '';
+        const inSelected = depts.some(d => {
+          const dVal = typeof d === 'string' ? d : (d?.value || d?.label || '');
+          return (
+            dVal === itemDept ||
+            dVal.toLowerCase() === itemDept.toLowerCase() ||
+            (Array.isArray(item.departments) && item.departments.some(dep => (typeof dep === 'string' ? dep : dep?.value)?.toLowerCase() === dVal.toLowerCase()))
+          );
+        });
+        return inSelected && isFG(item);
+      });
+    }
+
+    return allItems.some(isFG);
+  }, [selectedDepartments, state.items]);
   
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -300,10 +335,9 @@ export default function ItemLibrary() {
   };
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in duration-500 pb-10">
+    <div className="flex flex-col gap-2 flex-1 w-full h-[calc(100vh-140px)] min-h-[640px] animate-in fade-in duration-300">
       {/* Top Controls outside table */}
-      <div className="flex justify-end pr-4">
-        <div className="w-[300px]">
+      <div className="flex justify-end pr-2 mb-1"><div className="w-[280px]">
           <CustomMultiSelect 
               options={(state.departments || []).map(d => ({ value: d.value, label: d.label }))}
               selectedValues={selectedDepartments}
@@ -313,14 +347,13 @@ export default function ItemLibrary() {
         </div>
       </div>
       
-      <div className="flex flex-col lg:flex-row gap-6 h-full max-w-full">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 flex-1 w-full h-full min-h-0 max-w-full">
         {/* Left Main List */}
-        <div className="flex-1 bg-surface-container-lowest rounded-[2rem] shadow-[0_20px_40px_rgba(0,28,56,0.06)] border border-outline-variant/10 flex flex-col overflow-hidden max-h-[85vh]">
-          <div className="p-6 border-b border-outline-variant/10 flex flex-col gap-4 bg-surface/50">
+        <div className="flex-1 bg-surface-container-lowest rounded-[1.75rem] shadow-[0_16px_36px_rgba(0,28,56,0.05)] border border-outline-variant/10 flex flex-col overflow-hidden h-full">
+          <div className="px-6 py-3.5 border-b border-outline-variant/10 flex flex-col gap-2.5 bg-surface/50 shrink-0">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-bold font-manrope text-on-surface">Item Inventory</h3>
-                <p className="text-sm text-on-surface-variant mt-1">Manage and view stock details of all items</p>
+                <h3 className="text-lg font-bold font-manrope text-on-surface leading-tight">Item Inventory</h3><p className="text-xs text-on-surface-variant">Manage and view stock details of all items</p>
               </div>
               <div className="flex gap-4 items-center">
                   <div className="relative w-72">
@@ -333,7 +366,9 @@ export default function ItemLibrary() {
                         className="w-full pl-10 pr-4 py-2.5 bg-surface border border-outline-variant/30 rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                      />
                   </div>
-                  <FGCombinationBuilder compact={false} placeholder="Combination" allowCreation={false} onSelectItem={(chosen) => setSearchQuery(chosen.name)} />
+                  {hasFinishedGoodsInDept && (
+                    <FGCombinationBuilder compact={false} placeholder="Combination" allowCreation={false} onSelectItem={(chosen) => setSearchQuery(chosen.name)} />
+                  )}
                   {/* Settings Dropdown Button */}
                   <div className="relative" ref={colSettingsRef}>
                       <button 
@@ -446,9 +481,9 @@ export default function ItemLibrary() {
       </div>
 
       {/* Right Side Panel */}
-      <div className="w-full lg:w-[400px] flex flex-col gap-6 max-h-[85vh]">
+      <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 flex flex-col gap-3.5 h-full">
           {/* Top 3D Viewer */}
-          <div className="h-64 relative flex items-center justify-center shrink-0 bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden">
+          <div className="h-44 xl:h-50 relative flex items-center justify-center shrink-0 bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden">
                <ErrorBoundary fallback={
                    <div className="w-full h-full flex flex-col items-center justify-center text-on-surface-variant gap-2 p-4">
                        {activeItem?.image ? (
@@ -474,7 +509,7 @@ export default function ItemLibrary() {
 
           {/* Bottom Details Panel */}
           {activeItem ? (
-             <div className="flex-1 bg-surface-container-lowest rounded-[2rem] shadow-[0_20px_40px_rgba(0,28,56,0.06)] border border-outline-variant/10 p-6 flex flex-col overflow-y-auto">
+             <div className="flex-1 bg-surface-container-lowest rounded-[1.75rem] shadow-[0_16px_36px_rgba(0,28,56,0.05)] border border-outline-variant/10 p-5 flex flex-col overflow-y-auto custom-scrollbar">
                  <div className="flex justify-between items-start mb-6">
                      <div>
                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary mb-2 inline-block">

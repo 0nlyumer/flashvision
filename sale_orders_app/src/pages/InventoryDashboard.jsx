@@ -99,11 +99,11 @@ export default function InventoryDashboard() {
 
   return (
     <Layout subNavConfig={subNavConfig}>
-      <div className="max-w-full px-6 mx-auto w-full">
+      <div className="max-w-full px-1 md:px-2 mx-auto w-full flex-1 flex flex-col min-h-0">
         {/* Global Department Filter */}
         {activeTab !== 'rate-profile' && activeTab !== 'reorder-levels' && activeTab !== 'cloth-conversion' && (
-          <div className="flex justify-end mb-4 pr-4 animate-in fade-in slide-in-from-top-2 duration-500">
-              <div className="w-[300px]">
+          <div className="flex justify-end mb-1.5 pr-1 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="w-[280px]">
                   <CustomMultiSelect 
                       options={(state.departments || []).map(d => ({ label: d.label || d, value: d.value || d }))}
                       selectedValues={selectedDepartments}
@@ -115,14 +115,14 @@ export default function InventoryDashboard() {
         )}
 
         {/* Tab Content with Instant Warm Tab Caching */}
-        <div className="w-full">
+        <div className="w-full flex-1 flex flex-col min-h-0">
           {visitedTabs.has('dashboard') && (
-            <div style={{ display: activeTab === 'dashboard' ? 'block' : 'none' }}>
+            <div className="h-full flex-1 flex flex-col min-h-0" style={{ display: activeTab === 'dashboard' ? 'flex' : 'none' }}>
               <InvDashboard selectedDepartments={selectedDepartments} />
             </div>
           )}
           {visitedTabs.has('stock') && (
-            <div style={{ display: activeTab === 'stock' ? 'block' : 'none' }}>
+            <div className="h-full flex-1 flex flex-col min-h-0" style={{ display: activeTab === 'stock' ? 'flex' : 'none' }}>
               <InvStock selectedDepartments={selectedDepartments} />
             </div>
           )}

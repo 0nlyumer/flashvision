@@ -429,7 +429,7 @@ export default function InvLedger({ selectedDepartments = [], onBack }) {
 
   return (
     <>
-    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-24 print:hidden">
+    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-4 print:hidden">
       {/* Header Section */}
       <section className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-transparent pb-4 mb-8">
         <div className="space-y-4 flex-1 w-full max-w-2xl">

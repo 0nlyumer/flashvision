@@ -544,7 +544,7 @@ export default function ProductionModule() {
         )}
 
         {viewMode === 'item-library' && (
-            <div className="w-full pb-10 h-full min-h-[80vh]">
+            <div className="w-full flex-1 flex flex-col min-h-0">
                 <ItemLibrary />
             </div>
         )}

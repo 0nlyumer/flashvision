@@ -220,7 +220,7 @@ export default function InvAdjustment({ selectedDepartments = [], onBack }) {
 
   return (
     <>
-    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-24 print:hidden">
+    <div className="animate-in fade-in duration-500 max-w-full px-6 mx-auto pb-4 print:hidden">
       {/* Header section */}
       <header className="mb-10 flex justify-between items-end">
         <div>
@@ -506,7 +506,7 @@ export default function InvAdjustment({ selectedDepartments = [], onBack }) {
         {/* Reference / Reference Info Section */}
         <aside className="xl:col-span-4 space-y-6">
           {/* Expanded Recent History Bento */}
-          <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/10 shadow-sm flex flex-col h-[500px]">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/10 shadow-sm flex flex-col min-h-[550px] flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm font-bold text-on-surface tracking-widest uppercase flex items-center gap-2">
                   <span className="material-symbols-outlined text-[18px]">history</span>
